@@ -1,0 +1,6 @@
+POST /shop/createProduct
+{
+    "productID": "123",
+    "productName": "Novo Produto",
+    "price": 99.99
+}

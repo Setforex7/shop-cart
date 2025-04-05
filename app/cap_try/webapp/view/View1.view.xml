@@ -1,0 +1,104 @@
+<mvc:View controllerName="captry.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:table="sap.ui.table"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    
+    <Page id="page" title="{i18n>title}">
+            <customHeader>
+                <Bar>
+                    <contentLeft>
+                        <Button icon="sap-icon://menu2" press="menu" />
+                    </contentLeft>
+                    <contentMiddle>
+                        <Title text="{i18n>shop}" />
+                    </contentMiddle>
+                    <contentRight>
+                        <Button icon="sap-icon://cart" press="profile" tooltip="{i18n>cart}" >
+                            <customData>
+                                <BadgeCustomData animation="Full"  value="{= ${globalModel>/cart}.length }" />
+                            </customData>
+                        </Button>
+                    </contentRight>
+                </Bar>
+            </customHeader>
+            <content>
+                <HBox justifyContent="Center">
+                    <VBox width="95%" class="sapUiSmallMargin">
+                        <table:Table
+                            id="worklist"
+                            rows="{globalModel>/products}"
+                            selectionMode="MultiToggle"
+                            enableColumnReordering="true"
+                            enableColumnFreeze="true">
+                            <table:extension>
+                                <OverflowToolbar>
+                                    <Title text="{= ${/Products}.length }" />
+                                        <ToolbarSpacer />
+                                    <Title level="H4" text="{i18n>Company}" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
+                                    <ComboBox
+                                        id="companyComboBox"
+                                        width="auto"
+                                        selectedKey="{ID}"
+                                        placeholder="{i18n>select_company}"
+                                        items="{ path: '/Company',
+                                                sorter: { path: 'name' } }">    
+                                        <items>
+                                            <core:Item key="{ID}" text="{name}" />
+                                        </items>
+                                    </ComboBox>
+                                        <ToolbarSpacer />
+                                    <Button text="{i18n>add}" press="onAdd" />
+                                    <Button text="{i18n>delete}" press="createProduct" />
+                                </OverflowToolbar>
+                            </table:extension>
+                            <table:columns>
+                                <table:Column>
+                                    <Label text="{i18n>id}" />
+                                    <table:template>
+                                        <Text text="{globalModel>ID}" />
+                                    </table:template>
+                                </table:Column>
+                                <table:Column>
+                                    <Label text="{i18n>name}" />
+                                    <table:template>
+                                        <Text text="{globalModel>name}" />
+                                    </table:template>
+                                </table:Column>
+                                <table:Column>
+                                    <Label text="{i18n>description}" />
+                                    <table:template>
+                                        <Text text="{globalModel>description}" />
+                                    </table:template>
+                                </table:Column>
+                                <table:Column>
+                                    <Label text="{i18n>price}" />
+                                    <table:template>
+                                        <Text text="{globalModel>price} €" />
+                                    </table:template>
+                                </table:Column>
+                                <table:Column>
+                                    <Label text="{i18n>stock_min}" />
+                                    <table:template>
+                                        <Text text="{globalModel>stock_min}" />
+                                    </table:template>
+                                </table:Column>
+                                <table:Column>
+                                    <Label text="{i18n>stock_max}" />
+                                    <table:template>
+                                        <Text text="{globalModel>stock_max}" />
+                                    </table:template>
+                                </table:Column>
+                                <table:Column>
+                                    <Label text="{i18n>quantity}" />
+                                    <table:template>
+                                        <Input type="Number" value="{globalModel>quantity}" />
+                                    </table:template>
+                                </table:Column>
+                            </table:columns>
+                        </table:Table>
+                    </VBox>
+                </HBox>
+            </content>
+    </Page>
+</mvc:View>
