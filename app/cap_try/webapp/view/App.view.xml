@@ -1,4 +1,4 @@
-<mvc:View controllerName="captry.controller.App"
+<mvc:View controllerName="cap_try.controller.App"
     displayBlock="true"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">

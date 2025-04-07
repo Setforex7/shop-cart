@@ -4,10 +4,15 @@ namespace sap.capire.shop_cart;
 type Names : String(50);
 type Descriptions : String(600);
 type PriceCurrency : { amount : Decimal(10,2); currency : String(3); };
+type OrderType : String enum {
+  B; // Buy
+  S; // Sell
+}
+
 
 entity Orders : managed {
   key ID : Integer;
-  type : String(1); //? Only accepts "B" or "S"
+  type : OrderType; //? Only accepts "B" or "S"
   company : Association to Company;
   items : Composition of many OrderItems on items.order = $self; //? Array of referenced order items
   total_price : Decimal(10,2) @mandatory;

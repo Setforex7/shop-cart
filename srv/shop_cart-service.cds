@@ -1,11 +1,13 @@
   using { sap.capire.shop_cart as my } from '../db/schema';
 
-type ProductInput { name : String(50);
+type sAddProduct { name : String(50);
                     description : String(600);
                     price : Decimal(10,2);
                     currency : String(3);
                     stock_min : Integer;
-                    stock_max : Integer}
+                    stock_max : Integer }
+
+type sDeleteProduct { ID: UUID; }
 
 service ShopCartService @(path:'/shop') { 
 
@@ -17,5 +19,7 @@ service ShopCartService @(path:'/shop') {
   @readonly entity Products as select from my.Products;
 
   @requires: 'authenticated-user'
-  action createProduct (product: ProductInput)
+  action createProduct (product: sAddProduct) returns sAddProduct;
+  @requires: 'authenticated-user'
+  action deleteProduct (product: sDeleteProduct) returns sDeleteProduct;
 }

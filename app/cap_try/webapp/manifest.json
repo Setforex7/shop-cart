@@ -1,7 +1,7 @@
 {
   "_version": "1.65.0",
   "sap.app": {
-    "id": "captry",
+    "id": "cap_try",
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
@@ -67,7 +67,7 @@
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
-          "bundleName": "captry.i18n.i18n"
+          "bundleName": "cap_try.i18n.i18n"
         }
       },
       "": {
@@ -104,9 +104,9 @@
         "transition": "slide",
         "type": "View",
         "viewType": "XML",
-        "path": "captry.view",
+        "path": "cap_try.view",
         "async": true,
-        "viewPath": "captry.view"
+        "viewPath": "cap_try.view"
       },
       "routes": [
         {
@@ -125,7 +125,7 @@
       }
     },
     "rootView": {
-      "viewName": "captry.view.App",
+      "viewName": "cap_try.view.App",
       "type": "XML",
       "id": "App",
       "async": true

@@ -1,11 +1,11 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/ui/core/UIComponent",
-    "captry/model/models"
+    "cap_try/model/models"
 ], (JSONModel, UIComponent, models) => {
     "use strict";
 
-    return UIComponent.extend("captry.Component", {
+    return UIComponent.extend("cap_try.Component", {
         metadata: {
             manifest: "json",
             interfaces: [
@@ -20,7 +20,8 @@ sap.ui.define([
             // set the device model
             this.setModel(models.createDeviceModel(), "device");
 
-            const oGlobalModel = new JSONModel({ cart: ["teste", "bomdia"],
+            const oGlobalModel = new JSONModel({ product: { name: "", description: "", price: "0", stock_min: "0", stock_max: "500" },
+                                                 cart: ["teste", "bomdia"],
                                                  products: [],
                                                  Companys: [] });    
             this.setModel(oGlobalModel, "globalModel");                
