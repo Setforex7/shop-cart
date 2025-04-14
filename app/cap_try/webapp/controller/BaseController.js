@@ -35,6 +35,8 @@ sap.ui.define([
 		},
 
 		_createMessageView: function(){
+			this._aMessages = [];
+
 			const oLink = new Link({ text: "Show more information",
 									 href: "http://sap.com",
 									 target: "_blank" });
@@ -44,8 +46,7 @@ sap.ui.define([
 													   description: '{description}',
 													   subtitle: '{subtitle}',
 													   counter: '{counter}',
-													   markupDescription: "{markupDescription}",
-													   link: oLink });
+													   markupDescription: "{markupDescription}" });
 
 			this._oMessageView = new MessageView({ showDetailsPageHeader: false,
 												   itemSelect: function () {
@@ -55,7 +56,8 @@ sap.ui.define([
 												   	   		template: oMessageTemplate }
 				});
 
-			this._oMessageView.setModel(new JSONModel());
+			this._oMessageView.setModel(this.getOwnerComponent().getModel("messageModel"));
+			this._oMessageView.getModel().setData(this._aMessages);
 
 			const oBackButton = new Button({ icon: IconPool.getIconURI("nav-back"),
 											 visible: false,
@@ -81,6 +83,18 @@ sap.ui.define([
 										   footer: oPopoverFooter });
 		},
 
+		_deleteMessages: function(){
+			this._aMessages = [];
+			this._oMessageView.getModel().setData(this._aMessages);
+			this._oMessageView.getModel().refresh(true);
+		},
+
+		_addMessage: function(oMessage){
+			this._aMessages.push(oMessage);
+			this._oMessageView.getModel().setData(this._aMessages);
+			this._oMessageView.getModel().refresh(true);
+		},
+
 		_handlePopoverPress: function (oEvent) {
 			this._oMessageView.navigateBack();
 			this._oPopover.openBy(oEvent.getSource());
@@ -89,7 +103,7 @@ sap.ui.define([
 		//? Gets the products from the entity
 		_getProducts: function(){
 			//? Gets the products from the entity
-			const aProducts = this.getOwnerComponent().getModel().bindList("/Products").requestContexts()
+			this.getOwnerComponent().getModel().bindList("/Products").requestContexts()
 			.then(aProducts => { 
 				//? Creates a the array with the products object
 				const aProductsFinal = aProducts.map(oProduct => { return oProduct.getObject() }) 
@@ -98,7 +112,8 @@ sap.ui.define([
 				this.getOwnerComponent().getModel('globalModel').setProperty("/products", aProductsFinal );
             	this.getOwnerComponent().getModel('globalModel').refresh(true);
 				this.getView().setBusy(false);
-			});
+			})
+			.catch(oError => { console.error(oError) });
 		},
 
 		//? Returns the last ID of the products entity
@@ -110,32 +125,51 @@ sap.ui.define([
 		},
 
 		_createProduct: async function(oProduct){
-			//? Prepares the call for the backend
-			// const oCreatingContext = this.getOwnerComponent().getModel().bindContext("/createProduct(...)");
-		 	//? We assing the parameters of the creation action
-			// oCreatingContext.setParameter("product", oProduct);
+			return new Promise(async (resolve, reject) => {
+				//? Prepares the call for the backend
+				// const oCreatingContext = this.getOwnerComponent().getModel().bindContext("/createProduct(...)");
+				//? We assing the parameters of the creation action
+				// oCreatingContext.setParameter("product", oProduct);
 
-			// const sGetLastId = this.getOwnerComponent().getModel().bindContext("/getLastId(...)");
-			// sGetLastId.setParameter("entityName", "Products");
-			try{
-				const oProductRequest = this.getOwnerComponent().getModel().bindList("/Products").create(oProduct);
-				await oProductRequest.created()
-			}catch(oError){
-				console.error(oError);
-			}
+				// const sGetLastId = this.getOwnerComponent().getModel().bindContext("/getLastId(...)");
+				// sGetLastId.setParameter("entityName", "Products");
 
-			// try {
-			// 	//? Executes the backend request
-            //     await oCreatingContext.execute();
-			// 	//? Gets the return object from the action
-			// 	const oReturnedResponse = oCreatingContext.getBoundContext().getObject();
-			// 	console.log(oReturnedResponse);
-			// 	// const oData = await oReturnedResponse.requestObject();
-			// 	console.log("Produto criado com sucesso:", oReturnedResponse);
-            // } catch (oError) {
-            //     console.error(oError);
-			// 	console.log(oError);
-            // }
+				try{
+					const oListBinding = this.getOwnerComponent().getModel().bindList("/Products");
+					//? Sends the request to the backend
+					const oCreatedContext = oListBinding.create(oProduct);
+					//? Fully awaits for the backend response
+					await oCreatedContext.created();
+					//? Gets the data returned to the backend
+					const oCreatedData = oCreatedContext.getObject();
+					this._addMessage({ type: "Success",
+									   title: "Success",
+									   subtitle: `Product ${oCreatedContext.getObject().name} created successfully`});
+					MessageBox.success(`Product ${oCreatedContext.getObject().name} created successfully`);
+					this._getProducts();
+					resolve(true);
+					this._o
+				}catch(oError){
+					this._addMessage({ type: "Error",
+									   title: "Error",
+									   subtitle: `Something went wrong creating the product ${oProduct.name}`});
+					console.error(oError);
+					reject(oError);
+				}
+
+				// try {
+				// 	//? Executes the backend request
+				//     await oCreatingContext.execute();
+				// 	//? Gets the return object from the action
+				// 	const oReturnedResponse = oCreatingContext.getBoundContext().getObject();
+				// 	console.log(oReturnedResponse);
+				// 	// const oData = await oReturnedResponse.requestObject();
+				// 	console.log("Produto criado com sucesso:", oReturnedResponse);
+				// } catch (oError) {
+				//     console.error(oError);
+				// 	console.log(oError);
+				// }
+			});
 		}
 	});
 });

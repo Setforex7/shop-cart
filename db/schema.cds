@@ -38,7 +38,7 @@ entity Company {
 
 entity Products {
   key ID : Integer @mandatory;
-  name : Names @mandatory;
+  key name : Names @mandatory;
   description : Descriptions;
   price : Decimal(10,2) @mandatory;
   currency : String(3) @mandatory;

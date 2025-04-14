@@ -1,0 +1,52 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+    xmlns:table="sap.ui.table"
+>
+    <Dialog title="Shopping Cart" id="Cart">
+        <content>
+            <table:Table
+                id="cartTable"
+                rows="{globalModel>/cart}"
+                visibleRowCount="5"
+                selectionMode="None"
+                class="sapUiSmallMargin">
+                <table:columns>
+                    <table:Column width="20%">
+                        <Label text="Name" />
+                        <table:template>
+                            <Text text="{globalModel>name}" />
+                        </table:template>
+                    </table:Column>
+                    <table:Column width="20%">
+                        <Label text="Description" />
+                        <table:template>
+                            <Text text="{globalModel>description}" />
+                        </table:template>
+                    </table:Column>
+                    <table:Column width="20%">
+                        <Label text="Price" />
+                        <table:template>
+                            <Text text="{globalModel>price}" />
+                        </table:template>
+                    </table:Column>
+                    <table:Column width="20%">
+                        <Label text="Quantity" />
+                        <table:template>
+                            <Text text="{globalModel>quantity}" />
+                        </table:template>
+                    </table:Column>
+                    <table:Column width="20%">
+                        <Label text="Total" />
+                        <table:template>
+                            <Text text="{= ${globalModel>quantity} * ${globalModel>price}}" />
+                        </table:template>
+                    </table:Column>
+                </table:columns>
+            </table:Table>
+        </content>
+        <beginButton>
+            <Button text="{i18n>close}" press="closeCartDialog" />
+        </beginButton>
+    </Dialog>
+</c:FragmentDefinition>

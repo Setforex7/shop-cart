@@ -3,7 +3,7 @@
     xmlns:l="sap.ui.layout.form"
     xmlns:core="sap.ui.core">
     <Dialog
-        id="addProductDialog"
+        id="addProduct"
         title="Add Product"
         contentWidth="500px"
         contentHeight="auto"

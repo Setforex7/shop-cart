@@ -1,6 +1,8 @@
 <mvc:View controllerName="cap_try.controller.View1"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns:table="sap.ui.table"
+    xmlns:l="sap.ui.layout"
+	xmlns:f="sap.ui.layout.form"
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
     
@@ -14,39 +16,71 @@
                         <Title text="{i18n>shop}" />
                     </contentMiddle>
                     <contentRight>
-                        <Button icon="sap-icon://cart" press="profile" tooltip="{i18n>cart}" >
+                        <Button icon="sap-icon://cart" press="openCartDialog" tooltip="{i18n>cart}" >
                             <customData>
-                                <BadgeCustomData animation="Full"  value="{= ${globalModel>/cart}.length }" />
+                                <BadgeCustomData animation="Update"  value="{= ${globalModel>/cart}.length }" />
                             </customData>
                         </Button>
                     </contentRight>
                 </Bar>
             </customHeader>
+            <Panel expandable="true"
+                   class="sapUiSmallMargin"
+                   expanded="true"
+                   headerText="Toggle Company Details">
+                <VBox class="sapUiSmallMargin">
+                    <f:SimpleForm id="SimpleFormDisplay354"
+                        editable="false"
+                        layout="ResponsiveGridLayout"
+                        title="Company details"
+                        labelSpanXL="3"
+                        labelSpanL="3"
+                        labelSpanM="3"
+                        labelSpanS="12"
+                        adjustLabelSpan="false"
+                        emptySpanXL="4"
+                        emptySpanL="4"
+                        emptySpanM="4"
+                        emptySpanS="0"
+                        columnsXL="1"
+                        columnsL="1"
+                        columnsM="1"
+                        binding="{globalModel>/selectedCompany}"
+                        singleContainerFullSize="false" >
+                        <f:content>
+                            <Label class="sapUiTinyMargin" text="Company name" />
+                            <ComboBox width="30%" change="companyChange" id="" placeholder="Select a company..."
+                                items="{ path: '/Company',
+                                         sorter: { path: 'name' } }">
+                                <items>
+                                    <core:Item key="{ID}" text="{name}" />
+                                </items>
+                            </ComboBox>                
+                            <Label text="Name" />
+                            <Text text="{globalModel>name}" />
+                            <Label text="Description" />
+                            <Text text="{globalModel>description}" />
+                            <Label text="Capital" />
+                            <Text id="countryText" text="{globalModel>capital} {globalModel>currency}" />
+                        </f:content>
+                    </f:SimpleForm>
+                </VBox>
+            </Panel>
             <content>
-                <HBox justifyContent="Center">
-                    <VBox width="95%" class="sapUiSmallMargin">
-                    <Title text="Lista de Produtos" level="H3" class="sapUiTinyMarginBottom" />
+                <HBox width="95%" class="sapUiSmallMargin">
+                    <VBox >
+                    <Title text="Lista de Produtos" level="H3" />
                         <table:Table
                             id="worklist"
                             rows="{globalModel>/products}"
+                            visibleRowCount="13"
                             selectionMode="MultiToggle"
                             enableColumnReordering="true"
                             enableColumnFreeze="true">
                             <table:extension>
                                 <OverflowToolbar>
+                                        <OverflowToolbarButton icon="sap-icon://add" text="{i18n>addProduct}" press="openAddProductDialog" />
                                     <ToolbarSpacer />
-                                        <Title level="H4" text="{i18n>Company}" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
-                                        <ComboBox
-                                            id="companyComboBox"
-                                            width="auto"
-                                            selectedKey="{ID}"
-                                            placeholder="{i18n>select_company}"
-                                            items="{ path: '/Company',
-                                                    sorter: { path: 'name' } }">    
-                                            <items>
-                                                <core:Item key="{ID}" text="{name}" />
-                                            </items>
-                                        </ComboBox>
                                     <ToolbarSpacer />
                                         <Title level="H2" text="Total" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
                                         <Text text="{= ${globalModel>/products}.length }" />
@@ -74,7 +108,7 @@
                                 <table:Column>
                                     <Label text="{i18n>price}" />
                                     <table:template>
-                                        <Text text="{globalModel>price} €" />
+                                        <Text text="{globalModel>price} {globalModel>/selectedCompany/currency}" />
                                     </table:template>
                                 </table:Column>
                                 <table:Column>
@@ -102,9 +136,9 @@
             </content>
             <footer>
                 <Toolbar>
-                    <Button press="handlePopoverPress" icon="sap-icon://alert" />
-                    <Button press="openAddProductDialog" text="Inserir produto" />
+                    <Button visible="{= ${messageModel>/}.length !== 0}" press="toggleMessageView" icon="sap-icon://alert" text="{= ${messageModel>/}.length}" />
                     <ToolbarSpacer />
+                    <Button press="openAddProductDialog" icon="sap-icon://add-product"/>
                 </Toolbar>
             </footer>
     </Page>

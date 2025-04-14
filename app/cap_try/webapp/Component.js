@@ -21,10 +21,14 @@ sap.ui.define([
             this.setModel(models.createDeviceModel(), "device");
 
             const oGlobalModel = new JSONModel({ product: { name: "", description: "", price: "0", stock_min: "0", stock_max: "500" },
-                                                 cart: ["teste", "bomdia"],
+                                                 selectedCompany: {},
+                                                 cart: [],
                                                  products: [],
                                                  Companys: [] });    
-            this.setModel(oGlobalModel, "globalModel");                
+            this.setModel(oGlobalModel, "globalModel"); 
+            this.setModel(new JSONModel(), "messageModel");    
+            
+            // this.getModel().setRefreshAfterChange(true);
 
             // enable routing
             this.getRouter().initialize();
