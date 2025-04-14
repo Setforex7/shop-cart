@@ -49,12 +49,13 @@ sap.ui.define([
         },
 
         createProduct: async function(oProduct) {
-            await BaseController.prototype.createProduct.apply(this, [{ name: this.getOwnerComponent().getModel('globalModel').getProperty("/product/name"),
-                                                                        description: this.getOwnerComponent().getModel('globalModel').getProperty("/product/description"),
-                                                                        price: this.getOwnerComponent().getModel('globalModel').getProperty("/product/price"),
-                                                                        currency: "EUR",
-                                                                        stock_min: this.getOwnerComponent().getModel('globalModel').getProperty("/product/stock_min"),
-                                                                        stock_max: this.getOwnerComponent().getModel('globalModel').getProperty("/product/stock_max") }]);
+            await BaseController.prototype._createProduct.apply(this, [{ ID: BaseController.prototype._getProductsLastId.call(this),
+                                                                         name: this.getOwnerComponent().getModel('globalModel').getProperty("/product/name"),
+                                                                         description: this.getOwnerComponent().getModel('globalModel').getProperty("/product/description"),
+                                                                         price: this.getOwnerComponent().getModel('globalModel').getProperty("/product/price"),
+                                                                         currency: "EUR",
+                                                                         stock_min: this.getOwnerComponent().getModel('globalModel').getProperty("/product/stock_min"),
+                                                                         stock_max: this.getOwnerComponent().getModel('globalModel').getProperty("/product/stock_max") }]);
         },
 
         menu: function (oEvent) {

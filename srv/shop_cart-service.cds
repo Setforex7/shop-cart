@@ -16,7 +16,7 @@ service ShopCartService @(path:'/shop') {
   // } excluding { createdBy, modifiedBy };
   
   @readonly entity Company as select from my.Company;
-  @readonly entity Products as select from my.Products;
+  entity Products as select from my.Products;
 
   @requires: 'authenticated-user'
   action createProduct (product: sAddProduct) returns sAddProduct;

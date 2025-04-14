@@ -101,24 +101,41 @@ sap.ui.define([
 			});
 		},
 
+		//? Returns the last ID of the products entity
+		_getProductsLastId: function(){
+			let sLastId = "0";
+			this.getOwnerComponent().getModel('globalModel').getProperty('/products')
+			.forEach(oProduct => { if(parseInt(sLastId) < parseInt(oProduct.ID)) sLastId = oProduct.ID });
+			return (parseInt(sLastId) + 1).toString();
+		},
+
 		_createProduct: async function(oProduct){
 			//? Prepares the call for the backend
-			const oCreatingContext = this.getOwnerComponent().getModel().bindContext("/createProduct(...)");
+			// const oCreatingContext = this.getOwnerComponent().getModel().bindContext("/createProduct(...)");
 		 	//? We assing the parameters of the creation action
-			 oCreatingContext.setParameter("product", oProduct);
+			// oCreatingContext.setParameter("product", oProduct);
 
-			try {
-				//? Executes the backend request
-                await oCreatingContext.execute();
-				//? Gets the return object from the action
-				const oReturnedResponse = oCreatingContext.getBoundContext().getObject();
-				console.log(oReturnedResponse);
-				// const oData = await oReturnedResponse.requestObject();
-				console.log("Produto criado com sucesso:", oReturnedResponse);
-            } catch (oError) {
-                console.error(oError);
-				console.log(oError);
-            }
+			// const sGetLastId = this.getOwnerComponent().getModel().bindContext("/getLastId(...)");
+			// sGetLastId.setParameter("entityName", "Products");
+			try{
+				const oProductRequest = this.getOwnerComponent().getModel().bindList("/Products").create(oProduct);
+				await oProductRequest.created()
+			}catch(oError){
+				console.error(oError);
+			}
+
+			// try {
+			// 	//? Executes the backend request
+            //     await oCreatingContext.execute();
+			// 	//? Gets the return object from the action
+			// 	const oReturnedResponse = oCreatingContext.getBoundContext().getObject();
+			// 	console.log(oReturnedResponse);
+			// 	// const oData = await oReturnedResponse.requestObject();
+			// 	console.log("Produto criado com sucesso:", oReturnedResponse);
+            // } catch (oError) {
+            //     console.error(oError);
+			// 	console.log(oError);
+            // }
 		}
 	});
 });
