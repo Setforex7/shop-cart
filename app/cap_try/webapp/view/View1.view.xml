@@ -49,7 +49,7 @@
                         singleContainerFullSize="false" >
                         <f:content>
                             <Label class="sapUiTinyMargin" text="Company name" />
-                            <ComboBox width="30%" change="companyChange" id="" placeholder="Select a company..."
+                            <ComboBox width="30%" change="companyChange" id="companyComboBox" placeholder="Select a company..."
                                 items="{ path: '/Company',
                                          sorter: { path: 'name' } }">
                                 <items>
@@ -71,7 +71,7 @@
                     <VBox >
                     <Title text="Lista de Produtos" level="H3" />
                         <table:Table
-                            id="worklist"
+                            id="productsWorklist"
                             rows="{globalModel>/products}"
                             visibleRowCount="13"
                             selectionMode="MultiToggle"
@@ -79,7 +79,7 @@
                             enableColumnFreeze="true">
                             <table:extension>
                                 <OverflowToolbar>
-                                        <OverflowToolbarButton icon="sap-icon://add" text="{i18n>addProduct}" press="openAddProductDialog" />
+                                        <OverflowToolbarButton icon="sap-icon://add" text="{i18n>addProduct}" press="addProductCart" />
                                     <ToolbarSpacer />
                                     <ToolbarSpacer />
                                         <Title level="H2" text="Total" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />

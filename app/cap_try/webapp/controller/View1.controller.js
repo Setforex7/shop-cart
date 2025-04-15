@@ -36,6 +36,31 @@ sap.ui.define([
             this._oDialogHandler = new DialogHandler(this);
         },
 
+        addProductCart: function(){
+            if(!this.getOwnerComponent().getModel("globalModel").getProperty("/selectedCompany/name")){
+                this.getView().byId("companyComboBox").setValueState("Error");
+                this.getView().byId("companyComboBox").setValueStateText("You must select a company to add products to the cart.");
+                return BaseController.prototype._addMessage.call(this, { type: "Error", 
+                                                                         title: "Error", 
+                                                                         subtitle: "Select a company to add products to the cart." });
+            }
+            
+            const oTable = this.getView().byId("productsWorklist");
+            const aSelectedProducts = oTable.getSelectedIndices();
+
+            console.log("Selected Products: ", aSelectedProducts);
+        },
+
+
+
+        _resetProductQuantity: function(){
+            this.getOwnerComponent().getModel('globalModel').setProperty("/products",
+            this.getOwnerComponent().getModel('globalModel').getProperty("/products").map(oProduct => {
+                oProduct.quantity = 0;
+                return oProduct;
+            }));
+        },
+
         openAddProductDialog: function () { this._oDialogHandler._openAddProductDialog();},
 
         closeAddProductDialog: function () { this._oDialogHandler._closeAddProductDialog() },
@@ -70,6 +95,8 @@ sap.ui.define([
 
         companyChange: function(oEvent){
             this.getView().setBusy(true);
+
+            oEvent.getSource().setValueState("None");
             
             this.getOwnerComponent().getModel()
             .bindList("/Company", undefined, undefined, [new Filter("name", FilterOperator.EQ, oEvent.getParameter("value"))])

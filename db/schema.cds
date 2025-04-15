@@ -45,3 +45,21 @@ entity Products {
   stock_min : Integer @mandatory;
   stock_max : Integer @mandatory;
 }
+
+entity Cart {
+  key ID : UUID;
+  key user_id : String(50) @mandatory;
+  company : Association to Company;
+  products : Composition of many Products; 
+  total_price : Decimal(10,2);
+  currency : String(3) @mandatory;
+}
+
+entity CartItem {
+  key ID : UUID;
+  cart : Association to Cart;
+  product : Association to Products @mandatory;
+  quantity : Integer @mandatory;
+  price : Decimal(10,2) @mandatory;
+  currency : String(3) @mandatory;
+}
