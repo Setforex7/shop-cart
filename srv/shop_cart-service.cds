@@ -17,6 +17,7 @@ service ShopCartService @(path:'/shop') {
   
   @readonly entity Company as select from my.Company;
   entity Products as select from my.Products;
+  entity Cart as select from my.Cart;
 
   @requires: 'authenticated-user'
   action createProduct (product: sAddProduct) returns sAddProduct;

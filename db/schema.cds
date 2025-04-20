@@ -50,7 +50,7 @@ entity Cart {
   key ID : UUID;
   key user_id : String(50) @mandatory;
   company : Association to Company;
-  products : Composition of many Products; 
+  products : Composition of many CartItem on products.cart = $self; //? Array of referenced cart items
   total_price : Decimal(10,2);
   currency : String(3) @mandatory;
 }

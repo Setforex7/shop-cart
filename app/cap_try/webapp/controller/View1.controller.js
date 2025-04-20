@@ -24,6 +24,7 @@ sap.ui.define([
             BaseController.prototype._createMessageView.call(this);
             this._oView = this.getView();
             this._oView.setBusy(true);
+            //? Base controller call
             this._getProducts();
             // BaseController.prototype.onInit.call(this);
             this.getOwnerComponent().getModel().bindList("/Products").requestContexts().then(function(aContexts) {
@@ -32,8 +33,14 @@ sap.ui.define([
             this.getOwnerComponent().getModel().bindList("/Company").requestContexts().then(function(aContexts) {
                 aContexts.forEach(oContext => console.log("Empresa: ", oContext.getObject()) );
             });
-
+            console.log(this.getView().byId("productsWorklist").getRows());
             this._oDialogHandler = new DialogHandler(this);
+        },
+
+        onBeforeRendering: function() {
+            this.getOwnerComponent().getModel().bindList("/Cart").requestContexts().then((teste) => {
+                console.log(teste);
+            })
         },
 
         addProductCart: function(){
@@ -50,8 +57,6 @@ sap.ui.define([
 
             console.log("Selected Products: ", aSelectedProducts);
         },
-
-
 
         _resetProductQuantity: function(){
             this.getOwnerComponent().getModel('globalModel').setProperty("/products",
