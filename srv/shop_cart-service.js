@@ -4,7 +4,7 @@ const validations = require('./handlers/validations');
 class ShopCartService extends cds.ApplicationService { async init() {
 
   const db = await cds.connect.to('db')
-  const { Products, Company } = db.entities      
+  const { Products, Company, Cart } = db.entities      
   
   this.before('CREATE', 'Products', async req => {
     const product = req.data;
@@ -20,6 +20,10 @@ class ShopCartService extends cds.ApplicationService { async init() {
     console.log("eu estou aqui: ", data);
     return data;
   });
+
+  this.before('CREATE', 'Carts', async (data, req) => {
+    console.log(req.data);
+  })
 
   // this.on('getLastId', async req => {
   //   const { ID, entityName }= req.data;

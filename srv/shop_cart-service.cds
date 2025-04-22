@@ -1,11 +1,11 @@
   using { sap.capire.shop_cart as my } from '../db/schema';
 
 type sAddProduct { name : String(50);
-                    description : String(600);
-                    price : Decimal(10,2);
-                    currency : String(3);
-                    stock_min : Integer;
-                    stock_max : Integer }
+                   description : String(600);
+                   price : Decimal(10,2);
+                   currency : String(3);
+                   stock_min : Integer;
+                   stock_max : Integer }
 
 type sDeleteProduct { ID: UUID; }
 

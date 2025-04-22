@@ -43,8 +43,11 @@ sap.ui.define([
             })
         },
 
-        addProductCart: function(){
-            if(!this.getOwnerComponent().getModel("globalModel").getProperty("/selectedCompany/name")){
+        addProductCart: async function(){
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oCompany = oGlobalModel.getProperty("/selectedCompany");
+            // const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
+            if(!oGlobalModel.getProperty("/selectedCompany/name")){
                 this.getView().byId("companyComboBox").setValueState("Error");
                 this.getView().byId("companyComboBox").setValueStateText("You must select a company to add products to the cart.");
                 return BaseController.prototype._addMessage.call(this, { type: "Error", 
@@ -54,6 +57,28 @@ sap.ui.define([
             
             const oTable = this.getView().byId("productsWorklist");
             const aSelectedProducts = oTable.getSelectedIndices();
+
+            const oSelectedCart = {
+                // não envie o ID se for gerado automaticamente pelo CAP
+                user_id: "1",
+                "company@odata.bind": `/Company('${oCompany.ID}')`,
+                total_price: 0,
+                currency: "EUR"
+              };
+
+            try{
+                const oCartList = this.getOwnerComponent().getModel().bindList("/Cart");  
+                const oCreatedCart = oCartList.create(oSelectedCart);
+                await oCreatedCart.created();
+                const oResult = oCreatedCart.getObject();
+                console.log(oResult);
+            }catch(oError){
+                // this._addMessage({ type: "Error",
+                //                    title: "Error",
+                //                    subtitle: `Something went wrong creating the product ${oProduct.name}`});
+                console.error(oError);
+                // reject(oError);
+            }
 
             console.log("Selected Products: ", aSelectedProducts);
         },
@@ -65,14 +90,6 @@ sap.ui.define([
                 return oProduct;
             }));
         },
-
-        openAddProductDialog: function () { this._oDialogHandler._openAddProductDialog();},
-
-        closeAddProductDialog: function () { this._oDialogHandler._closeAddProductDialog() },
-
-        openCartDialog: function () { this._oDialogHandler._openCartDialog();},
-
-        closeCartDialog: function () { this._oDialogHandler._closeCartDialog() },
 
         toggleMessageView: function (oEvent) {
             BaseController.prototype._handlePopoverPress.call(this, oEvent);
@@ -109,11 +126,23 @@ sap.ui.define([
                 this.getOwnerComponent().getModel("globalModel").setProperty("/selectedCompany", oCompany.getObject());
                 this.getOwnerComponent().getModel("globalModel").refresh(true);
                 this.getView().setBusy(false);
-            }).bind(this)
+            })
             .catch(function(oError) { 
                 this.getView().setBusy(false);
                 console.error("Erro ao buscar empresa:", oError) 
             });
-        }
+        },
+
+        //#region Dialog OPEN/CLOSE
+
+        openAddProductDialog: function () { this._oDialogHandler._openAddProductDialog() },
+
+        closeAddProductDialog: function () { this._oDialogHandler._closeAddProductDialog() },
+
+        openCartDialog: function () { this._oDialogHandler._openCartDialog() },
+
+        closeCartDialog: function () { this._oDialogHandler._closeCartDialog() },
+
+        //#endregion
     });
 });

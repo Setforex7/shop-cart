@@ -22,7 +22,8 @@ sap.ui.define([
 
             const oGlobalModel = new JSONModel({ product: { name: "", description: "", price: "0", stock_min: "0", stock_max: "500" },
                                                  selectedCompany: {},
-                                                 cart: [],
+                                                 cart: {},
+                                                 selectedCart: [],
                                                  products: [],
                                                  Companys: [] });    
             this.setModel(oGlobalModel, "globalModel"); 
