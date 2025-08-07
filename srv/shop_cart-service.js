@@ -1,6 +1,7 @@
 const cds = require('@sap/cds');
 const { errors } = require('@sap/cds');
 const validations = require('./handlers/validations');
+
 class ShopCartService extends cds.ApplicationService { async init() {
 
   const db = await cds.connect.to('db')
@@ -16,14 +17,23 @@ class ShopCartService extends cds.ApplicationService { async init() {
   });
 
   this.after('CREATE', 'Products', async (data, req) => {
-    console.log("FINAL DO PROCESSO DE ADD");
-    console.log("eu estou aqui: ", data);
+    const product = data;
+    console.log(product);
     return data;
   });
 
-  this.before('CREATE', 'Carts', async (data, req) => {
-    console.log(req.data);
-  })
+
+  this.before('CREATE', 'Cart', async req => { 
+    const cart = req.data;
+
+    const tx = cds.transaction(req);
+
+    const carts = await tx.run(SELECT.from(Cart).where({ user_id: cart.user_id }));
+
+    cart.name = `Cart - ${carts.length + 1}`;
+
+    return cart;
+   });
 
   // this.on('getLastId', async req => {
   //   const { ID, entityName }= req.data;

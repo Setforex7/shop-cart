@@ -31,11 +31,29 @@ sap.ui.define([
 			this._oController.byId("addProduct").close();
 		},
 
+        _openEditProductDialog: function () {
+            if (!this._dDialogEditProduct) {
+                this._dDialogEditProduct = Fragment.load({ id: this._oController.getView().getId(),
+                                                 name: "cap_try.view.fragments.EditProduct",
+                                                 controller: this._oController })
+                .then(function (oDialog) {
+                    this._oController.getView().addDependent(oDialog);
+                    return oDialog;
+                }.bind(this));
+            }
+
+            this._dDialogEditProduct.then(oDialog => oDialog.open() );
+        },
+
+        _closeEditProductDialog: function () { 
+            this._oController.byId("editProduct").close();
+        },
+
 		_openCartDialog: function () {
             if (!this._dDialogCart) {
                 this._dDialogCart = Fragment.load({ id: this._oController.getView().getId(),
-                                                name: "cap_try.view.fragments.Cart",
-                                                controller: this._oController })
+                                                    name: "cap_try.view.fragments.Cart",
+                                                    controller: this._oController })
                 .then(function (oDialog) {
                     this._oController.getView().addDependent(oDialog);
                     return oDialog;

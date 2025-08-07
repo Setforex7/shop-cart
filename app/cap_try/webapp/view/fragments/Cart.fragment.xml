@@ -1,6 +1,6 @@
-<c:FragmentDefinition
+<core:FragmentDefinition
 	xmlns="sap.m"
-	xmlns:c="sap.ui.core"
+	xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table"
 >
     <Dialog title="Shopping Cart" id="Cart">
@@ -11,6 +11,23 @@
                 visibleRowCount="5"
                 selectionMode="None"
                 class="sapUiSmallMargin">
+                <table:extension>
+                    <OverflowToolbar>
+                            <Button text="Add Cart" iconFirst="true" icon="sap-icon://add" press="onAddCartButtonPress" />
+                        <ToolbarSeparator />
+                            <Label text="Cart's" />
+                            <Select autoAdjustWidth="false" columnRatio="3:2" editable="true" enabled="true" forceSelection="false" id="cartsSelect"
+                                    icon="sap-icon://cart" maxWidth="100%" items="{globalModel>/carts}" selectedKey="{globalModel>/selectedCart/ID}" change="onCartsSelectChange" resetOnMissingKey="false" width="10%" wrapItemsText="false">
+                                <items>
+                                    <core:Item key="{globalModel>ID}" text="{globalModel>name}" />
+                                </items>
+                            </Select>
+                        <ToolbarSpacer />
+                        <ToolbarSpacer />
+                            <Title level="H2" text="Total" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
+                            <Text text="{= ${globalModel>/products}.length }" />
+                    </OverflowToolbar>
+                </table:extension>
                 <table:columns>
                     <table:Column width="20%">
                         <Label text="Name" />
@@ -49,4 +66,4 @@
             <Button text="{i18n>close}" press="closeCartDialog" />
         </beginButton>
     </Dialog>
-</c:FragmentDefinition>
+</core:FragmentDefinition>

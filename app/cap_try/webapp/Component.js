@@ -20,12 +20,14 @@ sap.ui.define([
             // set the device model
             this.setModel(models.createDeviceModel(), "device");
 
-            const oGlobalModel = new JSONModel({ product: { name: "", description: "", price: "0", stock_min: "0", stock_max: "500" },
+            const oGlobalModel = new JSONModel({ product: { name: "", description: "", price: "0", stock_min: "0", stock_max: "0" },
                                                  selectedCompany: {},
-                                                 cart: {},
+                                                 selectedProduct: {},
                                                  selectedCart: [],
+                                                 cart: {},
                                                  products: [],
-                                                 Companys: [] });    
+                                                 Companys: [],
+                                                 carts: [] });    
             this.setModel(oGlobalModel, "globalModel"); 
             this.setModel(new JSONModel(), "messageModel");    
             

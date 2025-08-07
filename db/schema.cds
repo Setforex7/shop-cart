@@ -37,7 +37,7 @@ entity Company {
 }
 
 entity Products {
-  key ID : Integer @mandatory;
+  key ID : UUID;
   key name : Names @mandatory;
   description : Descriptions;
   price : Decimal(10,2) @mandatory;
@@ -49,13 +49,14 @@ entity Products {
 entity Cart {
   key ID : UUID;
   key user_id : String(50) @mandatory;
-  company : Association to Company;
+  name: Names;
+  company : Association to Company; @mandatory
   products : Composition of many CartItem on products.cart = $self; //? Array of referenced cart items
   total_price : Decimal(10,2);
   currency : String(3) @mandatory;
 }
 
-entity CartItem {
+entity CartItem : managed {
   key ID : UUID;
   cart : Association to Cart;
   product : Association to Products @mandatory;

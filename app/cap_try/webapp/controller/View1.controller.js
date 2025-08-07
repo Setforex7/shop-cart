@@ -2,90 +2,170 @@ sap.ui.define([
     "cap_try/controller/BaseController",
     "cap_try/controller/DialogHandler",
     "sap/ui/core/mvc/Controller",
+    "cap_try/formatters/formatter",
     "sap/ui/core/Fragment",
     "sap/m/Menu",
     "sap/m/MenuItem",
 	"sap/ui/model/Binding",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
+    "sap/ui/model/FilterOperator",
+    "sap/m/MessageToast",
+    "sap/m/MessageBox"
 ], (BaseController,
-    DialogHandler,
+	DialogHandler,
 	Controller,
+    Formatter,
 	Fragment,
 	Menu,
 	MenuItem,
 	Binding,
 	Filter,
-    FilterOperator) => {
+	FilterOperator,
+	MessageToast,
+	MessageBox) => {
     "use strict";
 
+    const sUserId = "1";
+    const sEntityCompany = "/Company";
+    const sEntityProducts = "/Products";
+    const sEntityCart = "/Cart";
+
     return BaseController.extend("cap_try.controller.View1", {
+        formatter: Formatter,
         onInit: function() {
             BaseController.prototype._createMessageView.call(this);
-            this._oView = this.getView();
-            this._oView.setBusy(true);
+
+            console.log(this.getOwnerComponent().getModel().getMetaModel());
+
+            //? I18n object declaration
+            this._i18n = this.getOwnerComponent().getModel("i18n").getResourceBundle();
             //? Base controller call
             this._getProducts();
             // BaseController.prototype.onInit.call(this);
-            this.getOwnerComponent().getModel().bindList("/Products").requestContexts().then(function(aContexts) {
+            this.getOwnerComponent().getModel().bindList(sEntityProducts).requestContexts().then(function(aContexts) {
                 aContexts.forEach(oContext => console.log("Produto: ", oContext.getObject()) );
             });
-            this.getOwnerComponent().getModel().bindList("/Company").requestContexts().then(function(aContexts) {
+            this.getOwnerComponent().getModel().bindList(sEntityCompany).requestContexts().then(function(aContexts) {
                 aContexts.forEach(oContext => console.log("Empresa: ", oContext.getObject()) );
             });
-            console.log(this.getView().byId("productsWorklist").getRows());
+            this.getOwnerComponent().getModel().bindList(sEntityCart).requestContexts().then((aContexts) => {
+                aContexts.forEach(oContext => console.log("Cart: ", oContext.getObject()) );
+            })
+            // console.log(this.getView().byId("productsWorklist").getRows());
             this._oDialogHandler = new DialogHandler(this);
         },
 
         onBeforeRendering: function() {
-            this.getOwnerComponent().getModel().bindList("/Cart").requestContexts().then((teste) => {
-                console.log(teste);
-            })
         },
 
-        addProductCart: async function(){
+        onAfterRendering: async function() {
             const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-            const oCompany = oGlobalModel.getProperty("/selectedCompany");
-            // const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
-            if(!oGlobalModel.getProperty("/selectedCompany/name")){
-                this.getView().byId("companyComboBox").setValueState("Error");
-                this.getView().byId("companyComboBox").setValueStateText("You must select a company to add products to the cart.");
-                return BaseController.prototype._addMessage.call(this, { type: "Error", 
-                                                                         title: "Error", 
-                                                                         subtitle: "Select a company to add products to the cart." });
-            }
             
+            await this._setEntityModel(sEntityCart, "/carts");
+            this._setUserCartsName();
+
+            if(oGlobalModel.getProperty("/carts").length > 0) oGlobalModel.setProperty("/selectedCart", oGlobalModel.getProperty("/carts")[0]);
+            oGlobalModel.refresh(true);
+        },
+
+        onQuantityInputChange: function(oEvent) {
+            const iQuantity = parseInt(oEvent.getParameter("value"));
+            const { stock_min, stock_max } = oEvent.getSource().getBindingContext("globalModel").getObject();
+
+            if(iQuantity > stock_max){
+                oEvent.getSource().setValueState("Error");
+                return oEvent.getSource().setValueStateText("Quantity exceeds the maximum stock limit.");
+            }else if(iQuantity <= stock_max ){
+                oEvent.getSource().setValueState("Success");
+            }else{
+                oEvent.getSource().setValueState("None");
+                oEvent.getSource().setValue("0");
+            }
+            oEvent.getSource().setValueStateText("");
+        },
+
+        onAddCartButtonPress: function(){ 
+            const { ID } = this.getOwnerComponent().getModel("globalModel").getProperty("/selectedCompany");
+            
+            this._createCart(ID);
+        },
+
+        onEditProductPress: function(oEvent) {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oSelectedProduct = oEvent.getSource().getBindingContext("globalModel").getObject();
+            
+            oGlobalModel.setProperty("/selectedProduct", oSelectedProduct);
+            oGlobalModel.refresh(true);
+
+            this._oDialogHandler._openEditProductDialog();
+        },
+
+        onDeleteProductPress: async function(oEvent) {
+            const oView = this.getView();
+            const oCurrentProduct = oEvent.getSource().getBindingContext("globalModel").getObject();
+
+            MessageBox.confirm(this._i18n.getText("delete_product", [oCurrentProduct.name]), {
+                title: this._i18n.getText("confirmation_needed"),
+                actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { oView.setBusy(true);
+                                                                                           await this._deleteProduct(oCurrentProduct); }}.bind(this)                                          
+            });
+        },
+
+        addProductCart: async function() {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
             const oTable = this.getView().byId("productsWorklist");
             const aSelectedProducts = oTable.getSelectedIndices();
+            const { ID } = oGlobalModel.getProperty("/selectedCompany");
+            const aSelectedProductsContexts = aSelectedProducts.map(iIndex => { return oTable.getContextByIndex(iIndex).getObject() });
 
-            const oSelectedCart = {
-                // não envie o ID se for gerado automaticamente pelo CAP
-                user_id: "1",
-                "company@odata.bind": `/Company('${oCompany.ID}')`,
-                total_price: 0,
-                currency: "EUR"
-              };
+            if(!this._validateCompanySelection()) return;
 
-            try{
-                const oCartList = this.getOwnerComponent().getModel().bindList("/Cart");  
-                const oCreatedCart = oCartList.create(oSelectedCart);
-                await oCreatedCart.created();
-                const oResult = oCreatedCart.getObject();
-                console.log(oResult);
-            }catch(oError){
-                // this._addMessage({ type: "Error",
-                //                    title: "Error",
-                //                    subtitle: `Something went wrong creating the product ${oProduct.name}`});
-                console.error(oError);
-                // reject(oError);
+            if(aSelectedProducts.length === 0) return MessageToast.show(this._i18n.getText("add_product_null_selection"));
+
+            const aCarts = await this._getEntitySet(sEntityCart, undefined, undefined, [new Filter("user_id", FilterOperator.EQ, sUserId)]);
+
+            if(aCarts.length === 0) await this._createCart(ID);
+
+            this._addProductsCart(aSelectedProductsContexts)
+        },
+
+        _validateCompanySelection: function() {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const cCompanyComboBox = this.getView().byId("companyComboBox");
+            const { name } = oGlobalModel.getProperty("/selectedCompany");
+
+            this._deleteMessages();
+
+            if(!name) {
+                cCompanyComboBox.setValueState("Error");
+                cCompanyComboBox.setValueStateText(this._i18n.getText("add_product_error_company"));
+                MessageToast.show(this._i18n.getText("add_product_error_company"));
+                this._addMessage.call(this, { type: "Error", title: this._i18n.getText("error"), subtitle: this._i18n.getText("add_product_error_company") });
+                return false;
             }
 
-            console.log("Selected Products: ", aSelectedProducts);
+            cCompanyComboBox.setValueState("None");
+            cCompanyComboBox.setValueStateText("");
+            return true;
+        },
+
+        onCartsSelectChange: function(oEvent){
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oSelectedCart = oEvent.getParameter("selectedItem").getBindingContext("globalModel").getObject();
+
+            oGlobalModel.setProperty("/selectedCart", oSelectedCart);
+            oGlobalModel.refresh(true);
+
+            this._resetProductQuantity();
         },
 
         _resetProductQuantity: function(){
-            this.getOwnerComponent().getModel('globalModel').setProperty("/products",
-            this.getOwnerComponent().getModel('globalModel').getProperty("/products").map(oProduct => {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+
+            oGlobalModel.setProperty("/products",
+            oGlobalModel.getProperty("/products").map(oProduct => {
                 oProduct.quantity = 0;
                 return oProduct;
             }));
@@ -95,14 +175,17 @@ sap.ui.define([
             BaseController.prototype._handlePopoverPress.call(this, oEvent);
         },
 
-        createProduct: async function() {
-            const oResult = await BaseController.prototype._createProduct.apply(this, [{ ID: BaseController.prototype._getProductsLastId.call(this),
-                                                                          name: this.getOwnerComponent().getModel('globalModel').getProperty("/product/name"),
-                                                                          description: this.getOwnerComponent().getModel('globalModel').getProperty("/product/description"),
-                                                                          price: this.getOwnerComponent().getModel('globalModel').getProperty("/product/price"),
-                                                                          currency: "EUR",
-                                                                          stock_min: this.getOwnerComponent().getModel('globalModel').getProperty("/product/stock_min"),
-                                                                          stock_max: this.getOwnerComponent().getModel('globalModel').getProperty("/product/stock_max") }]);
+        onCreateButtonPress: async function() {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+
+            this.getView().setBusy(true);
+
+            const oResult = await this._createProduct({ name: oGlobalModel.getProperty("/product/name"),
+                                                        description: oGlobalModel.getProperty("/product/description"),
+                                                        price: oGlobalModel.getProperty("/product/price"),
+                                                        currency: "EUR",
+                                                        stock_min: oGlobalModel.getProperty("/product/stock_min"),
+                                                        stock_max: oGlobalModel.getProperty("/product/stock_max") });
             if(oResult) this.getView().byId("addProduct").close();
         },
 
@@ -115,22 +198,25 @@ sap.ui.define([
             this._oGlobalMenu.openBy(oEvent.getSource());
         },
 
-        companyChange: function(oEvent){
-            this.getView().setBusy(true);
+        onCompanyCancelPress: function(oEvent) {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+
+            oGlobalModel.setProperty("/selectedCompany", {});
+            oGlobalModel.refresh(true);
+        },
+
+        onCompanyChange: async function(oEvent){
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oView = this.getView();
+
+            oView.setBusy(true);
 
             oEvent.getSource().setValueState("None");
-            
-            this.getOwnerComponent().getModel()
-            .bindList("/Company", undefined, undefined, [new Filter("name", FilterOperator.EQ, oEvent.getParameter("value"))])
-            .requestContexts().then(([oCompany]) => {
-                this.getOwnerComponent().getModel("globalModel").setProperty("/selectedCompany", oCompany.getObject());
-                this.getOwnerComponent().getModel("globalModel").refresh(true);
-                this.getView().setBusy(false);
-            })
-            .catch(function(oError) { 
-                this.getView().setBusy(false);
-                console.error("Erro ao buscar empresa:", oError) 
-            });
+
+            const oSelectedCompany = await BaseController.prototype._getEntity.call(this, sEntityCompany, oEvent.getSource().getSelectedKey());
+            oGlobalModel.setProperty("/selectedCompany", oSelectedCompany);
+            oGlobalModel.refresh(true);
+            oView.setBusy(false);
         },
 
         //#region Dialog OPEN/CLOSE
@@ -139,7 +225,12 @@ sap.ui.define([
 
         closeAddProductDialog: function () { this._oDialogHandler._closeAddProductDialog() },
 
-        openCartDialog: function () { this._oDialogHandler._openCartDialog() },
+        openEditProductDialog: function (oEvent) { this._oDialogHandler._openEditProductDialog() },
+
+        closeEditProductDialog: function () { this._oDialogHandler._closeEditProductDialog() },
+
+        openCartDialog: function () { if(!this._validateCompanySelection()) return;
+                                      this._oDialogHandler._openCartDialog() },
 
         closeCartDialog: function () { this._oDialogHandler._closeCartDialog() },
 

@@ -25,10 +25,11 @@
                 </Bar>
             </customHeader>
             <Panel expandable="true"
-                   class="sapUiSmallMargin"
+                width="auto"
+                   class="sapUiResponsiveMargin"
                    expanded="true"
                    headerText="Toggle Company Details">
-                <VBox class="sapUiSmallMargin">
+                <VBox>
                     <f:SimpleForm id="SimpleFormDisplay354"
                         editable="false"
                         layout="ResponsiveGridLayout"
@@ -45,17 +46,20 @@
                         columnsXL="1"
                         columnsL="1"
                         columnsM="1"
-                        binding="{globalModel>/selectedCompany}"
-                        singleContainerFullSize="false" >
+                        binding="{globalModel>/selectedCompany}" >
                         <f:content>
                             <Label class="sapUiTinyMargin" text="Company name" />
-                            <ComboBox width="30%" change="companyChange" id="companyComboBox" placeholder="Select a company..."
+                            <HBox width="auto">
+                                <ComboBox width="auto" change="onCompanyChange" value="{globalModel>name}" id="companyComboBox" placeholder="Select a company..."
                                 items="{ path: '/Company',
                                          sorter: { path: 'name' } }">
-                                <items>
-                                    <core:Item key="{ID}" text="{name}" />
-                                </items>
-                            </ComboBox>                
+                                    <items>
+                                        <core:Item key="{ID}" text="{name}" />
+                                    </items>
+                                </ComboBox>  
+                                <Button text="{i18n>cancel}" type="Default" class="sapUiSmallMarginBegin" 
+                                        visible="{= !!${globalModel>name} }" press="onCompanyCancelPress" />
+                            </HBox>              
                             <Label text="Name" />
                             <Text text="{globalModel>name}" />
                             <Label text="Description" />
@@ -67,16 +71,16 @@
                 </VBox>
             </Panel>
             <content>
-                <HBox width="95%" class="sapUiSmallMargin">
-                    <VBox >
+                <HBox width="auto">
+                    <VBox class="sapUiResponsiveMargin">
                     <Title text="Lista de Produtos" level="H3" />
                         <table:Table
                             id="productsWorklist"
                             rows="{globalModel>/products}"
-                            visibleRowCount="13"
                             selectionMode="MultiToggle"
                             enableColumnReordering="true"
-                            enableColumnFreeze="true">
+                            enableColumnFreeze="true"
+                            alternateRowColors="true">
                             <table:extension>
                                 <OverflowToolbar>
                                         <OverflowToolbarButton icon="sap-icon://add" text="{i18n>addProduct}" press="addProductCart" />
@@ -86,47 +90,81 @@
                                         <Text text="{= ${globalModel>/products}.length }" />
                                 </OverflowToolbar>
                             </table:extension>
+                            <table:rowSettingsTemplate>
+                            <table:RowSettings highlight="{= ${globalModel>status} === 'Error' ? 'Error' : ${globalModel>status} === 'Warning' ? 'Warning' : 'Success'}"
+                                               tooltip="{= ${globalModel>status} === 'Error' ? 'Error: Low stock' : ${globalModel>status} === 'Warning' ? 'Warning: Medium stock' : 'Success: In stock'}"/>
+                            </table:rowSettingsTemplate>
                             <table:columns>
-                                <table:Column>
+                                <table:Column width="4rem" hAlign="Center">
+                                    <Label text="{i18n>status}" />
+                                    <table:template>
+                                        <core:Icon src="{= ${globalModel>status} === 'Error' ? 'sap-icon://error' : ${globalModel>status} === 'Warning' ? 'sap-icon://alert' : 'sap-icon://sys-enter-2'}"
+                                                   tooltip="{= ${globalModel>status} === 'Error' ? 'Low stock' : ${globalModel>status} === 'Warning' ? 'Medium stock' : 'In stock'}" />
+                                    </table:template>
+                                </table:Column>
+                                <!-- <table:Column width="3rem" hAlign="Center">
                                     <Label text="{i18n>id}" />
                                     <table:template>
                                         <Text text="{globalModel>ID}" />
                                     </table:template>
+                                </table:Column> -->
+                                <table:Column width="4rem" hAlign="Center">
+                                    <Label text="{i18n>edit}" />
+                                    <table:template>
+                                        <!-- <core:Icon src="sap-icon://edit" press="onIconPress" /> -->
+                                        <Button
+                                            icon="sap-icon://edit"
+                                            type="Transparent"
+                                            tooltip="Edit Product"
+                                            press="onEditProductPress" />
+                                    </table:template>
                                 </table:Column>
-                                <table:Column>
+                                <table:Column width="4rem" hAlign="Center">
+                                    <Label text="{i18n>delete}" />
+                                    <table:template>
+                                        <!-- <core:Icon src="sap-icon://edit" press="onIconPress" /> -->
+                                        <Button
+                                            icon="sap-icon://delete"
+                                            type="Transparent"
+                                            tooltip="Delete Product"
+                                            press="onDeleteProductPress" />
+                                    </table:template>
+                                </table:Column>
+                                <table:Column autoResizable="true">
                                     <Label text="{i18n>name}" />
                                     <table:template>
                                         <Text text="{globalModel>name}" />
                                     </table:template>
                                 </table:Column>
-                                <table:Column>
+                                <table:Column autoResizable="true">
                                     <Label text="{i18n>description}" />
                                     <table:template>
                                         <Text text="{globalModel>description}" />
                                     </table:template>
                                 </table:Column>
-                                <table:Column>
+                                <table:Column width="7rem">
                                     <Label text="{i18n>price}" />
                                     <table:template>
-                                        <Text text="{globalModel>price} {globalModel>/selectedCompany/currency}" />
+                                        <Text text="{ path: 'globalModel>price', formatter: '.priceDecimalCasesFormatter' }" />
+                                        <!-- <Text text="{globalModel>price} {globalModel>/selectedCompany/currency}" /> -->
                                     </table:template>
                                 </table:Column>
-                                <table:Column>
+                                <table:Column width="7rem">
                                     <Label text="{i18n>stock_min}" />
                                     <table:template>
                                         <Text text="{globalModel>stock_min}" />
                                     </table:template>
                                 </table:Column>
-                                <table:Column>
+                                <table:Column width="7rem">
                                     <Label text="{i18n>stock_max}" />
                                     <table:template>
                                         <Text text="{globalModel>stock_max}" />
                                     </table:template>
                                 </table:Column>
-                                <table:Column>
+                                <table:Column width="10rem">
                                     <Label text="{i18n>quantity}" />
                                     <table:template>
-                                        <Input type="Number" value="{globalModel>quantity}" />
+                                        <Input type="Number" change="onQuantityInputChange" value="{globalModel>quantity}" />
                                     </table:template>
                                 </table:Column>
                             </table:columns>
