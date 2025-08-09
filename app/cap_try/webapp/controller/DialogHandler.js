@@ -58,9 +58,15 @@ sap.ui.define([
                     this._oController.getView().addDependent(oDialog);
                     return oDialog;
                 }.bind(this));
-            }
+            }   
 
-            this._dDialogCart.then(oDialog => oDialog.open() );
+            this._dDialogCart.then(oDialog => {
+                const oGlobalModel = this._oController.getOwnerComponent().getModel("globalModel");
+                const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
+                if(oSelectedCart?.ID) Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(oSelectedCart.ID);
+                else Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey("");
+                oDialog.open();
+            });
         },
 
         _closeCartDialog: function () { 

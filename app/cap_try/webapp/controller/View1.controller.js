@@ -33,7 +33,7 @@ sap.ui.define([
     return BaseController.extend("cap_try.controller.View1", {
         formatter: Formatter,
         onInit: function() {
-            BaseController.prototype._createMessageView.call(this);
+            this._createMessageView();
 
             console.log(this.getOwnerComponent().getModel().getMetaModel());
 
@@ -59,13 +59,6 @@ sap.ui.define([
         },
 
         onAfterRendering: async function() {
-            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-            
-            await this._setEntityModel(sEntityCart, "/carts");
-            this._setUserCartsName();
-
-            if(oGlobalModel.getProperty("/carts").length > 0) oGlobalModel.setProperty("/selectedCart", oGlobalModel.getProperty("/carts")[0]);
-            oGlobalModel.refresh(true);
         },
 
         onQuantityInputChange: function(oEvent) {
@@ -75,7 +68,7 @@ sap.ui.define([
             if(iQuantity > stock_max){
                 oEvent.getSource().setValueState("Error");
                 return oEvent.getSource().setValueStateText("Quantity exceeds the maximum stock limit.");
-            }else if(iQuantity <= stock_max ){
+            }else if(iQuantity <= stock_max && iQuantity !== 0){
                 oEvent.getSource().setValueState("Success");
             }else{
                 oEvent.getSource().setValueState("None");
@@ -113,22 +106,54 @@ sap.ui.define([
             });
         },
 
+        onDeleteSelectedCartPress: async function() {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
+
+            if (!oSelectedCart) return MessageToast.show(this._i18n.getText("delete_current_cart_selection_missing"));
+
+            MessageBox.confirm(this._i18n.getText("delete_current_cart_message", [oSelectedCart.name]), {
+                title: this._i18n.getText("confirmation_needed"),
+                actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: async function(oAction) {
+                    if (oAction === MessageBox.Action.YES) {
+                        this.getView().setBusy(true);
+                        await this._deleteCart(oSelectedCart);
+                    }
+                }.bind(this)
+            });
+        },
+
         addProductCart: async function() {
             const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
             const oTable = this.getView().byId("productsWorklist");
-            const aSelectedProducts = oTable.getSelectedIndices();
+            const aSelectedProducts = oTable.getSelectedItems();
             const { ID } = oGlobalModel.getProperty("/selectedCompany");
-            const aSelectedProductsContexts = aSelectedProducts.map(iIndex => { return oTable.getContextByIndex(iIndex).getObject() });
+            const aSelectedProductsContexts = aSelectedProducts.map(oProduct => { return { cart_user_id: sUserId,
+                                                                                           product_ID: oProduct.getBindingContext("globalModel").getObject().ID,
+                                                                                           quantity: oProduct.getBindingContext("globalModel").getObject().quantity }});
 
             if(!this._validateCompanySelection()) return;
 
             if(aSelectedProducts.length === 0) return MessageToast.show(this._i18n.getText("add_product_null_selection"));
 
-            const aCarts = await this._getEntitySet(sEntityCart, undefined, undefined, [new Filter("user_id", FilterOperator.EQ, sUserId)]);
+            const aCarts = await this._getEntitySet(sEntityCart, undefined, undefined, [ new Filter("user_id", FilterOperator.EQ, sUserId),
+                                                                                         new Filter("company/ID", FilterOperator.EQ, ID) ]);
 
-            if(aCarts.length === 0) await this._createCart(ID);
-
-            this._addProductsCart(aSelectedProductsContexts)
+            if(aCarts.length === 0)
+                MessageBox.confirm(this._i18n.getText("create_cart_confirm_message"), {
+                    title: this._i18n.getText("confirmation_needed"),
+                    actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                    emphasizedAction: MessageBox.Action.YES,
+                    onClose: async function(oAction) {
+                        if(oAction === MessageBox.Action.YES) { this.openCartDialog();
+                                                                await this._createCart(ID);
+                                                                this._addProductsCart(aSelectedProductsContexts) }
+                    }.bind(this)
+                });
+            else
+                this._addProductsCart(aSelectedProductsContexts);
         },
 
         _validateCompanySelection: function() {
@@ -155,8 +180,12 @@ sap.ui.define([
             const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
             const oSelectedCart = oEvent.getParameter("selectedItem").getBindingContext("globalModel").getObject();
 
+            this.getView().setBusy(true);
+
             oGlobalModel.setProperty("/selectedCart", oSelectedCart);
             oGlobalModel.refresh(true);
+
+            this._getCartProducts();
 
             this._resetProductQuantity();
         },
@@ -172,7 +201,7 @@ sap.ui.define([
         },
 
         toggleMessageView: function (oEvent) {
-            BaseController.prototype._handlePopoverPress.call(this, oEvent);
+            this._handlePopoverPress(oEvent);
         },
 
         onCreateButtonPress: async function() {
@@ -213,9 +242,12 @@ sap.ui.define([
 
             oEvent.getSource().setValueState("None");
 
-            const oSelectedCompany = await BaseController.prototype._getEntity.call(this, sEntityCompany, oEvent.getSource().getSelectedKey());
+            const oSelectedCompany = await this._getEntity(sEntityCompany, oEvent.getSource().getSelectedKey());
             oGlobalModel.setProperty("/selectedCompany", oSelectedCompany);
+            oGlobalModel.setProperty("/selectedCart", {});
+            oGlobalModel.setProperty("/cart", []);
             oGlobalModel.refresh(true);
+            this._getCarts();
             oView.setBusy(false);
         },
 

@@ -46,7 +46,7 @@ entity Products {
   stock_max : Integer @mandatory;
 }
 
-entity Cart {
+entity Cart : managed {
   key ID : UUID;
   key user_id : String(50) @mandatory;
   name: Names;
@@ -59,8 +59,9 @@ entity Cart {
 entity CartItem : managed {
   key ID : UUID;
   cart : Association to Cart;
-  product : Association to Products @mandatory;
+  product_ID : UUID;
   quantity : Integer @mandatory;
   price : Decimal(10,2) @mandatory;
   currency : String(3) @mandatory;
+  product : Association to Products on product.ID = $self.product_ID;
 }

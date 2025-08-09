@@ -1,0 +1,132 @@
+<c:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+    xmlns:core="sap.ui.core"
+    xmlns:table="sap.ui.table">
+    
+    <Title text="Lista de Produtos" level="H3" />
+        <Table
+        id="productsWorklist"
+        mode="MultiSelect"
+        inset="false"
+        items="{
+            path: 'globalModel>/products',
+            sorter: {
+                path: 'name'
+            }
+        }"
+        alternateRowColors="true">
+
+        <headerToolbar>
+            <OverflowToolbar>
+                <Title text="Lista de Produtos" level="H2"/>
+                <ToolbarSpacer />
+                <SearchField
+                    width="30%"
+                    placeholder="Procurar por nome..."
+                    liveChange="onSearch" />
+                <Button
+                    icon="sap-icon://cart-4"
+                    tooltip="Adicionar Produto ao Carrinho"
+                    press="addProductCart" />
+            </OverflowToolbar>
+        </headerToolbar>
+
+        <columns>
+            <Column width="4rem" hAlign="Center">
+                <header>
+                    <Label text="{i18n>status}" />
+                </header>
+            </Column>
+
+            <Column>
+                <header>
+                    <Label text="{i18n>name}" />
+                </header>
+            </Column>
+
+            <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
+                <header>
+                    <Label text="{i18n>price}" />
+                </header>
+            </Column>
+
+            <Column hAlign="End" minScreenWidth="Desktop" demandPopin="true">
+                <header>
+                    <Label text="{i18n>stock_min}" />
+                </header>
+            </Column>
+
+            <Column hAlign="End" minScreenWidth="Desktop" demandPopin="true">
+                <header>
+                    <Label text="{i18n>stock_max}" />
+                </header>
+            </Column>
+
+            <Column hAlign="Center" minScreenWidth="Tablet" demandPopin="true" width="10rem">
+                <header>
+                    <Label text="{i18n>quantity}" />
+                </header>
+            </Column>
+            <Column hAlign="Center" minScreenWidth="Tablet" demandPopin="true" width="10rem">
+                <header>
+                    <Label text="{i18n>edit}" />
+                </header>
+            </Column>
+            <Column hAlign="Center" minScreenWidth="Tablet" demandPopin="true" width="10rem">
+                <header>
+                    <Label text="{i18n>delete}" />
+                </header>
+            </Column>
+        </columns>
+
+        <items>
+            <ColumnListItem vAlign="Middle"
+                type="Inactive"
+                highlight="{= ${globalModel>status} === 'Error' ? 'Error' : ${globalModel>status} === 'Warning' ? 'Warning' : 'Success'}">
+                <cells>
+                    <core:Icon
+                        src="{= ${globalModel>status} === 'Error' ? 'sap-icon://error' : ${globalModel>status} === 'Warning' ? 'sap-icon://alert' : 'sap-icon://sys-enter-2'}"
+                        tooltip="{= ${globalModel>status} === 'Error' ? 'Estoque baixo' : ${globalModel>status} === 'Warning' ? 'Estoque médio' : 'Em estoque'}"
+                        class="sapUiSmallMargin"
+                        color="{= ${globalModel>status} === 'Error' ? 'Negative' : ${globalModel>status} === 'Warning' ? 'Critical' : 'Positive'}"
+                        />
+                    
+                    <ObjectIdentifier
+                        title="{globalModel>name}"
+                        text="{globalModel>description}"
+                        />
+                    
+                    <ObjectStatus
+                        text="{
+                            parts: [ 'globalModel>price', 'globalModel>/selectedCompany/currency' ],
+                            formatter: '.formatter.priceCurrencyFormatter'
+                        } {globalModel>/selectedCompany/currency}"
+                        />
+
+                    <Text text="{globalModel>stock_min}" />
+
+                    <Text text="{globalModel>stock_max}" />
+                    
+                    <StepInput
+                        value="{globalModel>quantity}"
+                        min="0"
+                        max="{globalModel>stock_max}"
+                        width="100px"
+                        change="onQuantityInputChange" />
+
+                    <Button
+                        icon="sap-icon://edit"
+                        type="Transparent"
+                        tooltip="Editar Produto"
+                        press="onEditProductPress" />
+                    <Button
+                        icon="sap-icon://delete"
+                        type="Transparent"
+                        tooltip="Apagar Produto"
+                        press="onDeleteProductPress" />
+                </cells>
+            </ColumnListItem>
+        </items>
+    </Table>
+</c:FragmentDefinition>

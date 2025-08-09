@@ -7,7 +7,8 @@
         <content>
             <table:Table
                 id="cartTable"
-                rows="{globalModel>/cart}"
+                rows="{ path: 'globalModel>/cart',
+                        sorter: { path: 'name' } }"
                 visibleRowCount="5"
                 selectionMode="None"
                 class="sapUiSmallMargin">
@@ -15,13 +16,23 @@
                     <OverflowToolbar>
                             <Button text="Add Cart" iconFirst="true" icon="sap-icon://add" press="onAddCartButtonPress" />
                         <ToolbarSeparator />
-                            <Label text="Cart's" />
-                            <Select autoAdjustWidth="false" columnRatio="3:2" editable="true" enabled="true" forceSelection="false" id="cartsSelect"
-                                    icon="sap-icon://cart" maxWidth="100%" items="{globalModel>/carts}" selectedKey="{globalModel>/selectedCart/ID}" change="onCartsSelectChange" resetOnMissingKey="false" width="10%" wrapItemsText="false">
+                            <Label text="Cart's" design="Bold" />
+                            <Select autoAdjustWidth="false" columnRatio="3:2" editable="true" forceSelection="false" id="cartsSelect"
+                                    icon="sap-icon://cart" maxWidth="100%" items="{ path: 'globalModel>/carts',
+                                                                                    sorter: { path: 'createdAt', descending: false } }" 
+                                    change="onCartsSelectChange" resetOnMissingKey="false" width="10%" wrapItemsText="false"
+                                    enabled="{= ${globalModel>/carts}.length > 0 }" >
                                 <items>
                                     <core:Item key="{globalModel>ID}" text="{globalModel>name}" />
                                 </items>
                             </Select>
+                            <Button
+                                icon="sap-icon://delete"
+                                type="Transparent"
+                                tooltip="{i18n>delete_current_cart}"
+                                class="sapUiTinyMarginBegin"
+                                press="onDeleteSelectedCartPress"
+                                enabled="{= !!${globalModel>/selectedCart/ID} }" />
                         <ToolbarSpacer />
                         <ToolbarSpacer />
                             <Title level="H2" text="Total" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
@@ -44,7 +55,7 @@
                     <table:Column width="20%">
                         <Label text="Price" />
                         <table:template>
-                            <Text text="{globalModel>price}" />
+                            <Text text="{globalModel>price} {globalModel>/selectedCompany/currency}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
@@ -56,10 +67,35 @@
                     <table:Column width="20%">
                         <Label text="Total" />
                         <table:template>
-                            <Text text="{= ${globalModel>quantity} * ${globalModel>price}}" />
+                            <!-- <Text text="{= ${globalModel>quantity} * ${globalModel>price}}" /> -->
+                            <Text text="{ parts: [ 'globalModel>total_price', 'globalModel>/selectedCompany/currency' ],
+                                          formatter: '.formatter.priceCurrencyFormatter' } {globalModel>/selectedCompany/currency}" />
+                        </table:template>
+                    </table:Column>
+                    <table:Column width="20%">
+                        <Label text="{i18n>delete}" />
+                        <table:template >
+                            <Button
+                                icon="sap-icon://delete"
+                                type="Transparent"
+                                tooltip="{i18n>delete_cart_product}"
+                                press="onDeleteProductPress" />
                         </table:template>
                     </table:Column>
                 </table:columns>
+                <table:footer>
+                    <OverflowToolbar>
+                        <ToolbarSpacer />
+                        <Label text="Total do Carrinho:" design="Bold" />
+                        <Text class="sapUiTinyMarginBegin" text="{
+                                parts: [ 
+                                    {path: 'globalModel>/selectedCart/total_price'},
+                                    {path: 'globalModel>/selectedCompany/currency'}
+                                ],
+                                formatter: '.formatter.priceCurrencyFormatter'
+                            } {globalModel>/selectedCompany/currency}" />
+                    </OverflowToolbar>
+                </table:footer>
             </table:Table>
         </content>
         <beginButton>

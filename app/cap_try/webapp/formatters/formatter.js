@@ -5,11 +5,15 @@ sap.ui.define([
 
     return {
 
-        priceDecimalCasesFormatter: function(nValue) {
-            const oNumberFormat = NumberFormat.getFloatInstance({ minFractionDigits: 2,
-                                                                  maxFractionDigits: 2 });
+        priceCurrencyFormatter: function (fValue, sCurrencyCode) {
+            if (fValue === null || fValue === undefined || !sCurrencyCode) return "";
 
-            return oNumberFormat.format(nValue);
-        }
+            const oCurrencyFormat = NumberFormat.getCurrencyInstance({
+                currencyCode: sCurrencyCode,
+                showMeasure: true          
+            });
+
+            return oCurrencyFormat.format(fValue);
+        },
     };
 });

@@ -16,7 +16,7 @@
                         <Title text="{i18n>shop}" />
                     </contentMiddle>
                     <contentRight>
-                        <Button icon="sap-icon://cart" press="openCartDialog" tooltip="{i18n>cart}" >
+                        <Button icon="sap-icon://cart" press="openCartDialog" tooltip="{i18n>cart}" visible="{= !!${globalModel>/selectedCompany/ID} }" >
                             <customData>
                                 <BadgeCustomData animation="Update"  value="{= ${globalModel>/cart}.length }" />
                             </customData>
@@ -72,103 +72,8 @@
             </Panel>
             <content>
                 <HBox width="auto">
-                    <VBox class="sapUiResponsiveMargin">
-                    <Title text="Lista de Produtos" level="H3" />
-                        <table:Table
-                            id="productsWorklist"
-                            rows="{globalModel>/products}"
-                            selectionMode="MultiToggle"
-                            enableColumnReordering="true"
-                            enableColumnFreeze="true"
-                            alternateRowColors="true">
-                            <table:extension>
-                                <OverflowToolbar>
-                                        <OverflowToolbarButton icon="sap-icon://add" text="{i18n>addProduct}" press="addProductCart" />
-                                    <ToolbarSpacer />
-                                    <ToolbarSpacer />
-                                        <Title level="H2" text="Total" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
-                                        <Text text="{= ${globalModel>/products}.length }" />
-                                </OverflowToolbar>
-                            </table:extension>
-                            <table:rowSettingsTemplate>
-                            <table:RowSettings highlight="{= ${globalModel>status} === 'Error' ? 'Error' : ${globalModel>status} === 'Warning' ? 'Warning' : 'Success'}"
-                                               tooltip="{= ${globalModel>status} === 'Error' ? 'Error: Low stock' : ${globalModel>status} === 'Warning' ? 'Warning: Medium stock' : 'Success: In stock'}"/>
-                            </table:rowSettingsTemplate>
-                            <table:columns>
-                                <table:Column width="4rem" hAlign="Center">
-                                    <Label text="{i18n>status}" />
-                                    <table:template>
-                                        <core:Icon src="{= ${globalModel>status} === 'Error' ? 'sap-icon://error' : ${globalModel>status} === 'Warning' ? 'sap-icon://alert' : 'sap-icon://sys-enter-2'}"
-                                                   tooltip="{= ${globalModel>status} === 'Error' ? 'Low stock' : ${globalModel>status} === 'Warning' ? 'Medium stock' : 'In stock'}" />
-                                    </table:template>
-                                </table:Column>
-                                <!-- <table:Column width="3rem" hAlign="Center">
-                                    <Label text="{i18n>id}" />
-                                    <table:template>
-                                        <Text text="{globalModel>ID}" />
-                                    </table:template>
-                                </table:Column> -->
-                                <table:Column width="4rem" hAlign="Center">
-                                    <Label text="{i18n>edit}" />
-                                    <table:template>
-                                        <!-- <core:Icon src="sap-icon://edit" press="onIconPress" /> -->
-                                        <Button
-                                            icon="sap-icon://edit"
-                                            type="Transparent"
-                                            tooltip="Edit Product"
-                                            press="onEditProductPress" />
-                                    </table:template>
-                                </table:Column>
-                                <table:Column width="4rem" hAlign="Center">
-                                    <Label text="{i18n>delete}" />
-                                    <table:template>
-                                        <!-- <core:Icon src="sap-icon://edit" press="onIconPress" /> -->
-                                        <Button
-                                            icon="sap-icon://delete"
-                                            type="Transparent"
-                                            tooltip="Delete Product"
-                                            press="onDeleteProductPress" />
-                                    </table:template>
-                                </table:Column>
-                                <table:Column autoResizable="true">
-                                    <Label text="{i18n>name}" />
-                                    <table:template>
-                                        <Text text="{globalModel>name}" />
-                                    </table:template>
-                                </table:Column>
-                                <table:Column autoResizable="true">
-                                    <Label text="{i18n>description}" />
-                                    <table:template>
-                                        <Text text="{globalModel>description}" />
-                                    </table:template>
-                                </table:Column>
-                                <table:Column width="7rem">
-                                    <Label text="{i18n>price}" />
-                                    <table:template>
-                                        <Text text="{ path: 'globalModel>price', formatter: '.priceDecimalCasesFormatter' }" />
-                                        <!-- <Text text="{globalModel>price} {globalModel>/selectedCompany/currency}" /> -->
-                                    </table:template>
-                                </table:Column>
-                                <table:Column width="7rem">
-                                    <Label text="{i18n>stock_min}" />
-                                    <table:template>
-                                        <Text text="{globalModel>stock_min}" />
-                                    </table:template>
-                                </table:Column>
-                                <table:Column width="7rem">
-                                    <Label text="{i18n>stock_max}" />
-                                    <table:template>
-                                        <Text text="{globalModel>stock_max}" />
-                                    </table:template>
-                                </table:Column>
-                                <table:Column width="10rem">
-                                    <Label text="{i18n>quantity}" />
-                                    <table:template>
-                                        <Input type="Number" change="onQuantityInputChange" value="{globalModel>quantity}" />
-                                    </table:template>
-                                </table:Column>
-                            </table:columns>
-                        </table:Table>
+                    <VBox class="sapUiResponsiveMargin" visible="{= !!${globalModel>/selectedCompany/ID} }">
+                        <core:Fragment fragmentName="cap_try.view.fragments.ProductsTable" type="XML" />
                     </VBox>
                 </HBox>
             </content>
@@ -176,7 +81,7 @@
                 <Toolbar>
                     <Button visible="{= ${messageModel>/}.length !== 0}" press="toggleMessageView" icon="sap-icon://alert" text="{= ${messageModel>/}.length}" />
                     <ToolbarSpacer />
-                    <Button press="openAddProductDialog" icon="sap-icon://add-product"/>
+                    <Button press="openAddProductDialog" visible="{= !!${globalModel>/selectedCompany/ID} }" icon="sap-icon://add-product"/>
                 </Toolbar>
             </footer>
     </Page>
