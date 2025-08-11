@@ -11,6 +11,7 @@ sap.ui.define([
 			this._oController = oController;
 			this._dDialogCart = undefined;
 			this._dDialogAddProduct = undefined;
+            this._dDialogEditProduct = undefined;
 		},
 		
 		_openAddProductDialog: function () {

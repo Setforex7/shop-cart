@@ -37,6 +37,12 @@ class ShopCartService extends cds.ApplicationService { async init() {
     return data;
   });
 
+  this.before("DELETE", "Products", async req => {
+    const { ID } = req.data;
+    await DELETE.from(CartItem).where({ product_ID: ID });
+    
+    return super.init();
+  });
 
   this.before('CREATE', 'Cart', async req => { 
     const cart = req.data;
@@ -52,49 +58,64 @@ class ShopCartService extends cds.ApplicationService { async init() {
     return super.init();
    });
 
-   this.on('addProductsToCart', async req => {
+   this.on('finalizeProcess', async req => {
+     const { cart } = req.data;
+
+     console.log("Finalizing process for cart:", cart);
+
+     return super.init();
+   });
+
+  this.on('addProductsToCart', async req => {
     const { products } = req.data;
 
     for (const oProductToAdd of products) {
-        const product = await SELECT.one.from(Products).where({ ID: oProductToAdd.product_ID });
+      const { products } = req.data;
+      const tx = cds.transaction(req); 
 
-        if (!product) return req.error(404, `Produto com ID ${product.ID} não encontrado.`);
+      const cart_ID = products[0]?.cart_ID;
+      if(!cart_ID) return req.error(400, 'ID do carrinho não fornecido.');
 
-        if (product.stock < oProductToAdd.quantity) return req.error(400, `Stock insuficiente para o produto ${product.name}. A operação foi cancelada.`);
-      console.log("Produto a adicionar ao carrinho:", oProductToAdd);
-        const existingCartItem = await SELECT.from(CartItem).where({ cart_ID: oProductToAdd.cart_ID, product_ID: oProductToAdd.product_ID });
-        console.log("Item do carrinho existente:", existingCartItem);
-        if(existingCartItem.length > 0)
-          await UPDATE(CartItem, existingCartItem[0].ID).with({ quantity: { '+=': oProductToAdd.quantity } });
-        else
-          await INSERT.into(CartItem).entries({ cart: { ID: oProductToAdd.cart_ID },
-                                                cart_user_id: oProductToAdd.cart_user_id,
-                                                product: { ID: oProductToAdd.product_ID },
-                                                quantity: oProductToAdd.quantity,
-                                                price: product.price,
-                                                currency: product.currency,
-                                                // totalLinePrice: product.price * oProductToAdd.quantity
-        });
-        console.log("cheguei aqui sou um deus");
-        await UPDATE(Products, oProductToAdd.product_ID).with({ stock_max: { '-=': oProductToAdd.quantity } });
-        
+      for (const oProductToAdd of products) {
+          const product = await SELECT.one.from(Products).where({ ID: oProductToAdd.product_ID });
+
+          if (!product) return req.error(404, `Produto com ID ${oProductToAdd.product_ID} não encontrado.`);
+
+          if (product.stock_max < oProductToAdd.quantity) return req.error(400, `Stock insuficiente para o produto ${product.name}. A operação foi cancelada.`);
+
+          const existingCartItem = await SELECT.one.from(CartItem).where({ cart_ID: oProductToAdd.cart_ID, product_ID: oProductToAdd.product_ID });
+
+          if (existingCartItem) 
+              await tx.run(UPDATE(CartItem, existingCartItem.ID).with({ quantity: { '+=': oProductToAdd.quantity } }));
+          else 
+              await tx.run(INSERT.into(CartItem).entries({ cart: { ID: oProductToAdd.cart_ID },
+                                                           cart_user_id: oProductToAdd.cart_user_id,
+                                                           product: { ID: oProductToAdd.product_ID },
+                                                           quantity: oProductToAdd.quantity,
+                                                           price: product.price,
+                                                           currency: product.currency }));
+          
+
+          // await tx.run(UPDATE(Products, oProductToAdd.product_ID).with({ stock_max: { '-=': oProductToAdd.quantity } }));
+      }
+      const cartItems = await tx.run(SELECT.from(CartItem).where({ cart_ID: cart_ID }));
+      const total_price = cartItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+
+      await tx.run(UPDATE(Cart, cart_ID).with({ total_price: total_price }));
+
+      const updatedCart = await tx.run(SELECT.one.from(Cart).where({ ID: cart_ID })
+                                                            .columns(c => {
+                                                                c `.*`,
+                                                                c.products(i => {
+                                                                    i `.*`,
+                                                                    i.product(p => p `.*`)
+                                                                })
+                                                            }));
+
+      return updatedCart;
     }
+  });
 
-    // No final, busca e retorna o estado completo e atualizado do carrinho
-    // const updatedCart = await cds.tx(req).run(
-    //     SELECT.one.from(my.Cart)
-    //           .where({ ID: cartID })
-    //           .columns(c => { c `.*`, c.items(i => { i `.*`, i.product `.*` }) })
-    // );
-    
-    // ... aqui pode recalcular o totalPrice do carrinho ...
-   });
-
-  // this.on('getLastId', async req => {
-  //   const { ID, entityName }= req.data;
-  //   console.log(await SELECT.from(entityName).where({ ID: ID }));
-  //   return [await SELECT.from(entityName).where({ ID })] 
-  // }),
 
   this.on('createProduct', async req => {
     //? Gets the request data from the frontend
@@ -102,16 +123,8 @@ class ShopCartService extends cds.ApplicationService { async init() {
     console.log("Producto", product);
     if(!validations.validateProduct(product).state) return req.error(400, 'Something went wrong creating the product');
 
-    // if(!product) return req.error(400, 'Something went wrong creating the product');
-    // if(!product.name) return req.error(400, 'Please insert a valid name');
-    // if(!product.price || parseFloat(product.price) < 0) return req.error(400, 'Please insert a valid price');
-    // if(parseFloat(product.stock_min) < 0) return req.error(400, 'Please insert a valid value for stock minimum');
-    // if(parseFloat(product.stock_max) < 0) return req.error(400, 'Please insert a valid value for stock maximum');
-    // if(product.currency !== "EUR" && product.currency !== "USD") return req.error(400, 'Please insert a valid currency (EUR or USD)');
-
     const duplicateProduct = await SELECT.from(Products).where({ name: product.name, price: product.price, currency: product.currency });
     console.log(duplicateProduct);
-    // if(duplicateProduct.length !== 0) return req.error(400, 'Product already exists in the database!');
 
     //? Makes the action in the database
     const createdProducts = await INSERT.into(Products).entries(product);

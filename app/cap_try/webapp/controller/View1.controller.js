@@ -10,11 +10,11 @@ sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/m/MessageToast",
-    "sap/m/MessageBox"
+    "sap/m/MessageBox",
 ], (BaseController,
 	DialogHandler,
 	Controller,
-    Formatter,
+	Formatter,
 	Fragment,
 	Menu,
 	MenuItem,
@@ -102,8 +102,9 @@ sap.ui.define([
                 actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
                 emphasizedAction: MessageBox.Action.YES,
                 onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { oView.setBusy(true);
-                                                                                           await this._deleteProduct(oCurrentProduct); }}.bind(this)                                          
-            });
+                                                                                           await this._deleteProduct(oCurrentProduct);
+                                                                                           this._getCart();
+                                                                                           oView.setBusy(false) }}.bind(this)});
         },
 
         onDeleteSelectedCartPress: async function() {
@@ -133,10 +134,14 @@ sap.ui.define([
             const aSelectedProductsContexts = aSelectedProducts.map(oProduct => { return { cart_user_id: sUserId,
                                                                                            product_ID: oProduct.getBindingContext("globalModel").getObject().ID,
                                                                                            quantity: oProduct.getBindingContext("globalModel").getObject().quantity }});
-
+            
             if(!this._validateCompanySelection()) return;
+            if(!this._validateProducts(aSelectedProductsContexts)) return;
 
-            if(aSelectedProducts.length === 0) return MessageToast.show(this._i18n.getText("add_product_null_selection"));
+            if(aSelectedProducts.length === 0){
+                this._addMessage({ type: "Warning", title: this._i18n.getText("warning"), subtitle: this._i18n.getText("add_product_null_selection") })
+                return MessageToast.show(this._i18n.getText("add_product_null_selection"));
+            }
 
             const aCarts = await this._getEntitySet(sEntityCart, undefined, undefined, [ new Filter("user_id", FilterOperator.EQ, sUserId),
                                                                                          new Filter("company/ID", FilterOperator.EQ, ID) ]);
@@ -167,7 +172,7 @@ sap.ui.define([
                 cCompanyComboBox.setValueState("Error");
                 cCompanyComboBox.setValueStateText(this._i18n.getText("add_product_error_company"));
                 MessageToast.show(this._i18n.getText("add_product_error_company"));
-                this._addMessage.call(this, { type: "Error", title: this._i18n.getText("error"), subtitle: this._i18n.getText("add_product_error_company") });
+                this._addMessage({ type: "Error", title: this._i18n.getText("error"), subtitle: this._i18n.getText("add_product_error_company") });
                 return false;
             }
 
@@ -249,6 +254,86 @@ sap.ui.define([
             oGlobalModel.refresh(true);
             this._getCarts();
             oView.setBusy(false);
+        },
+
+        _validateProducts: function(aProductsToAdd) {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oProductsTable = this.getView().byId("productsWorklist");
+            const oProductsTableItems = oProductsTable.getItems();
+            const aProducts = oGlobalModel.getProperty("/products");
+            let bInvalidQuantity = false;
+
+            for(const oProduct of oProductsTableItems){
+                const oCurrentProduct = aProducts.find(oMatchProduct => oMatchProduct.name === oProduct.getCells()[1].getTitle());
+                const oProductToAdd = aProductsToAdd.some(oProd => oCurrentProduct.ID === oProd.product_ID);
+                if(!oProductToAdd) continue;
+
+                if(oProduct.getCells()[5].getValue() === 0){
+                    bInvalidQuantity = true;
+                    oProduct.getCells()[5].setValueState("Error");
+                    oProduct.getCells()[5].setValueStateText(this._i18n.getText("add_product_error_quantity_state"));
+                }
+            }
+
+            if(bInvalidQuantity){
+                MessageToast.show(this._i18n.getText("add_product_error_quantity"));
+                this._addMessage({ type: "Error", title: this._i18n.getText("error"), subtitle: this._i18n.getText("add_product_error_quantity") });
+            }
+
+            return bInvalidQuantity ? false : true;
+        },
+        
+        onDeleteCartProductPress: function (){
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oView = this.getView();
+            const oTable = this.getView().byId("cartTable");
+            const oTableId = oView.byId("cartTable");
+            const aSelectedProductsIndex = oTable.getSelectedIndices();
+            const aSelectedProdcuts = aSelectedProductsIndex.map(iIndex => { return oTable.getContextByIndex(iIndex).getObject() });
+
+            MessageBox.confirm(this._i18n.getText("delete_cart_product_confirmation"), {
+                actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: (oAction) => {
+                    if (oAction === MessageBox.Action.YES){
+                        oTableId.setBusy(true);
+                        this._deleteProduct(aSelectedProdcuts);
+                        this._getCart();
+                        oTableId.setBusy(false);
+                    } 
+                }
+            });
+        },
+
+        onProductCartQuantityChangePress: function (oEvent) {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oView = this.getView();
+            const oUpdatedProduct = oEvent.getSource().getBindingContext("globalModel")?.getObject();
+            const iNewQuantity = oEvent.getParameter("value");
+
+            oView.setBusy(true);
+
+            oUpdatedProduct.metadata.setProperty("quantity", iNewQuantity);
+            this._getCart();
+
+            oView.setBusy(false);
+        },
+
+        onFinalizePurchaseButtonPress: function (oEvent){
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oView = this.getView();
+            const oCurrentCart = oGlobalModel.getProperty("/selectedCart");
+            const oCartProducts = oGlobalModel.getProperty("/cart");
+
+            const oPayloadCart = { ID: oCurrentCart.ID,
+                                   user_id: oCurrentCart.user_id, products: oCartProducts.map(oProduct => { return {
+                                                                                                            cart_ID: oCurrentCart.ID,
+                                                                                                            cart_user_id: oCurrentCart.user_id,
+                                                                                                            product_ID: oProduct.ID,
+                                                                                                            quantity: oProduct.quantity }}) };
+            oView.setBusy(true);
+
+            this._finalizeCart(oPayloadCart);
         },
 
         //#region Dialog OPEN/CLOSE

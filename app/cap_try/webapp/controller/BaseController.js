@@ -144,14 +144,19 @@ sap.ui.define([
 			});
 		},
 
-		_deleteProduct: async function(oProduct){
+		_deleteProduct: async function(oProducts){
 			try{
-				await oProduct.metadata.delete();
-				MessageToast.show(this._i18n.getText("delete_product_success", [oProduct.name]));
+				if(oProducts.metadata){
+					await oProducts.metadata.delete();
+					MessageToast.show(this._i18n.getText("delete_product_success", [oProducts.name]));
+				}
+				else
+					oProducts.forEach(async oProducts => { await oProducts.metadata.delete();
+														   MessageToast.show(this._i18n.getText("delete_product_success", [oProducts.name])); });
 				this._getProducts();
 			}catch(oError){
 				this.getView().setBusy(false);
-				return MessageBox.error(this._i18n.getText("delete_product_error", [oProduct.name]));
+				return MessageBox.error(this._i18n.getText("delete_product_error", [oProducts.name]));
 			}
 		},
 
@@ -292,6 +297,20 @@ sap.ui.define([
 
 		},
 
+		_getCart: function(){
+			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+			const { ID } = oGlobalModel.getProperty("/selectedCart");
+
+			this.getOwnerComponent().getModel().bindContext(sEntityCart + `(ID='${ID}',user_id='${sUserId}')`, undefined, undefined, undefined)
+			.requestObject()
+			.then(oCart => {
+				const { total_price } = oCart;
+				oGlobalModel.setProperty("/selectedCart/total_price", total_price);
+				oGlobalModel.refresh(true);
+				this._getCartProducts();
+			});
+		},
+
 		_getCarts: function(){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 
@@ -331,7 +350,7 @@ sap.ui.define([
 
 				const aCartProducts = aCartProductsData.map(oProduct => { 
 					const { ID, cart_ID, cart_user_id, product_ID, quantity, price, product } = oProduct.getObject();
-					const oCartProduct = { ID, cart_ID, cart_user_id, product_ID, quantity, price, name: product.name, description: product.description };
+					const oCartProduct = { ID, cart_ID, cart_user_id, product_ID, quantity, price, name: product?.name, description: product?.description };
 					oCartProduct.metadata = oProduct;
 					oCartProduct.total_price = quantity * price;
 					return oCartProduct;
@@ -341,6 +360,32 @@ sap.ui.define([
 				oGlobalModel.refresh(true);
 				oView.setBusy(false);
 			});
+		},
+
+		_finalizeCart: async function(oCart){
+			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+
+			//? Prepares the call for the backend
+			const oFinalizeCartAction = this.getOwnerComponent().getModel().bindContext("/finalizeProcess(...)");
+			//? We assing the parameters of the creation action
+			oFinalizeCartAction.setParameter("cart", oCart);
+
+			try {
+				//? Executes the backend request
+			    await oFinalizeCartAction.execute();
+				//? Gets the return object from the action
+				const oReturnedResponse = oFinalizeCartAction.getBoundContext();
+				console.log(oReturnedResponse?.getObject());
+
+				oGlobalModel.setProperty("/selectedCart", oReturnedResponse.getObject());
+				MessageToast.show(this._i18n.getText("add_products_cart_success"));
+				
+				this._getCartProducts();
+				this._getProducts();
+			} catch (oError) {
+			    console.error(oError);
+				console.log(oError);
+			}
 		},
 
 		_addProductsCart: async function(aProducts){
@@ -365,14 +410,12 @@ sap.ui.define([
 			    await oAddManyToCartAction.execute();
 				//? Gets the return object from the action
 				const oReturnedResponse = oAddManyToCartAction.getBoundContext();
-				console.log(oReturnedResponse);
+				console.log(oReturnedResponse.getObject());
 
+				oGlobalModel.setProperty("/selectedCart", oReturnedResponse.getObject());
 				MessageToast.show(this._i18n.getText("add_products_cart_success"));
 				
 				this._getCartProducts();
-				const oCartBind = oDataModel.bindList(sEntityCart + `(ID='${ID}',user_id='${sUserId}')`, undefined, undefined, undefined);
-				const oCart = await oCartBind.requestContexts();
-				console.log("Cart after adding products:", oCart);
 				this._getProducts();
 			} catch (oError) {
 			    console.error(oError);

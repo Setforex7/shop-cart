@@ -10,7 +10,8 @@
                 rows="{ path: 'globalModel>/cart',
                         sorter: { path: 'name' } }"
                 visibleRowCount="5"
-                selectionMode="None"
+                selectionMode="MultiToggle"
+                alternateRowColors="true"
                 class="sapUiSmallMargin">
                 <table:extension>
                     <OverflowToolbar>
@@ -61,7 +62,7 @@
                     <table:Column width="20%">
                         <Label text="Quantity" />
                         <table:template>
-                            <Text text="{globalModel>quantity}" />
+                            <StepInput change="onProductCartQuantityChangePress" value="{globalModel>quantity}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
@@ -72,7 +73,7 @@
                                           formatter: '.formatter.priceCurrencyFormatter' } {globalModel>/selectedCompany/currency}" />
                         </table:template>
                     </table:Column>
-                    <table:Column width="20%">
+                    <table:Column width="5rem">
                         <Label text="{i18n>delete}" />
                         <table:template >
                             <Button
@@ -85,6 +86,9 @@
                 </table:columns>
                 <table:footer>
                     <OverflowToolbar>
+                        <Button icon="sap-icon://delete" text="{i18n>delete_products}" press="onDeleteCartProductPress" />
+                        <ToolbarSeparator visible="{= ${globalModel>/cart}.length === 0 ? false : true}" />
+                        <Button text="{i18n>finalize_purchase}" visible="{= ${globalModel>/cart}.length === 0 ? false : true}" press="onFinalizePurchaseButtonPress" type="Success" />
                         <ToolbarSpacer />
                         <Label text="Total do Carrinho:" design="Bold" />
                         <Text class="sapUiTinyMarginBegin" text="{

@@ -1,24 +1,22 @@
 using { sap.capire.shop_cart as my } from '../db/schema';
 
-type sAddProduct { 
-  name        : String(50);
-  description : String(600);
-  price       : Decimal(10,2);
-  currency    : String(3);
-  stock_min   : Integer;
-  stock_max   : Integer 
-};
+type sAddProduct { name        : String(50);
+                   description : String(600);
+                   price       : Decimal(10,2);
+                   currency    : String(3);
+                   stock_min   : Integer;
+                   stock_max   : Integer };
 
-type sCartItem { 
-  cart_ID     : UUID;
-  cart_user_id : String(50);
-  product_ID  : UUID;
-  quantity    : Integer 
-};
+type sCartItem { cart_ID     : UUID;
+                 cart_user_id : String(50);
+                 product_ID  : UUID;
+                 quantity    : Integer };
 
-type sDeleteProduct { 
-  ID: UUID 
-};
+type sFinalizeCart { ID         : UUID;
+                     user_id    : String(50);
+                     products   : many sCartItem }
+
+type sDeleteProduct { ID: UUID };
 
 service ShopCartService @(path:'/shop') { 
 
@@ -38,7 +36,7 @@ service ShopCartService @(path:'/shop') {
 
   entity CartItem as select from my.CartItem {
     *,
-    product : redirected to Products
+    product : redirected to Products @cascade: { delete: true }
   };
 
   @requires: 'authenticated-user'
@@ -49,4 +47,7 @@ service ShopCartService @(path:'/shop') {
 
   @requires: 'authenticated-user'
   action addProductsToCart (products: many sCartItem) returns Cart;
+
+  @requires: 'authenticated-user'
+  action finalizeProcess (cart: sFinalizeCart) returns Cart;
 }

@@ -16,7 +16,6 @@
             }
         }"
         alternateRowColors="true">
-
         <headerToolbar>
             <OverflowToolbar>
                 <Title text="Lista de Produtos" level="H2"/>
@@ -109,6 +108,7 @@
                     <Text text="{globalModel>stock_max}" />
                     
                     <StepInput
+                        id=""
                         value="{globalModel>quantity}"
                         min="0"
                         max="{globalModel>stock_max}"
