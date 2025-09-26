@@ -1,0 +1,12 @@
+<mvc:View controllerName="cap_try.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:table="sap.ui.table"
+    xmlns:l="sap.ui.layout"
+	xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m">
+    
+    <Page id="page" title="{i18n>title}">
+        <Text text="Reports Page" /> 
+    </Page>
+</mvc:View>

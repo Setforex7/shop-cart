@@ -39,6 +39,8 @@ sap.ui.define([
 
             //? I18n object declaration
             this._i18n = this.getOwnerComponent().getModel("i18n").getResourceBundle();
+            //? Router object declaration
+            this._oRouter = this.getOwnerComponent().getRouter();
             //? Base controller call
             this._getProducts();
             // BaseController.prototype.onInit.call(this);
@@ -225,9 +227,24 @@ sap.ui.define([
 
         menu: function (oEvent) {
             if (!this._oGlobalMenu) 
-                this._oGlobalMenu = new sap.m.Menu({ items: [ new MenuItem({ text: "Início", icon: "sap-icon://home" }),
-                                                              new MenuItem({ text: "History", icon: "sap-icon://product" }),
-                                                              new MenuItem({ text: "Definições", icon: "sap-icon://action-settings" }) ] });
+                this._oGlobalMenu = new Menu({ items: [ new MenuItem({ text: "Start", icon: "sap-icon://home" }),
+                                                        new MenuItem({ text: "Reports", icon: "sap-icon://product" }),
+                                                        new MenuItem({ text: "Settings", icon: "sap-icon://action-settings" }) ],
+                                               itemSelected: function(oEvent){ 
+                                                   const sSelectedAction = oEvent.getParameter("item").getText() || "";
+
+                                                   switch(sSelectedAction){
+                                                    case "Start":
+                                                        this._oRouter.navTo("View1");
+                                                        break;
+                                                    case "Reports":
+                                                        this._oRouter.navTo("Reports")
+                                                        break;
+                                                    case "Settings":
+                                                        MessageToast.show("Feature still under maintance!");
+                                                        break;
+                                                   }
+                                            }.bind(this) });
             
             this._oGlobalMenu.openBy(oEvent.getSource());
         },
