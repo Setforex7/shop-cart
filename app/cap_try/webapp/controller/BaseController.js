@@ -264,7 +264,8 @@ sap.ui.define([
                 const oResult = oCreatedCart.getObject();
 
 				this._getCarts();
-
+				
+				oResult.metadata = oCreatedCart;
 				oGlobalModel.setProperty("/selectedCart", oResult);
 				Fragment.byId(this.getView().getId(), "cartsSelect")?.setSelectedKey(oResult.ID);
 
@@ -286,7 +287,7 @@ sap.ui.define([
 			try{
 				await metadata.delete();
 				MessageToast.show(this._i18n.getText("delete_current_cart_success", [name]));
-				oGlobalModel.setProperty("/selectedCart", {});
+				// oGlobalModel.setProperty("/selectedCart", {});
 				oGlobalModel.refresh(true);
 				this._getCarts();
 				oView.setBusy(false);
