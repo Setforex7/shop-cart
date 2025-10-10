@@ -156,11 +156,11 @@ sap.ui.define([
                     onClose: async function(oAction) {
                         if(oAction === MessageBox.Action.YES) { this.openCartDialog();
                                                                 await this._createCart(ID);
-                                                                this._addProductsCart(aSelectedProductsContexts) }
+                                                                await this._addProductsCart(aSelectedProductsContexts) }
                     }.bind(this)
                 });
             else
-                this._addProductsCart(aSelectedProductsContexts);
+                await this._addProductsCart(aSelectedProductsContexts);
         },
 
         _validateCompanySelection: function() {

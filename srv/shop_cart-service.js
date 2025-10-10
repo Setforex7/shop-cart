@@ -40,7 +40,6 @@ class ShopCartService extends cds.ApplicationService { async init() {
   this.before("DELETE", "Products", async req => {
     const { ID } = req.data;
     await DELETE.from(CartItem).where({ product_ID: ID });
-    
     return super.init();
   });
 

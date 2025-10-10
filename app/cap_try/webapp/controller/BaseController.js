@@ -263,9 +263,9 @@ sap.ui.define([
                 await oCreatedCart.created();
                 const oResult = oCreatedCart.getObject();
 
-				this._getCarts();
+				await this._getCarts();
 				
-				oResult.metadata = oCreatedCart;
+				Object.assign(oResult, { metadata: oCreatedCart });
 				oGlobalModel.setProperty("/selectedCart", oResult);
 				Fragment.byId(this.getView().getId(), "cartsSelect")?.setSelectedKey(oResult.ID);
 
@@ -312,13 +312,13 @@ sap.ui.define([
 			});
 		},
 
-		_getCarts: function(){
+		_getCarts: async function(){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 
-			this.getOwnerComponent().getModel().bindList(sEntityCart, undefined, [ new Sorter("createdAt", false) ], [ new Filter("user_id", FilterOperator.EQ, sUserId || ""),
+			const aCartsData = await this.getOwnerComponent().getModel().bindList(sEntityCart, undefined, [ new Sorter("createdAt", false) ], [ new Filter("user_id", FilterOperator.EQ, sUserId || ""),
 																	  						  					 	   new Filter("company/ID", FilterOperator.EQ, oGlobalModel.getProperty("/selectedCompany/ID") || "") ])
-			.requestContexts()
-			.then(aCartsData => {
+			.requestContexts();
+			
 				if(aCartsData.length === 0){ oGlobalModel.setProperty("/cart", []);
 											 oGlobalModel.setProperty("/carts", []);	
 											 oGlobalModel.setProperty("/selectedCart", {}); 
@@ -333,7 +333,7 @@ sap.ui.define([
 				if(!oGlobalModel.getProperty("/selectedCart/ID")) oGlobalModel.setProperty("/selectedCart", aCartsSorted[0] || {});
 				oGlobalModel.refresh(true);
 				this._getCartProducts();
-			});
+			
 		},
 
 		_getCartProducts: function(){
@@ -368,7 +368,7 @@ sap.ui.define([
 
 			//? Prepares the call for the backend
 			const oFinalizeCartAction = this.getOwnerComponent().getModel().bindContext("/finalizeProcess(...)");
-			//? We assing the parameters of the creation action
+			//? We assign the parameters of the creation action
 			oFinalizeCartAction.setParameter("cart", oCart);
 
 			try {
@@ -413,7 +413,7 @@ sap.ui.define([
 				const oReturnedResponse = oAddManyToCartAction.getBoundContext();
 				console.log(oReturnedResponse.getObject());
 
-				oGlobalModel.setProperty("/selectedCart", oReturnedResponse.getObject());
+				// oGlobalModel.setProperty("/selectedCart", oReturnedResponse.getObject());
 				MessageToast.show(this._i18n.getText("add_products_cart_success"));
 				
 				this._getCartProducts();
