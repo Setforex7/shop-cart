@@ -7,13 +7,20 @@ type sAddProduct { name        : String(50);
                    stock_min   : Integer;
                    stock_max   : Integer };
 
-type sCartItem { cart_ID     : UUID;
+//? Structure for products on the Cart
+type sCartItem { cart_ID      : UUID;
                  cart_user_id : String(50);
-                 product_ID  : UUID;
-                 quantity    : Integer };
+                 product_ID   : UUID;
+                 price        : Decimal(10,2);
+                 total_price  : Decimal(10,2);
+                 quantity     : Integer };
 
+//? Structure for finalizing the Cart process
 type sFinalizeCart { ID         : UUID;
+                     company_ID : UUID;
                      user_id    : String(50);
+                     type       : String(1);
+                     currency   : String(3);
                      products   : many sCartItem }
 
 type sDeleteProduct { ID: UUID };
@@ -38,6 +45,12 @@ service ShopCartService @(path:'/shop') {
     *,
     product : redirected to Products @cascade: { delete: true }
   };
+
+  @restrict: [ { grant: 'READ' }, { grant: 'WRITE',
+                                    to: 'authenticated-user' } ]
+  entity Orders as select from my.Orders;
+
+  entity OrderItems as select from my.OrderItems;
 
   @requires: 'authenticated-user'
   action createProduct (product: sAddProduct) returns sAddProduct;

@@ -298,25 +298,31 @@ sap.ui.define([
 
 		},
 
-		_getCart: function(){
+		_getCart: async function(){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 			const { ID } = oGlobalModel.getProperty("/selectedCart");
 
-			this.getOwnerComponent().getModel().bindContext(sEntityCart + `(ID='${ID}',user_id='${sUserId}')`, undefined, undefined, undefined)
-			.requestObject()
-			.then(oCart => {
-				const { total_price } = oCart;
-				oGlobalModel.setProperty("/selectedCart/total_price", total_price);
-				oGlobalModel.refresh(true);
-				this._getCartProducts();
-			});
+			// this.getOwnerComponent().getModel().bindContext(sEntityCart + `(ID='${ID}',user_id='${sUserId}')`, undefined, undefined, undefined)
+			// .requestObject()
+			// .then(oCart => {
+			// 	const { total_price } = oCart;
+			// 	oGlobalModel.setProperty("/selectedCart/total_price", total_price);
+			// 	oGlobalModel.refresh(true);
+			// 	this._getCartProducts();
+			// });
+
+			const oCurrentCart = await this.getOwnerComponent().getModel().bindContext(sEntityCart + `(ID='${ID}',user_id='${sUserId}')`, undefined, undefined, undefined).requestObject();
+			const { total_price } = oCurrentCart;
+			oGlobalModel.setProperty("/selectedCart/total_price", total_price);
+			oGlobalModel.refresh(true);
+			await this._getCartProducts();
 		},
 
 		_getCarts: async function(){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 
 			const aCartsData = await this.getOwnerComponent().getModel().bindList(sEntityCart, undefined, [ new Sorter("createdAt", false) ], [ new Filter("user_id", FilterOperator.EQ, sUserId || ""),
-																	  						  					 	   new Filter("company/ID", FilterOperator.EQ, oGlobalModel.getProperty("/selectedCompany/ID") || "") ])
+																	  						  				new Filter("company/ID", FilterOperator.EQ, oGlobalModel.getProperty("/selectedCompany/ID") || "") ])
 			.requestContexts();
 			
 				if(aCartsData.length === 0){ oGlobalModel.setProperty("/cart", []);
@@ -332,18 +338,21 @@ sap.ui.define([
 				oGlobalModel.setProperty("/carts", aCartsSorted);
 				if(!oGlobalModel.getProperty("/selectedCart/ID")) oGlobalModel.setProperty("/selectedCart", aCartsSorted[0] || {});
 				oGlobalModel.refresh(true);
-				this._getCartProducts();
+				await this._getCartProducts();
 			
 		},
 
-		_getCartProducts: function(){
+		_getCartProducts: async function(){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 			const oView = this.getView();	
 			const { ID } = oGlobalModel.getProperty("/selectedCart");
 
-			this.getOwnerComponent().getModel().bindList(sEntityCart + `(ID='${ID}',user_id='${sUserId}')/products`, undefined, undefined, undefined, { $expand: "product" })
-			.requestContexts()
-			.then(aCartProductsData => {
+			const aCartProductsData = await this.getOwnerComponent().getModel().bindList(sEntityCart + `(ID='${ID}',user_id='${sUserId}')/products`, undefined, undefined, undefined, { $expand: "product" })
+			.requestContexts();
+
+			// this.getOwnerComponent().getModel().bindList(sEntityCart + `(ID='${ID}',user_id='${sUserId}')/products`, undefined, undefined, undefined, { $expand: "product" })
+			// .requestContexts()
+			// .then(aCartProductsData => {
 				if(aCartProductsData.length === 0) { Fragment.byId(oView.getId(), "cartsSelect")?.setSelectedKey(ID);;
 													 oGlobalModel.setProperty("/cart", []); 
 													 oGlobalModel.refresh(true);
@@ -360,7 +369,7 @@ sap.ui.define([
 				oGlobalModel.setProperty("/cart", aCartProducts);
 				oGlobalModel.refresh(true);
 				oView.setBusy(false);
-			});
+			// });
 		},
 
 		_finalizeCart: async function(oCart){
@@ -379,10 +388,12 @@ sap.ui.define([
 				console.log(oReturnedResponse?.getObject());
 
 				oGlobalModel.setProperty("/selectedCart", oReturnedResponse.getObject());
+				console.log(oReturnedResponse);
 				MessageToast.show(this._i18n.getText("add_products_cart_success"));
 				
-				this._getCartProducts();
-				this._getProducts();
+				// this._getCartProducts();
+				// this._getProducts();
+				this.getView().setBusy(false);
 			} catch (oError) {
 			    console.error(oError);
 				console.log(oError);

@@ -156,7 +156,8 @@ sap.ui.define([
                     onClose: async function(oAction) {
                         if(oAction === MessageBox.Action.YES) { this.openCartDialog();
                                                                 await this._createCart(ID);
-                                                                await this._addProductsCart(aSelectedProductsContexts) }
+                                                                await this._addProductsCart(aSelectedProductsContexts);
+                                                                await this._getCart() }
                     }.bind(this)
                 });
             else
@@ -341,13 +342,21 @@ sap.ui.define([
             const oView = this.getView();
             const oCurrentCart = oGlobalModel.getProperty("/selectedCart");
             const oCartProducts = oGlobalModel.getProperty("/cart");
+            const { ID } = oGlobalModel.getProperty("/selectedCompany");
+
+            console.log(oCartProducts);
 
             const oPayloadCart = { ID: oCurrentCart.ID,
-                                   user_id: oCurrentCart.user_id, products: oCartProducts.map(oProduct => { return {
-                                                                                                            cart_ID: oCurrentCart.ID,
-                                                                                                            cart_user_id: oCurrentCart.user_id,
-                                                                                                            product_ID: oProduct.ID,
-                                                                                                            quantity: oProduct.quantity }}) };
+                                   company_ID: ID,
+                                   user_id: oCurrentCart.user_id,
+                                   type: "S",
+                                   currency: "EUR",
+                                   products: oCartProducts.map(oProduct => { return { cart_ID: oCurrentCart.ID,
+                                                                                      cart_user_id: oCurrentCart.user_id,
+                                                                                      product_ID: oProduct.ID,
+                                                                                      price: oProduct.price.toFixed(2),
+                                                                                      total_price: (oProduct.price * oProduct.quantity).toFixed(2),
+                                                                                      quantity: oProduct.quantity, }}) };
             oView.setBusy(true);
 
             this._finalizeCart(oPayloadCart);

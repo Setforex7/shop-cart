@@ -7,7 +7,7 @@ const e = require('express');
 class ShopCartService extends cds.ApplicationService { async init() {
 
   const db = await cds.connect.to('db')
-  const { Products, Company, Cart, CartItem } = db.entities
+  const { Products, Company, Cart, CartItem, Orders } = db.entities
 
   this.after('READ', 'Cart', async (carts, req) => {
       if (!Array.isArray(carts)) carts = [carts];
@@ -55,15 +55,26 @@ class ShopCartService extends cds.ApplicationService { async init() {
     cart.name = `Cart - ${carts.length > 0 ? parseInt(carts[0]?.name.split(" - ")[1]) + 1 : 1}`;
 
     return super.init();
-   });
+  });
 
-   this.on('finalizeProcess', async req => {
-     const { cart } = req.data;
+  this.on('finalizeProcess', async req => {
+    const { cart } = req.data;
+    const { products } = cart;
 
-     console.log("Finalizing process for cart:", cart);
+    const tx = cds.transaction(req);
 
-     return super.init();
-   });
+    console.log("Finalizing process for cart:", cart);
+
+     await tx.run(INSERT.into(Orders).entries({ company: { ID: cart.company_ID },
+                                                items: products.map(p => { return { product: { ID: p.product_ID }, 
+                                                                                    price: p.price,
+                                                                                    total_price: p.price * p.quantity,
+                                                                                    quantity: p.quantity,
+                                                                                    currency: p.currency }; }),
+                                                type: "S",
+                                                total_price: products.reduce((sum, p) => sum + (p.quantity * p.price), 0),
+                                                currency: "EUR" }));
+  });
 
   this.on('addProductsToCart', async req => {
     const { products } = req.data;
@@ -103,13 +114,9 @@ class ShopCartService extends cds.ApplicationService { async init() {
       await tx.run(UPDATE(Cart, cart_ID).with({ total_price: total_price }));
 
       const updatedCart = await tx.run(SELECT.one.from(Cart).where({ ID: cart_ID })
-                                                            .columns(c => {
-                                                                c `.*`,
-                                                                c.products(i => {
-                                                                    i `.*`,
-                                                                    i.product(p => p `.*`)
-                                                                })
-                                                            }));
+                                                            .columns(c => { c `.*`,
+                                                                            c.products(i => { i `.*`,
+                                                                                              i.product(p => p `.*`)})}));
 
       return updatedCart;
     }
