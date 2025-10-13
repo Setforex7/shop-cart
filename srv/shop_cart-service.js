@@ -65,15 +65,38 @@ class ShopCartService extends cds.ApplicationService { async init() {
 
     console.log("Finalizing process for cart:", cart);
 
-     await tx.run(INSERT.into(Orders).entries({ company: { ID: cart.company_ID },
-                                                items: products.map(p => { return { product: { ID: p.product_ID }, 
-                                                                                    price: p.price,
-                                                                                    total_price: p.price * p.quantity,
-                                                                                    quantity: p.quantity,
-                                                                                    currency: p.currency }; }),
-                                                type: "S",
-                                                total_price: products.reduce((sum, p) => sum + (p.quantity * p.price), 0),
-                                                currency: "EUR" }));
+    //? Calculate total price of the cart
+    const cartTotalPrice = products.reduce((sum, p) => sum + (p.quantity * p.price), 0);
+
+    //? Create an order and his respective items
+    await tx.run(INSERT.into(Orders).entries({ company: { ID: cart.company_ID },
+                                               items: products.map(p => { return { product: { ID: p.product_ID }, 
+                                                                                   price: p.price,
+                                                                                   total_price: p.price * p.quantity,
+                                                                                   quantity: p.quantity,
+                                                                                   currency: p.currency }; }),
+                                               type: "S",
+                                               total_price: cartTotalPrice,
+                                               currency: "EUR" }));
+
+    const productsToUpdate = {};
+
+    for(let p of products) productsToUpdate[p.product_ID] = (productsToUpdate[p.product_ID] || 0) + p.quantity;
+
+    const productPromises = Object.entries(productsToUpdate).map(([product_ID, quantity]) =>
+      tx.run(
+        UPDATE(Products)
+          .set`stock_max = stock_max - ${quantity}`
+          .where({ ID: product_ID })
+      )
+    );
+
+    await Promise.all(productPromises);
+
+    await tx.run(UPDATE(Company, cart.company_ID).with({ capital: { '+=': cartTotalPrice } }));
+
+    // Finalizar transação
+    await tx.commit();
   });
 
   this.on('addProductsToCart', async req => {
