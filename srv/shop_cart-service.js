@@ -60,6 +60,7 @@ class ShopCartService extends cds.ApplicationService { async init() {
   this.on('finalizeProcess', async req => {
     const { cart } = req.data;
     const { products } = cart;
+    console.log("entity", db.entities);
 
     const tx = cds.transaction(req);
 
@@ -79,24 +80,14 @@ class ShopCartService extends cds.ApplicationService { async init() {
                                                total_price: cartTotalPrice,
                                                currency: "EUR" }));
 
-    const productsToUpdate = {};
-
-    for(let p of products) productsToUpdate[p.product_ID] = (productsToUpdate[p.product_ID] || 0) + p.quantity;
-
-    const productPromises = Object.entries(productsToUpdate).map(([product_ID, quantity]) =>
-      tx.run(
-        UPDATE(Products)
-          .set`stock_max = stock_max - ${quantity}`
-          .where({ ID: product_ID })
-      )
-    );
-
-    await Promise.all(productPromises);
-
+    for (const p of products) {
+  await tx.run(
+    UPDATE(Products)
+      .set`stock_max = stock_max - ${p.quantity}`
+      .where({ ID: p.product_ID })
+  );
+}
     await tx.run(UPDATE(Company, cart.company_ID).with({ capital: { '+=': cartTotalPrice } }));
-
-    // Finalizar transação
-    await tx.commit();
   });
 
   this.on('addProductsToCart', async req => {
