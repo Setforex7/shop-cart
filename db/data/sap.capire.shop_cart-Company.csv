@@ -1,4 +1,4 @@
-ID,name,description,capital,currency
-8d828172-9bb7-4afe-9957-2f1c060f5b26,Tech Innovators Inc.,Leading tech solutions provider,5000000.0,EUR
-1624e5cb-ce87-4d9f-8153-2597411a59ac,Green Energy Corp.,Renewable energy company,3000000.0,EUR
-6b6e011e-58bd-4d17-be1e-7e240a537807,HealthCare Solutions Ltd.,Healthcare products and services,7000000.0,EUR
+ID,name,description,capital,currency_code
+8d828172-9bb7-4afe-9957-2f1c060f5b26,Tech Innovators Inc.,Leading tech solutions provider,5000000.00,EUR
+1624e5cb-ce87-4d9f-8153-2597411a59ac,Green Energy Corp.,Renewable energy company,3000000.00,EUR
+6b6e011e-58bd-4d17-be1e-7e240a537807,HealthCare Solutions Ltd.,Healthcare products and services,7000000.00,EUR

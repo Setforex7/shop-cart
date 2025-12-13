@@ -50,28 +50,28 @@ sap.ui.define([
             this._oController.byId("editProduct").close();
         },
 
-		_openCartDialog: function () {
-            if (!this._dDialogCart) {
-                this._dDialogCart = Fragment.load({ id: this._oController.getView().getId(),
-                                                    name: "cap_try.view.fragments.Cart",
-                                                    controller: this._oController })
-                .then(function (oDialog) {
-                    this._oController.getView().addDependent(oDialog);
-                    return oDialog;
-                }.bind(this));
-            }   
+	// 	_openCartDialog: function () {
+    //         if (!this._dDialogCart) {
+    //             this._dDialogCart = Fragment.load({ id: this._oController.getView().getId(),
+    //                                                 name: "cap_try.view.fragments.Cart",
+    //                                                 controller: this._oController })
+    //             .then(function (oDialog) {
+    //                 this._oController.getView().addDependent(oDialog);
+    //                 return oDialog;
+    //             }.bind(this));
+    //         }   
 
-            this._dDialogCart.then(oDialog => {
-                const oGlobalModel = this._oController.getOwnerComponent().getModel("globalModel");
-                const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
-                if(oSelectedCart?.ID) Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(oSelectedCart.ID);
-                else Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey("");
-                oDialog.open();
-            });
-        },
+    //         this._dDialogCart.then(oDialog => {
+    //             const oGlobalModel = this._oController.getOwnerComponent().getModel("globalModel");
+    //             const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
+    //             if(oSelectedCart?.ID) Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(oSelectedCart.ID);
+    //             else Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey("");
+    //             oDialog.open();
+    //         });
+    //     },
 
-        _closeCartDialog: function () { 
-			this._oController.byId("Cart").close();
-		},
+    //     _closeCartDialog: function () { 
+	// 		this._oController.byId("Cart").close();
+	// 	},
 	});
 });

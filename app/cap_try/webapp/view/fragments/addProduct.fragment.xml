@@ -44,7 +44,7 @@
                             </l:FormElement>
                             <l:FormElement label="Stock Atual">
                                 <l:fields>
-                                    <Input type="Number" value="{globalModel>stock_max}" required="true" />
+                                    <Input type="Number" value="{globalModel>stock}" required="true" />
                                 </l:fields>
                             </l:FormElement>
                         </l:formElements>

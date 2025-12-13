@@ -29,17 +29,8 @@
       "auth": {
         "kind": "mocked",
         "users": {
-          "alice": {
-            "roles": [
-              "admin"
-            ]
-          },
-          "bob": {
-            "password": "bob",
-            "roles": [
-              "viewer"
-            ]
-          }
+          "alice": { "roles": [ "admin" ] },
+          "bob": { "roles": [ "User" ] }
         }
       }
     }

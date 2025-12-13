@@ -10,7 +10,7 @@
         mode="MultiSelect"
         inset="false"
         items="{
-            path: 'globalModel>/products',
+            path: 'products',
             sorter: {
                 path: 'name'
             }
@@ -58,7 +58,7 @@
 
             <Column hAlign="End" minScreenWidth="Desktop" demandPopin="true">
                 <header>
-                    <Label text="{i18n>stock_max}" />
+                    <Label text="{i18n>stock}" />
                 </header>
             </Column>
 
@@ -82,36 +82,37 @@
         <items>
             <ColumnListItem vAlign="Middle"
                 type="Inactive"
-                highlight="{= ${globalModel>status} === 'Error' ? 'Error' : ${globalModel>status} === 'Warning' ? 'Warning' : 'Success'}">
+                highlight="{ parts: [ { 'path': 'stock' },
+                                      { 'path': 'stock_min' } ], 
+                                        formatter: '.formatter.stockStateFormatter'}">
                 <cells>
                     <core:Icon
-                        src="{= ${globalModel>status} === 'Error' ? 'sap-icon://error' : ${globalModel>status} === 'Warning' ? 'sap-icon://alert' : 'sap-icon://sys-enter-2'}"
-                        tooltip="{= ${globalModel>status} === 'Error' ? 'Estoque baixo' : ${globalModel>status} === 'Warning' ? 'Estoque médio' : 'Em estoque'}"
+                        src="{ parts: [ { 'path': 'stock' },
+                                        { 'path': 'stock_min' } ], 
+                                        formatter: '.formatter.stockIconFormatter'}"
+                        tooltip=""
                         class="sapUiSmallMargin"
-                        color="{= ${globalModel>status} === 'Error' ? 'Negative' : ${globalModel>status} === 'Warning' ? 'Critical' : 'Positive'}"
+                        color="{ parts: [ { 'path': 'stock' },
+                                          { 'path': 'stock_min' } ], 
+                                          formatter: '.formatter.stockIconColorFormatter'}"
                         />
                     
                     <ObjectIdentifier
-                        title="{globalModel>name}"
-                        text="{globalModel>description}"
+                        title="{name}"
+                        text="{description}"
                         />
                     
-                    <ObjectStatus
-                        text="{
-                            parts: [ 'globalModel>price', 'globalModel>/selectedCompany/currency' ],
-                            formatter: '.formatter.priceCurrencyFormatter'
-                        } {globalModel>/selectedCompany/currency}"
-                        />
+                    <ObjectNumber number="{price}" unit="{currency}" />
 
-                    <Text text="{globalModel>stock_min}" />
+                    <Text text="{stock_min}" />
 
-                    <Text text="{globalModel>stock_max}" />
+                    <Text text="{stock}" />
                     
                     <StepInput
                         id=""
-                        value="{globalModel>quantity}"
+                        value="{quantity}"
                         min="0"
-                        max="{globalModel>stock_max}"
+                        max="{stock}"
                         width="100px"
                         change="onQuantityInputChange" />
 
