@@ -9,12 +9,8 @@
         id="productsWorklist"
         mode="MultiSelect"
         inset="false"
-        items="{
-            path: 'products',
-            sorter: {
-                path: 'name'
-            }
-        }"
+        items="{ path: 'products',
+                 sorter: { path: 'name' } }"
         alternateRowColors="true">
         <headerToolbar>
             <OverflowToolbar>
@@ -43,6 +39,11 @@
                     <Label text="{i18n>name}" />
                 </header>
             </Column>
+            <Column>
+                <header>
+                    <Label text="{i18n>description}" />
+                </header>
+            </Column>
 
             <Column hAlign="End" minScreenWidth="Tablet" demandPopin="true">
                 <header>
@@ -52,19 +53,7 @@
 
             <Column hAlign="End" minScreenWidth="Desktop" demandPopin="true">
                 <header>
-                    <Label text="{i18n>stock_min}" />
-                </header>
-            </Column>
-
-            <Column hAlign="End" minScreenWidth="Desktop" demandPopin="true">
-                <header>
-                    <Label text="{i18n>stock}" />
-                </header>
-            </Column>
-
-            <Column hAlign="Center" minScreenWidth="Tablet" demandPopin="true" width="10rem">
-                <header>
-                    <Label text="{i18n>quantity}" />
+                    <Label text="{i18n>stock} / {i18n>stock_min}" />
                 </header>
             </Column>
             <Column hAlign="Center" minScreenWidth="Tablet" demandPopin="true" width="10rem">
@@ -82,39 +71,37 @@
         <items>
             <ColumnListItem vAlign="Middle"
                 type="Inactive"
-                highlight="{ parts: [ { 'path': 'stock' },
-                                      { 'path': 'stock_min' } ], 
+                highlight="{ parts: [ { 'path': 'stock', targetType: 'any' },
+                                      { 'path': 'stock_min', targetType: 'any' } ], 
                                         formatter: '.formatter.stockStateFormatter'}">
                 <cells>
                     <core:Icon
-                        src="{ parts: [ { 'path': 'stock' },
-                                        { 'path': 'stock_min' } ], 
+                        src="{ parts: [ { 'path': 'stock', targetType: 'any' },
+                                        { 'path': 'stock_min', targetType: 'any' } ], 
                                         formatter: '.formatter.stockIconFormatter'}"
                         tooltip=""
                         class="sapUiSmallMargin"
-                        color="{ parts: [ { 'path': 'stock' },
-                                          { 'path': 'stock_min' } ], 
+                        color="{ parts: [ { 'path': 'stock', targetType: 'any' },
+                                          { 'path': 'stock_min', targetType: 'any' } ], 
                                           formatter: '.formatter.stockIconColorFormatter'}"
                         />
                     
-                    <ObjectIdentifier
-                        title="{name}"
-                        text="{description}"
-                        />
-                    
-                    <ObjectNumber number="{price}" unit="{currency}" />
+                    <ObjectIdentifier title="{name}" />
 
-                    <Text text="{stock_min}" />
-
-                    <Text text="{stock}" />
+                    <ObjectIdentifier text="{description}" />
                     
-                    <StepInput
-                        id=""
-                        value="{quantity}"
-                        min="0"
-                        max="{stock}"
-                        width="100px"
-                        change="onQuantityInputChange" />
+                    <ObjectNumber number="{ parts: [ { path: 'price' },
+                                                     { path: 'globalModel>/selectedCompany/currency_code' }  ],
+                                            type: 'sap.ui.model.type.Currency',
+                                            formatOptions: { showMeasure: false } }" unit="{currency}" />
+                    
+                    <VBox alignItems="End"> 
+                        <ObjectNumber number="{ path: 'stock', type: 'sap.ui.model.type.Integer' }"
+                                      state="{ parts: [ { path: 'stock', targetType: 'any' }, 
+                                                        { path: 'stock_min', targetType: 'any' } ], 
+                                               formatter: '.formatter.stockStateFormatter' }" />
+                        <ObjectNumber number="{ path: 'stock_min', type: 'sap.ui.model.type.Integer' }" unit="Min" />
+                    </VBox>
 
                     <Button
                         icon="sap-icon://edit"

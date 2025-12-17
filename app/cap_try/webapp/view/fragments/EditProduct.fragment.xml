@@ -34,17 +34,20 @@
                             </l:FormElement>
                             <l:FormElement label="Price">
                                 <l:fields>
-                                    <Input type="Number" value="{globalModel>price}" required="true" />
+                                    <Input value="{ path: 'globalModel>price',
+                                                    type: 'sap.ui.model.type.Float',
+                                                    formatOptions: { minFractionDigits: 2,
+                                                                     maxFractionDigits: 2 } }" required="true" />
                                 </l:fields>
                             </l:FormElement>
                             <l:FormElement label="Stock Min">
                                 <l:fields>
-                                    <Input type="Number" value="{globalModel>stock_min}" required="true" />
+                                    <Input value="{globalModel>stock_min}" type="Number" required="true" />
                                 </l:fields>
                             </l:FormElement>
-                            <l:FormElement label="Stock Atual">
+                            <l:FormElement label="Stock Atual"> 
                                 <l:fields>
-                                    <Input type="Number" value="{globalModel>stock_max}" required="true" />
+                                    <Input value="{globalModel>stock}" type="Number" required="true" />
                                 </l:fields>
                             </l:FormElement>
                         </l:formElements>
@@ -54,7 +57,7 @@
         </content>
         
         <beginButton>
-            <Button text="Create" type="Success" press="createProduct" />
+            <Button text="Create" type="Success" press="onEditProduct" />
         </beginButton>
         <endButton>
             <Button text="Cancel" press="closeEditProductDialog" />

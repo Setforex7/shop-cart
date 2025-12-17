@@ -6,7 +6,7 @@ using { sap.capire.shop_cart as my } from '../db/schema';
 
 //? Payload for creating a product
 type sAddProduct { 
-  company_ID  : UUID;         // [ADICIONADO] Obrigatório no schema (Products -> Company)
+  company_ID  : UUID;   
   name        : String(50);
   description : String(600);
   price       : Decimal(10,2);
@@ -17,14 +17,11 @@ type sAddProduct {
 
 //? Payload for adding items to the Cart
 type sCartItemInput { 
-  cart_ID    : UUID;          // Se nulo, a lógica deve criar um novo carrinho
+  cart_ID    : UUID;          
   product_ID : UUID;          
   quantity   : Integer;
 };
 
-//? Payload for finalizing the process
-// [ALTERADO] Simplificado. Não deves enviar os produtos novamente. 
-// O backend deve ler o que já está salvo no Carrinho para garantir o preço correto.
 type sFinalizeCart { 
   cart_ID    : UUID; 
 };
@@ -32,15 +29,8 @@ type sFinalizeCart {
 type sDeleteProduct { ID: UUID };
 
 
-// ----------------------------------------------------------------------------
-// Service Definition
-// ----------------------------------------------------------------------------
 
 service ShopCartService @(path:'/shop') { 
-
-  // --------------------------------------------------------------------------
-  // Entities
-  // --------------------------------------------------------------------------
 
   @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], to: 'authenticated-user' } ]
   entity Company as projection on my.Company {
@@ -54,19 +44,21 @@ service ShopCartService @(path:'/shop') {
     *,
     company.currency.code as currency,
     company : redirected to Company,
-    virtual 0 as quantity : Integer @Core.Computed: false,
   };
 
   @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], where: 'createdBy = $user.id' } ]
   entity Cart as projection on my.Cart { 
     *,
-    items : redirected to CartItem // Redireciona para a projeção local
-  };
+    items : redirected to CartItem,
+  } actions {
+    action addProductToCart( product_IDs : many UUID ) returns Cart;
+  }
 
   @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], where: 'createdBy = $user.id' } ]
-  entity CartItem as projection on my.CartItem { // Mudei para 'projection on' para consistência
+  entity CartItem as projection on my.CartItem { 
     *,
-    product: redirected to Products
+    product: redirected to Products,
+    product.name as name,
   };
 
   @readonly
@@ -90,13 +82,9 @@ service ShopCartService @(path:'/shop') {
   entity OrderItems as projection on my.OrderItems;
 
   @readonly
-  // A view PurchaseHistory já tem a coluna 'user', então a cláusula where estava correta
   @restrict: [ { grant: 'READ', where: 'user = $user.id' } ] 
   entity PurchaseHistory as projection on my.PurchaseHistory;
 
-  // --------------------------------------------------------------------------
-  // Actions
-  // --------------------------------------------------------------------------
 
   @requires: 'authenticated-user'
   action createProduct (product: sAddProduct) returns Products; 
@@ -104,8 +92,8 @@ service ShopCartService @(path:'/shop') {
   @requires: 'authenticated-user'
   action deleteProduct (product: sDeleteProduct) returns sDeleteProduct;
 
-  @requires: 'authenticated-user'
-  action addProductsToCart (products: many sCartItemInput) returns Cart;
+  // @requires: 'authenticated-user'
+  // action addProductsToCart (products: many sCartItemInput) returns Cart;
 
   @requires: 'authenticated-user'
   action finalizeProcess (cart: sFinalizeCart) returns Orders; // [ALTERADO] Retorna a Encomenda criada, não o Carrinho

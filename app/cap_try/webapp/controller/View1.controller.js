@@ -4,8 +4,6 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "cap_try/formatters/formatter",
     "sap/ui/core/Fragment",
-    "sap/m/Menu",
-    "sap/m/MenuItem",
 	"sap/ui/model/Binding",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
@@ -16,8 +14,6 @@ sap.ui.define([
 	Controller,
 	Formatter,
 	Fragment,
-	Menu,
-	MenuItem,
 	Binding,
 	Filter,
 	FilterOperator,
@@ -33,11 +29,6 @@ sap.ui.define([
     return BaseController.extend("cap_try.controller.View1", {
         formatter: Formatter,
         onInit: function() {
-            this._createMessageView();
-
-            console.log(this.getOwnerComponent().getModel().getMetaModel());
-
-            //? I18n object declaration
 
             //? Router object declaration
             this._oRouter = this.getOwnerComponent().getRouter();
@@ -63,51 +54,46 @@ sap.ui.define([
         // onAfterRendering: async function() {
         // },
 
-        // onQuantityInputChange: function(oEvent) {
-        //     const iQuantity = parseInt(oEvent.getParameter("value"));
-        //     const { stock_min, stock_max } = oEvent.getSource().getBindingContext("globalModel").getObject();
-
-        //     if(iQuantity > stock_max){
-        //         oEvent.getSource().setValueState("Error");
-        //         return oEvent.getSource().setValueStateText("Quantity exceeds the maximum stock limit.");
-        //     }else if(iQuantity <= stock_max && iQuantity !== 0){
-        //         oEvent.getSource().setValueState("Success");
-        //     }else{
-        //         oEvent.getSource().setValueState("None");
-        //         oEvent.getSource().setValue("0");
-        //     }
-        //     oEvent.getSource().setValueStateText("");
-        // },
-
         // onAddCartButtonPress: function(){ 
         //     const { ID } = this.getOwnerComponent().getModel("globalModel").getProperty("/selectedCompany");
             
         //     this._createCart(ID);
         // },
 
-        // onEditProductPress: function(oEvent) {
-        //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-        //     const oSelectedProduct = oEvent.getSource().getBindingContext("globalModel").getObject();
+        onEditProductPress: function(oEvent) {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+
+            const oSelectedProduct = oEvent.getSource().getBindingContext().getObject();
+            oSelectedProduct.metadata = oEvent.getSource().getBindingContext();
             
-        //     oGlobalModel.setProperty("/selectedProduct", oSelectedProduct);
-        //     oGlobalModel.refresh(true);
+            oGlobalModel.setProperty("/selectedProduct", oSelectedProduct);
+            oGlobalModel.refresh(true);
 
-        //     this._oDialogHandler._openEditProductDialog();
-        // },
+            this._oDialogHandler._openEditProductDialog();
+        },
 
-        // onDeleteProductPress: async function(oEvent) {
-        //     const oView = this.getView();
-        //     const oCurrentProduct = oEvent.getSource().getBindingContext("globalModel").getObject();
+        onEditProduct: function(){
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oSelectedProduct = oGlobalModel.getProperty("/selectedProduct");
+            this._editProduct(oSelectedProduct);
 
-        //     MessageBox.confirm(this._i18n.getText("delete_product", [oCurrentProduct.name]), {
-        //         title: this._i18n.getText("confirmation_needed"),
-        //         actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
-        //         emphasizedAction: MessageBox.Action.YES,
-        //         onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { oView.setBusy(true);
-        //                                                                                    await this._deleteProduct(oCurrentProduct);
-        //                                                                                    this._getCart();
-        //                                                                                    oView.setBusy(false) }}.bind(this)});
-        // },
+            this._oDialogHandler._closeEditProductDialog();
+        },
+
+        onDeleteProductPress: async function(oEvent) {
+            const oView = this.getView();
+            const oCurrentProductBinding = oEvent.getSource().getBindingContext();
+            const oCurrentProduct = oCurrentProductBinding.getObject();
+
+            MessageBox.confirm(this._i18n.getText("delete_product", [oCurrentProduct.name]), {
+                title: this._i18n.getText("confirmation_needed"),
+                actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { oView.setBusy(true);
+                                                                                           await this._deleteProduct(oCurrentProductBinding);
+                                                                                        //    this._getCart();
+                                                                                           oView.setBusy(false) }}.bind(this)});
+        },
 
         // onDeleteSelectedCartPress: async function() {
         //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
@@ -128,60 +114,55 @@ sap.ui.define([
         //     });
         // },
 
-        // addProductCart: async function() {
-        //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-        //     const oTable = this.getView().byId("productsWorklist");
-        //     const aSelectedProducts = oTable.getSelectedItems();
-        //     const { ID } = oGlobalModel.getProperty("/selectedCompany");
-        //     const aSelectedProductsContexts = aSelectedProducts.map(oProduct => { return { /* cart_user_id: sUserId, */
-        //                                                                                    product_ID: oProduct.getBindingContext("globalModel").getObject().ID,
-        //                                                                                    quantity: oProduct.getBindingContext("globalModel").getObject().quantity }});
+        addProductCart: async function() {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oTable = this.getView().byId("productsWorklist");
+            const aSelectedProducts = oTable.getSelectedItems();
+            const { ID } = oGlobalModel.getProperty("/selectedCompany");
+            const aSelectedProductsContexts = aSelectedProducts.map(oProduct => { return { product_ID: oProduct.getBindingContext().getObject().ID }; });
             
-        //     if(!this._validateCompanySelection()) return;
-        //     if(!this._validateProducts(aSelectedProductsContexts)) return;
+            if(!this._validateCompanySelection()) return;
 
-        //     if(aSelectedProducts.length === 0){
-        //         this._addMessage({ type: "Warning", title: this._i18n.getText("warning"), subtitle: this._i18n.getText("add_product_null_selection") })
-        //         return MessageToast.show(this._i18n.getText("add_product_null_selection"));
-        //     }
+            if(aSelectedProducts.length === 0){
+                this._addMessage({ type: "Warning", title: this._i18n.getText("warning"), subtitle: this._i18n.getText("add_product_null_selection") })
+                return MessageToast.show(this._i18n.getText("add_product_null_selection"));
+            }
 
-        //     const aCarts = await this._getEntitySet(sEntityCart, undefined, undefined, [ new Filter("company/ID", FilterOperator.EQ, ID) ]);
+            const aCarts = await this._getEntitySetContexts(sEntityCart, undefined, undefined, [ new Filter("company/ID", FilterOperator.EQ, ID) ]);
 
-        //     if(aCarts.length === 0)
-        //         MessageBox.confirm(this._i18n.getText("create_cart_confirm_message"), {
-        //             title: this._i18n.getText("confirmation_needed"),
-        //             actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
-        //             emphasizedAction: MessageBox.Action.YES,
-        //             onClose: async function(oAction) {
-        //                 if(oAction === MessageBox.Action.YES) { this.openCartDialog();
-        //                                                         await this._createCart(ID);
-        //                                                         await this._addProductsCart(aSelectedProductsContexts);
-        //                                                         await this._getCart() }
-        //             }.bind(this)
-        //         });
-        //     else
-        //         await this._addProductsCart(aSelectedProductsContexts);
-        // },
+            if(aCarts.length === 0)
+                MessageBox.confirm(this._i18n.getText("create_cart_confirm_message"), {
+                    title: this._i18n.getText("confirmation_needed"),
+                    actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                    emphasizedAction: MessageBox.Action.YES,
+                    onClose: async function(oAction) {
+                        if(oAction === MessageBox.Action.YES) { this.openCartDialog();
+                                                                await this._createCart(ID);
+                                                                await this._addProductsCart(aSelectedProductsContexts);
+                                                                await this._getCart() }
+                    }.bind(this)
+                });
+            else
+                await this._addProductsCart(aSelectedProductsContexts);
+        },
 
-        // _validateCompanySelection: function() {
-        //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-        //     const cCompanyComboBox = this.getView().byId("companyComboBox");
-        //     const { name } = oGlobalModel.getProperty("/selectedCompany");
+        _validateCompanySelection: function() {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const cCompanyComboBox = this.getView().byId("companyComboBox");
+            const { name } = oGlobalModel.getProperty("/selectedCompany");
 
-        //     this._deleteMessages();
+            if(!name) {
+                cCompanyComboBox.setValueState("Error");
+                cCompanyComboBox.setValueStateText(this._i18n.getText("add_product_error_company"));
+                MessageToast.show(this._i18n.getText("add_product_error_company"));
+                this._addMessage({ type: "Error", title: this._i18n.getText("error"), subtitle: this._i18n.getText("add_product_error_company") });
+                return false;
+            }
 
-        //     if(!name) {
-        //         cCompanyComboBox.setValueState("Error");
-        //         cCompanyComboBox.setValueStateText(this._i18n.getText("add_product_error_company"));
-        //         MessageToast.show(this._i18n.getText("add_product_error_company"));
-        //         this._addMessage({ type: "Error", title: this._i18n.getText("error"), subtitle: this._i18n.getText("add_product_error_company") });
-        //         return false;
-        //     }
-
-        //     cCompanyComboBox.setValueState("None");
-        //     cCompanyComboBox.setValueStateText("");
-        //     return true;
-        // },
+            cCompanyComboBox.setValueState("None");
+            cCompanyComboBox.setValueStateText("");
+            return true;
+        },
 
         // onCartsSelectChange: function(oEvent){
         //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
@@ -207,19 +188,14 @@ sap.ui.define([
         //     }));
         // },
 
-        // toggleMessageView: function (oEvent) {
-        //     this._handlePopoverPress(oEvent);
-        // },
+        toggleMessageView: function (oEvent) { this._handlePopoverPress(oEvent); },
 
         onCreateButtonPress: async function() {
             const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-            const { name, description, price, stock_min, stock } = oGlobalModel.getProperty("/product")
+            const { name, description, price, stock_min, stock } = oGlobalModel.getProperty("/product");
             const { ID, currency_code } = oGlobalModel.getProperty("/selectedCompany");
 
-            console.log("curr", currency_code);
-
             this.getView().setBusy(true);
-            console.log(name, description, price, stock, stock_min, ID);
             const oResult = await this._createProduct({ name: name,
                                                         description: description,
                                                         company_ID: ID,
@@ -238,27 +214,25 @@ sap.ui.define([
         //                                            const sSelectedAction = oEvent.getParameter("item").getText() || "";
 
         //                                            switch(sSelectedAction){
-        //                                             case "Start":
-        //                                                 this._oRouter.navTo("View1");
-        //                                                 break;
-        //                                             case "Reports":
-        //                                                 this._oRouter.navTo("Reports")
-        //                                                 break;
-        //                                             case "Settings":
-        //                                                 MessageToast.show("Feature still under maintance!");
-        //                                                 break;
+        //                                             case "Start": this._oRouter.navTo("View1");
+        //                                                           break;
+        //                                             case "Reports": this._oRouter.navTo("Reports")
+        //                                                             break;
+        //                                             case "Settings": MessageToast.show("Feature still under maintance!");
+        //                                                              break;
         //                                            }
         //                                     }.bind(this) });
             
         //     this._oGlobalMenu.openBy(oEvent.getSource());
         // },
 
-        // onCompanyCancelPress: function(oEvent) {
-        //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+        onCompanyCancelPress: function(oEvent) {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 
-        //     oGlobalModel.setProperty("/selectedCompany", {});
-        //     oGlobalModel.refresh(true);
-        // },
+            oGlobalModel.setProperty("/selectedCompany", {});
+            this.getView().unbindElement("/Company");
+            oGlobalModel.refresh(true);
+        },
 
         onCompanyChange: async function(oEvent){
             const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
@@ -268,7 +242,7 @@ sap.ui.define([
 
             oEvent.getSource().setValueState("None");
 
-            const oSelectedCompany = await this._getEntity(sEntityCompany, oEvent.getSource().getSelectedKey());
+            const oSelectedCompany = await this._getEntityContexts(sEntityCompany, oEvent.getSource().getSelectedKey());
             oGlobalModel.setProperty("/selectedCompany", oSelectedCompany);
             oGlobalModel.setProperty("/selectedCart", {});
             oGlobalModel.setProperty("/cart", []);
@@ -278,33 +252,6 @@ sap.ui.define([
             // oView.setBusy(false);
 
         },
-
-        // _validateProducts: function(aProductsToAdd) {
-        //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-        //     const oProductsTable = this.getView().byId("productsWorklist");
-        //     const oProductsTableItems = oProductsTable.getItems();
-        //     const aProducts = oGlobalModel.getProperty("/products");
-        //     let bInvalidQuantity = false;
-
-        //     for(const oProduct of oProductsTableItems){
-        //         const oCurrentProduct = aProducts.find(oMatchProduct => oMatchProduct.name === oProduct.getCells()[1].getTitle());
-        //         const oProductToAdd = aProductsToAdd.some(oProd => oCurrentProduct.ID === oProd.product_ID);
-        //         if(!oProductToAdd) continue;
-
-        //         if(oProduct.getCells()[5].getValue() === 0){
-        //             bInvalidQuantity = true;
-        //             oProduct.getCells()[5].setValueState("Error");
-        //             oProduct.getCells()[5].setValueStateText(this._i18n.getText("add_product_error_quantity_state"));
-        //         }
-        //     }
-
-        //     if(bInvalidQuantity){
-        //         MessageToast.show(this._i18n.getText("add_product_error_quantity"));
-        //         this._addMessage({ type: "Error", title: this._i18n.getText("error"), subtitle: this._i18n.getText("add_product_error_quantity") });
-        //     }
-
-        //     return bInvalidQuantity ? false : true;
-        // },
         
         // onDeleteCartProductPress: function (){
         //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
@@ -377,10 +324,10 @@ sap.ui.define([
 
         closeEditProductDialog: function () { this._oDialogHandler._closeEditProductDialog() },
 
-        // openCartDialog: function () { if(!this._validateCompanySelection()) return;
-        //                               this._oDialogHandler._openCartDialog() },
+        openCartDialog: function () { if(!this._validateCompanySelection()) return;
+                                      this._oDialogHandler._openCartDialog() },
 
-        // closeCartDialog: function () { this._oDialogHandler._closeCartDialog() },
+        closeCartDialog: function () { this._oDialogHandler._closeCartDialog() },
 
         //#endregion
     });

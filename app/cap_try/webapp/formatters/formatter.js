@@ -5,32 +5,28 @@ sap.ui.define([
 
     return {
 
-        // priceCurrencyFormatter: function (fValue, sCurrencyCode) {
-        //     if (fValue === null || fValue === undefined || !sCurrencyCode) return "";
-
-        //     const oCurrencyFormat = NumberFormat.getCurrencyInstance({
-        //         currencyCode: sCurrencyCode,
-        //         showMeasure: true          
-        //     });
-
-        //     return oCurrencyFormat.format(fValue);
-        // },
-
         stockStateFormatter: function (iCurrentStock, iMinStock) {
             if (isNaN(iCurrentStock) || isNaN(iMinStock)) return 'None';
 
-            const iWarningStock = iMinStock * 0.20;
+            iCurrentStock = parseInt(iCurrentStock);
+            iMinStock = parseInt(iMinStock);
+
+            const iWarningStockPercentage = iMinStock * 0.20;
+            const iWarningStock = iMinStock + iWarningStockPercentage;
 
             if (iCurrentStock < iMinStock) return 'Error'; 
             else if (iCurrentStock <= iWarningStock) return 'Warning'; 
             else return 'Success';
-            
         },
 
         stockIconFormatter: function (iCurrentStock, iMinStock) {
             if (isNaN(iCurrentStock) || isNaN(iMinStock)) return '';
+            
+            iCurrentStock = parseInt(iCurrentStock);
+            iMinStock = parseInt(iMinStock);
 
-            const iWarningStock = iMinStock * 0.20;
+            const iWarningStockPercentage = iMinStock * 0.20;
+            const iWarningStock = iMinStock + iWarningStockPercentage;
 
             if (iCurrentStock < iMinStock) return 'sap-icon://error'; 
             else if (iCurrentStock <= iWarningStock) return 'sap-icon://alert'; 
@@ -40,12 +36,17 @@ sap.ui.define([
         stockIconColorFormatter: function (iCurrentStock, iMinStock) {
             if (isNaN(iCurrentStock) || isNaN(iMinStock)) return 'None';
 
-            const iWarningStock = iMinStock * 0.20;
+            iCurrentStock = parseInt(iCurrentStock);
+            iMinStock = parseInt(iMinStock);
+
+            const iWarningStockPercentage = iMinStock * 0.20;
+            const iWarningStock = iMinStock + iWarningStockPercentage;
 
             if (iCurrentStock < iMinStock) return 'Negative'; 
             else if (iCurrentStock <= iWarningStock) return 'Critical'; 
             else return 'Positive';
-            
         },
+
+        toNumber: function(sNumber){ return parseInt(sNumber); }
     };
 });

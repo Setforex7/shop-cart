@@ -10,7 +10,7 @@
             <customHeader>
                 <Bar>
                     <contentLeft>
-                        <Button icon="sap-icon://menu2" press="menu" />
+                        <Button icon="sap-icon://menu2" press="initializeMenu" />
                     </contentLeft>
                     <contentMiddle>
                         <Title text="{i18n>shop}" />
