@@ -7,7 +7,7 @@
         <content>
             <table:Table
                 id="cartTable"
-                rows="{ path: 'globalModel>/cart',
+                rows="{ path: 'items',
                         sorter: { path: 'name' } }"
                 visibleRowCount="5"
                 selectionMode="MultiToggle"
@@ -19,12 +19,12 @@
                         <ToolbarSeparator />
                             <Label text="Cart's" design="Bold" />
                             <Select autoAdjustWidth="false" columnRatio="3:2" editable="true" forceSelection="false" id="cartsSelect"
-                                    icon="sap-icon://cart" maxWidth="100%" items="{ path: 'globalModel>/carts',
+                                    icon="sap-icon://cart" maxWidth="100%" items="{ path: '/Cart',
                                                                                     sorter: { path: 'createdAt', descending: false } }" 
                                     change="onCartsSelectChange" resetOnMissingKey="false" width="10%" wrapItemsText="false"
-                                    enabled="{= ${globalModel>/carts}.length > 0 }" >
+                                    enabled="" >
                                 <items>
-                                    <core:Item key="{globalModel>ID}" text="{globalModel>name}" />
+                                    <core:Item key="{ID}" text="{name}" />
                                 </items>
                             </Select>
                             <Button
@@ -44,25 +44,25 @@
                     <table:Column width="20%">
                         <Label text="Name" />
                         <table:template>
-                            <Text text="{globalModel>name}" />
+                            <Text text="{name}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
                         <Label text="Description" />
                         <table:template>
-                            <Text text="{globalModel>description}" />
+                            <Text text="{description}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
                         <Label text="Price" />
                         <table:template>
-                            <Text text="{globalModel>price} {globalModel>/selectedCompany/currency}" />
+                            <Text text="{price} {globalModel>/selectedCompany/currency}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
                         <Label text="Quantity" />
                         <table:template>
-                            <StepInput change="onProductCartQuantityChangePress" value="{globalModel>quantity}" />
+                            <StepInput change="onProductCartQuantityChangePress" value="{quantity}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">

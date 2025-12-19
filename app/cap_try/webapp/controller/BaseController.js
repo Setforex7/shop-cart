@@ -259,10 +259,12 @@ sap.ui.define([
 
 		_createCart: async function(sCompanyID){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+			const { currency_code } = oGlobalModel.getProperty("/selectedCompany");
 
             try{            
                 const oCartList = this.getOwnerComponent().getModel().bindList(sEntityCart);
-                const oNewCart = { company_ID: sCompanyID };
+                const oNewCart = { company_ID: sCompanyID,
+								   currency_code: currency_code };
 
                 const oCreatedCart = oCartList.create(oNewCart);
                 await oCreatedCart.created();
@@ -326,8 +328,7 @@ sap.ui.define([
 		_getCarts: async function(){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 
-			const aCartsData = await this.getOwnerComponent().getModel().bindList(sEntityCart, undefined, [ new Sorter("createdAt", false) ], [ /* new Filter("user_id", FilterOperator.EQ, sUserId || ""), */
-																	  						  				new Filter("company/ID", FilterOperator.EQ, oGlobalModel.getProperty("/selectedCompany/ID") || "") ])
+			const aCartsData = await this.getOwnerComponent().getModel().bindList(sEntityCart, undefined, [ new Sorter("createdAt", false) ])
 			.requestContexts();
 			
 				if(aCartsData.length === 0){ oGlobalModel.setProperty("/cart", []);
@@ -347,35 +348,32 @@ sap.ui.define([
 			
 		},
 
-	// 	_getCartProducts: async function(){
-	// 		const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-	// 		const oView = this.getView();	
-	// 		const { ID } = oGlobalModel.getProperty("/selectedCart");
+		_getCartProducts: async function(){
+			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+			const oView = this.getView();	
+			const { ID } = oGlobalModel.getProperty("/selectedCart");
 
-	// 		const aCartProductsData = await this.getOwnerComponent().getModel().bindList(sEntityCart + `(ID='${ID}')/products`, undefined, undefined, undefined, { $expand: "product" })
-	// 		.requestContexts();
+			const aCartProductsData = await this.getOwnerComponent().getModel().bindList(sEntityCart + `(ID='${ID}')`, undefined, undefined, undefined)
+			.requestContexts();
 
-	// 		// this.getOwnerComponent().getModel().bindList(sEntityCart + `(ID='${ID}',user_id='${sUserId}')/products`, undefined, undefined, undefined, { $expand: "product" })
-	// 		// .requestContexts()
-	// 		// .then(aCartProductsData => {
-	// 			if(aCartProductsData.length === 0) { Fragment.byId(oView.getId(), "cartsSelect")?.setSelectedKey(ID);;
-	// 												 oGlobalModel.setProperty("/cart", []); 
-	// 												 oGlobalModel.refresh(true);
-	// 												 return oView.setBusy(false); }	
+			if(aCartProductsData.length === 0) { Fragment.byId(oView.getId(), "cartsSelect")?.setSelectedKey(ID);;
+												 oGlobalModel.setProperty("/cart", []); 
+											     oGlobalModel.refresh(true);
+												 return oView.setBusy(false); }	
 
-	// 			const aCartProducts = aCartProductsData.map(oProduct => { 
-	// 				const { ID, cart_ID, cart_user_id, product_ID, quantity, price, product } = oProduct.getObject();
-	// 				const oCartProduct = { ID, cart_ID, cart_user_id, product_ID, quantity, price, name: product?.name, description: product?.description };
-	// 				oCartProduct.metadata = oProduct;
-	// 				oCartProduct.total_price = quantity * price;
-	// 				return oCartProduct;
-	// 			});
+			const aCartProducts = aCartProductsData.map(oProduct => { 
+				const { ID, cart_ID, cart_user_id, product_ID, quantity, price, product } = oProduct.getObject();
+				const oCartProduct = { ID, cart_ID, cart_user_id, product_ID, quantity, price, name: product?.name, description: product?.description };
+				oCartProduct.metadata = oProduct;
+				oCartProduct.total_price = quantity * price;
+				return oCartProduct;
+			});
 
-	// 			oGlobalModel.setProperty("/cart", aCartProducts);
-	// 			oGlobalModel.refresh(true);
-	// 			oView.setBusy(false);
-	// 		// });
-	// 	},
+			oGlobalModel.setProperty("/cart", aCartProducts);
+			oGlobalModel.refresh(true);
+			oView.setBusy(false);
+			// });
+		},
 
 	// 	_finalizeCart: async function(oCart){
 	// 		const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
@@ -410,12 +408,9 @@ sap.ui.define([
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 			const { ID } = oGlobalModel.getProperty("/selectedCart");
 
-			// const sGetLastId = this.getOwnerComponent().getModel().bindContext("/getLastId(...)");
-			// sGetLastId.setParameter("entityName", "Products");
-
 			try {
 				//? Prepares the call for the backend
-				const oAddManyToCartAction = oDataModel.bindContext(`/Cart(${ID})/addProductToCart(...)`);
+				const oAddManyToCartAction = oDataModel.bindContext(`/Cart(${ID})/ShopCartService.addProductsToCart(...)`);
 				//? We assing the parameters of the creation action
 				oAddManyToCartAction.setParameter("product_IDs", aProducts);
 

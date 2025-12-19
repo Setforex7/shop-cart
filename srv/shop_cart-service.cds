@@ -46,12 +46,12 @@ service ShopCartService @(path:'/shop') {
     company : redirected to Company,
   };
 
-  @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], where: 'createdBy = $user.id' } ]
+  @restrict: [ { grant: '*', to: 'any' } ]
   entity Cart as projection on my.Cart { 
     *,
     items : redirected to CartItem,
   } actions {
-    action addProductToCart( product_IDs : many UUID ) returns Cart;
+    action addProductsToCart( product_IDs : many UUID ) returns Cart;
   }
 
   @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], where: 'createdBy = $user.id' } ]

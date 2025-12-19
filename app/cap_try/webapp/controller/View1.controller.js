@@ -54,11 +54,11 @@ sap.ui.define([
         // onAfterRendering: async function() {
         // },
 
-        // onAddCartButtonPress: function(){ 
-        //     const { ID } = this.getOwnerComponent().getModel("globalModel").getProperty("/selectedCompany");
+        onAddCartButtonPress: function(){ 
+            const { ID } = this.getOwnerComponent().getModel("globalModel").getProperty("/selectedCompany");
             
-        //     this._createCart(ID);
-        // },
+            this._createCart(ID);
+        },
 
         onEditProductPress: function(oEvent) {
             const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
@@ -119,7 +119,7 @@ sap.ui.define([
             const oTable = this.getView().byId("productsWorklist");
             const aSelectedProducts = oTable.getSelectedItems();
             const { ID } = oGlobalModel.getProperty("/selectedCompany");
-            const aSelectedProductsContexts = aSelectedProducts.map(oProduct => { return { product_ID: oProduct.getBindingContext().getObject().ID }; });
+            const aSelectedProductsContexts = aSelectedProducts.map(oProduct => { return oProduct.getBindingContext().getObject().ID;  });
             
             if(!this._validateCompanySelection()) return;
 

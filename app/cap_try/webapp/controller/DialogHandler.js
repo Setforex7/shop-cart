@@ -66,8 +66,10 @@ sap.ui.define([
             this._dDialogCart.then(oDialog => {
                 const oGlobalModel = this._oController.getOwnerComponent().getModel("globalModel");
                 const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
+                oDialog.bindElement({ path: `/Cart(ID='${oSelectedCart.ID}')` })
                 if(oSelectedCart?.ID) Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(oSelectedCart.ID);
                 else Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey("");
+
                 oDialog.open();
             });
         },
