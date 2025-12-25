@@ -95,24 +95,24 @@ sap.ui.define([
                                                                                            oView.setBusy(false) }}.bind(this)});
         },
 
-        // onDeleteSelectedCartPress: async function() {
-        //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-        //     const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
+        onDeleteSelectedCartPress: async function() {
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
 
-        //     if (!oSelectedCart) return MessageToast.show(this._i18n.getText("delete_current_cart_selection_missing"));
+            if (!oSelectedCart) return MessageToast.show(this._i18n.getText("delete_current_cart_selection_missing"));
 
-        //     MessageBox.confirm(this._i18n.getText("delete_current_cart_message", [oSelectedCart.name]), {
-        //         title: this._i18n.getText("confirmation_needed"),
-        //         actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
-        //         emphasizedAction: MessageBox.Action.YES,
-        //         onClose: async function(oAction) {
-        //             if (oAction === MessageBox.Action.YES) {
-        //                 this.getView().setBusy(true);
-        //                 await this._deleteCart(oSelectedCart);
-        //             }
-        //         }.bind(this)
-        //     });
-        // },
+            MessageBox.confirm(this._i18n.getText("delete_current_cart_message", [oSelectedCart.name]), {
+                title: this._i18n.getText("confirmation_needed"),
+                actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
+                emphasizedAction: MessageBox.Action.YES,
+                onClose: async function(oAction) {
+                    if (oAction === MessageBox.Action.YES) {
+                        this.getView().setBusy(true);
+                        await this._deleteCart(oSelectedCart);
+                    }
+                }.bind(this)
+            });
+        },
 
         addProductCart: async function() {
             const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
@@ -139,7 +139,8 @@ sap.ui.define([
                         if(oAction === MessageBox.Action.YES) { this.openCartDialog();
                                                                 await this._createCart(ID);
                                                                 await this._addProductsCart(aSelectedProductsContexts);
-                                                                await this._getCart() }
+                                                                // await this._getCart() 
+                                                            }
                     }.bind(this)
                 });
             else
@@ -164,19 +165,26 @@ sap.ui.define([
             return true;
         },
 
-        // onCartsSelectChange: function(oEvent){
-        //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-        //     const oSelectedCart = oEvent.getParameter("selectedItem").getBindingContext("globalModel").getObject();
+        onCartsSelectChange: function(oEvent){
+            const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+            const oView = this.getView();
+            const oCartTable = Fragment.byId(oView.getId(), "cartTable");
+            const oSelectedCart = oEvent.getParameter("selectedItem").getBindingContext();
+            const { ID } = oSelectedCart.getObject();
+            const oCartItemsTable = this.getView().byId("cartTable");
+            oView.setBusy(true);
+            oCartTable.setBusy(true);
 
-        //     this.getView().setBusy(true);
+            oCartItemsTable.bindRows({ path: `/Cart('"${ID}"')/items`,
+                                       events: { dataReceived: (oEvent) => { oView.setBusy(false);
+                                                                             oCartTable.setBusy(false); }} });
+            oGlobalModel.setProperty("/selectedCart", oSelectedCart);
+            oGlobalModel.refresh(true);
 
-        //     oGlobalModel.setProperty("/selectedCart", oSelectedCart);
-        //     oGlobalModel.refresh(true);
+            // this._getCartProducts();
 
-        //     this._getCartProducts();
-
-        //     this._resetProductQuantity();
-        // },
+            // this._resetProductQuantity();
+        },
 
         // _resetProductQuantity: function(){
         //     const oGlobalModel = this.getOwnerComponent().getModel("globalModel");

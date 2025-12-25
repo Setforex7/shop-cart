@@ -7,8 +7,6 @@
         <content>
             <table:Table
                 id="cartTable"
-                rows="{ path: 'items',
-                        sorter: { path: 'name' } }"
                 visibleRowCount="5"
                 selectionMode="MultiToggle"
                 alternateRowColors="true"
@@ -18,11 +16,11 @@
                             <Button text="Add Cart" iconFirst="true" icon="sap-icon://add" press="onAddCartButtonPress" />
                         <ToolbarSeparator />
                             <Label text="Cart's" design="Bold" />
-                            <Select autoAdjustWidth="false" columnRatio="3:2" editable="true" forceSelection="false" id="cartsSelect"
-                                    icon="sap-icon://cart" maxWidth="100%" items="{ path: '/Cart',
-                                                                                    sorter: { path: 'createdAt', descending: false } }" 
+                            <Select autoAdjustWidth="false" columnRatio="3:2" forceSelection="false" id="cartsSelect"
+                                    icon="sap-icon://cart" maxWidth="100%"  items="{ path: '/Cart',
+                                                                                     sorter: { path: 'createdAt', descending: false } }" 
                                     change="onCartsSelectChange" resetOnMissingKey="false" width="10%" wrapItemsText="false"
-                                    enabled="" >
+                                    enabled="true" >
                                 <items>
                                     <core:Item key="{ID}" text="{name}" />
                                 </items>
@@ -33,7 +31,7 @@
                                 tooltip="{i18n>delete_current_cart}"
                                 class="sapUiTinyMarginBegin"
                                 press="onDeleteSelectedCartPress"
-                                enabled="{= !!${globalModel>/selectedCart/ID} }" />
+                                enabled="true" />
                         <ToolbarSpacer />
                         <ToolbarSpacer />
                             <Title level="H2" text="Total" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
@@ -44,19 +42,20 @@
                     <table:Column width="20%">
                         <Label text="Name" />
                         <table:template>
-                            <Text text="{name}" />
+                            <Text text="{product/name}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
                         <Label text="Description" />
                         <table:template>
-                            <Text text="{description}" />
+                            <Text text="{product/description}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
                         <Label text="Price" />
                         <table:template>
-                            <Text text="{price} {globalModel>/selectedCompany/currency}" />
+                            <ObjectNumber number="{product/price}"
+                                          unit="{globalModel>/selectedCompany/currency}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
@@ -69,8 +68,8 @@
                         <Label text="Total" />
                         <table:template>
                             <!-- <Text text="{= ${globalModel>quantity} * ${globalModel>price}}" /> -->
-                            <Text text="{ parts: [ 'globalModel>total_price', 'globalModel>/selectedCompany/currency' ],
-                                          formatter: '.formatter.priceCurrencyFormatter' } {globalModel>/selectedCompany/currency}" />
+                            <ObjectNumber number="{total_price}"
+                                          unit="{globalModel>/selectedCompany/currency}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="5rem">

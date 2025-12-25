@@ -48,8 +48,8 @@ addProductToCart = async req => {
         if (existingCartItem) 
             await tx.run(UPDATE(CartItem, existingCartItem.sProductId).with({ quantity: { '+=': 1 } }));
         else 
-            await tx.run(INSERT.into(CartItem).entries({ cart_ID: { ID: cart_ID },
-                                                         product: { ID: sProductId },
+            await tx.run(INSERT.into(CartItem).entries({ cart_ID: cart_ID,
+                                                         product_ID: sProductId,
                                                          quantity: 1,
                                                          price: product.price,
                                                          currency: product.currency }));

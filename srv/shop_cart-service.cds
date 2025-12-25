@@ -47,8 +47,13 @@ service ShopCartService @(path:'/shop') {
   };
 
   @restrict: [ { grant: '*', to: 'any' } ]
-  entity Cart as projection on my.Cart { 
+  entity Cart as projection on my.Cart as C { 
     *,
+    (
+        select coalesce(sum(items.quantity * items.product.price), 0)
+        from my.CartItem as items
+        where items.cart.ID = C.ID
+    ) as cart_total : Decimal(10,2),
     items : redirected to CartItem,
   } actions {
     action addProductsToCart( product_IDs : many UUID ) returns Cart;
@@ -59,6 +64,8 @@ service ShopCartService @(path:'/shop') {
     *,
     product: redirected to Products,
     product.name as name,
+    product.price as price,
+    (quantity * product.price) as total_price : Decimal(10,2)
   };
 
   @readonly
