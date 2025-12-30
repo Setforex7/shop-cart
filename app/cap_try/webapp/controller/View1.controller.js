@@ -136,7 +136,7 @@ sap.ui.define([
                     actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
                     emphasizedAction: MessageBox.Action.YES,
                     onClose: async function(oAction) {
-                        if(oAction === MessageBox.Action.YES) { this.openCartDialog();
+                        if(oAction === MessageBox.Action.YES) { await this.openCartDialog();
                                                                 await this._createCart(ID);
                                                                 await this._addProductsCart(aSelectedProductsContexts);
                                                                 // await this._getCart() 
@@ -332,8 +332,8 @@ sap.ui.define([
 
         closeEditProductDialog: function () { this._oDialogHandler._closeEditProductDialog() },
 
-        openCartDialog: function () { if(!this._validateCompanySelection()) return;
-                                      this._oDialogHandler._openCartDialog() },
+        openCartDialog: async function () { if(!this._validateCompanySelection()) return;
+                                            await this._oDialogHandler._openCartDialog() },
 
         closeCartDialog: function () { this._oDialogHandler._closeCartDialog() },
 

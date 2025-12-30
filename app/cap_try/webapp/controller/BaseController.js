@@ -259,8 +259,6 @@ sap.ui.define([
 
 		_createCart: async function(sCompanyID){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
-			const oCartTable = Fragment.byId(this.getView().getId(), "cartTable");
-			const oCartSelect = Fragment.byId(this.getView().getId(), "cartsSelect");
 			const { currency_code } = oGlobalModel.getProperty("/selectedCompany");
 
             try{            
@@ -270,15 +268,11 @@ sap.ui.define([
 
                 const oCreatedCart = oCartList.create(oNewCart);
                 await oCreatedCart.created();
-                const oResult = oCreatedCart;
-				const { ID } = oResult.getObject();
-
-				oCartSelect.getBinding("items").refresh();
 
 				this._setCartOnLoad();
 				
-				oGlobalModel.setProperty("/selectedCart", oResult);
-				oCartSelect.setSelectedKey(ID);
+				const oCartTable = Fragment.byId(this.getView().getId(), "cartTable");
+				const { ID } = oGlobalModel.getProperty("/selectedCart").getObject();
 				oCartTable.bindRows({ path: "/Cart('" + ID + "')/items" });
 
 				MessageToast.show(this._i18n.getText("create_cart_success"));
@@ -359,12 +353,16 @@ sap.ui.define([
 		_setCartOnLoad: function(){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
 			const oCartSelect = Fragment.byId(this.getView().getId(), "cartsSelect");
-			const aCarts = oCartSelect.getAggregation("items");
+			const oCartSelectBinding = oCartSelect.getBinding("items");
+			const aCarts = oCartSelect?.getAggregation("items") || [];
 			
 			if(aCarts.length === 0) return;
 
-			const oSelectedCart = aCarts[0];
+			oCartSelectBinding.refresh();
+			const oSelectedCart = aCarts[0].getBindingContext();
+			const { ID } = oSelectedCart.getObject();
 			oGlobalModel.setProperty("/selectedCart", oSelectedCart);
+			oCartSelect.setSelectedKey(ID);
 			oGlobalModel.refresh(true);
 		},
 

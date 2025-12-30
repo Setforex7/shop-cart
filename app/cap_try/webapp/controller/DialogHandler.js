@@ -56,36 +56,32 @@ sap.ui.define([
             this._oController.byId("editProduct").close();
         },
 
-		_openCartDialog: function () {
+		_openCartDialog: async function () {
             if (!this._dDialogCart) {
-                this._dDialogCart = Fragment.load({ id: this._oController.getView().getId(),
-                                                    name: "cap_try.view.fragments.Cart",
-                                                    controller: this._oController })
-                .then(function (oDialog) {
-                    // this._oController.getView().addDependent(oDialog);
-                    oDialog.setModel(this._oController.getOwnerComponent().getModel());
-                    return oDialog;
-                }.bind(this));
+                this._dDialogCart = await Fragment.load({ id: this._oController.getView().getId(),
+                                                          name: "cap_try.view.fragments.Cart",
+                                                          controller: this._oController });
+                this._dDialogCart.setModel(this._oController.getOwnerComponent().getModel());
             }   
 
-            this._dDialogCart.then(async oDialog => {
-                const oGlobalModel = this._oController.getOwnerComponent().getModel("globalModel");
-                const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
-                const sCompanyID = oGlobalModel.getProperty("/selectedCompany/ID") || "";
-                const oCartItemsTable = Fragment.byId(this._oController.getView().getId(), "cartTable");
+            const oDialog =  await this._dDialogCart;
 
-                if(oSelectedCart?.ID) Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(oSelectedCart.ID);
-                else{
-                    const oSelectBinding = Fragment.byId(this._oController.getView().getId(), "cartsSelect").getBinding("items");
-                    oSelectBinding.filter([ new Filter("company_ID", FilterOperator.EQ, sCompanyID) ]);
-                    const oSelectBindingContext = await oSelectBinding.requestContexts();
-                    oGlobalModel.setProperty("/selectedCart", oSelectBindingContext[0] || null);
-                    const { ID } = oSelectBindingContext[0]?.getObject() || ""; 
-                    Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(ID);
-                    oCartItemsTable.bindRows({ path: "/Cart('" + ID + "')/items" });
-                }
-                oDialog.open();
-            });
+            const oGlobalModel = this._oController.getOwnerComponent().getModel("globalModel");
+            const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
+            const sCompanyID = oGlobalModel.getProperty("/selectedCompany/ID") || "";
+            const oCartItemsTable = Fragment.byId(this._oController.getView().getId(), "cartTable");
+
+            if(oSelectedCart?.ID) Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(oSelectedCart.ID);
+            else{
+                const oSelectBinding = Fragment.byId(this._oController.getView().getId(), "cartsSelect").getBinding("items");
+                oSelectBinding.filter([ new Filter("company_ID", FilterOperator.EQ, sCompanyID) ]);
+                const oSelectBindingContext = await oSelectBinding.requestContexts();
+                oGlobalModel.setProperty("/selectedCart", oSelectBindingContext[0] || null);
+                const { ID } = oSelectBindingContext[0]?.getObject() || ""; 
+                Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(ID);
+                oCartItemsTable.bindRows({ path: "/Cart('" + ID + "')/items" });
+            }
+            oDialog.open();
         },
 
         _closeCartDialog: function () { 
