@@ -266,14 +266,14 @@ sap.ui.define([
                 const oNewCart = { company_ID: sCompanyID,
 								   currency_code: currency_code };
 
-                const oCreatedCart = oCartList.create(oNewCart);
-                await oCreatedCart.created();
+                const oCreateCart = oCartList.create(oNewCart);
+                await oCreateCart.created();
+				const oCreatedCart = oCreateCart;
+				
+				oGlobalModel.setProperty("/selectedCart", oCreatedCart);
+				oGlobalModel.refresh(true);
 
 				this._setCartOnLoad();
-				
-				const oCartTable = Fragment.byId(this.getView().getId(), "cartTable");
-				const { ID } = oGlobalModel.getProperty("/selectedCart").getObject();
-				oCartTable.bindRows({ path: "/Cart('" + ID + "')/items" });
 
 				MessageToast.show(this._i18n.getText("create_cart_success"));
                 this._addMessage.call(this, { type: "Success", title: this._i18n.getText("success"), subtitle: this._i18n.getText("create_cart_success") });
@@ -350,20 +350,30 @@ sap.ui.define([
 			
 		// },
 
-		_setCartOnLoad: function(){
+		_setCartOnLoad: async function(){
 			const oGlobalModel = this.getOwnerComponent().getModel("globalModel");
+			const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
+			const oCartTable = Fragment.byId(this.getView().getId(), "cartTable");
 			const oCartSelect = Fragment.byId(this.getView().getId(), "cartsSelect");
 			const oCartSelectBinding = oCartSelect.getBinding("items");
-			const aCarts = oCartSelect?.getAggregation("items") || [];
-			
-			if(aCarts.length === 0) return;
+			let uCartId;
+
+			if(!Object.keys(oSelectedCart).length) return;
 
 			oCartSelectBinding.refresh();
-			const oSelectedCart = aCarts[0].getBindingContext();
-			const { ID } = oSelectedCart.getObject();
-			oGlobalModel.setProperty("/selectedCart", oSelectedCart);
-			oCartSelect.setSelectedKey(ID);
-			oGlobalModel.refresh(true);
+
+			const aCartContexts = await oCartSelectBinding.requestContexts();
+			if(aCartContexts.length === 0) return;
+
+			if(!oSelectedCart.getObject()){
+				const [ oFirstCart ] = aCartContexts;
+				uCartId = oFirstCart.getObject().ID;
+				oGlobalModel.setProperty("/selectedCart", oFirstCart);
+				oGlobalModel.refresh(true);
+			}else uCartId = oSelectedCart.getObject().ID;
+
+			oCartSelect.setSelectedKey(uCartId);
+			oCartTable.bindRows({ path: "/Cart('" + uCartId + "')/items" });
 		},
 
 		_getCartProducts: async function(){

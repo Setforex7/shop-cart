@@ -66,22 +66,8 @@ sap.ui.define([
 
             const oDialog =  await this._dDialogCart;
 
-            const oGlobalModel = this._oController.getOwnerComponent().getModel("globalModel");
-            const oSelectedCart = oGlobalModel.getProperty("/selectedCart");
-            const sCompanyID = oGlobalModel.getProperty("/selectedCompany/ID") || "";
-            const oCartItemsTable = Fragment.byId(this._oController.getView().getId(), "cartTable");
-
-            if(oSelectedCart?.ID) Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(oSelectedCart.ID);
-            else{
-                const oSelectBinding = Fragment.byId(this._oController.getView().getId(), "cartsSelect").getBinding("items");
-                oSelectBinding.filter([ new Filter("company_ID", FilterOperator.EQ, sCompanyID) ]);
-                const oSelectBindingContext = await oSelectBinding.requestContexts();
-                oGlobalModel.setProperty("/selectedCart", oSelectBindingContext[0] || null);
-                const { ID } = oSelectBindingContext[0]?.getObject() || ""; 
-                Fragment.byId(this._oController.getView().getId(), "cartsSelect").setSelectedKey(ID);
-                oCartItemsTable.bindRows({ path: "/Cart('" + ID + "')/items" });
-            }
             oDialog.open();
+            this._oController._setCartOnLoad();
         },
 
         _closeCartDialog: function () { 
