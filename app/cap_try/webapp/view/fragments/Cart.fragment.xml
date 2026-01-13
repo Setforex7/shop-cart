@@ -17,8 +17,9 @@
                         <ToolbarSeparator />
                             <Label text="Cart's" design="Bold" />
                             <Select autoAdjustWidth="false" columnRatio="3:2" forceSelection="false" id="cartsSelect"
-                                    icon="sap-icon://cart" maxWidth="100%"  items="{ path: '/Cart',
-                                                                                     sorter: { path: 'createdAt', descending: false } }" 
+                                    icon="sap-icon://cart" maxWidth="100%" items="{ path: '/Cart',
+                                                                                    filters: [ { path: 'status', operator: 'EQ', value1: 'Active' } ],
+                                                                                    sorter: { path: 'createdAt', descending: false } }" 
                                     change="onCartsSelectChange" resetOnMissingKey="false" width="10%" wrapItemsText="false"
                                     enabled="true" >
                                 <items>
@@ -35,7 +36,6 @@
                         <ToolbarSpacer />
                         <ToolbarSpacer />
                             <Title level="H2" text="Total" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
-                            <Text text="{= ${globalModel>/products}.length }" />
                     </OverflowToolbar>
                 </table:extension>
                 <table:columns>
@@ -79,30 +79,26 @@
                                 icon="sap-icon://delete"
                                 type="Transparent"
                                 tooltip="{i18n>delete_cart_product}"
-                                press="onDeleteProductPress" />
+                                press="onDeleteCartItemPress" />
                         </table:template>
                     </table:Column>
                 </table:columns>
                 <table:footer>
-                    <OverflowToolbar>
-                        <Button icon="sap-icon://delete" text="{i18n>delete_products}" press="onDeleteCartProductPress" />
+                    <OverflowToolbar id="cartTableFooter">
+                        <Button icon="sap-icon://delete" text="{i18n>delete_products}" press="onDeleteMultipleCartItemPress" />
                         <ToolbarSeparator visible="{= ${globalModel>/cart}.length === 0 ? false : true}" />
-                        <Button text="{i18n>finalize_purchase}" visible="{= ${globalModel>/cart}.length === 0 ? false : true}" press="onFinalizePurchaseButtonPress" type="Success" />
                         <ToolbarSpacer />
                         <Label text="Total do Carrinho:" design="Bold" />
-                        <Text class="sapUiTinyMarginBegin" text="{
-                                parts: [ 
-                                    {path: 'globalModel>/selectedCart/total_price'},
-                                    {path: 'globalModel>/selectedCompany/currency'}
-                                ],
-                                formatter: '.formatter.priceCurrencyFormatter'
-                            } {globalModel>/selectedCompany/currency}" />
+                        <Text class="sapUiTinyMarginBegin" text="{cart_total}" />
                     </OverflowToolbar>
                 </table:footer>
             </table:Table>
         </content>
         <beginButton>
-            <Button text="{i18n>close}" press="closeCartDialog" />
+            <Button text="Finalize Purchase" visible="{= ${globalModel>/cart}.length === 0 ? false : true}" press="onFinalizePurchasePress" type="Success" />
         </beginButton>
+        <endButton>
+            <Button text="Close" type="Default" press="closeCartDialog" />
+        </endButton>
     </Dialog>
 </core:FragmentDefinition>

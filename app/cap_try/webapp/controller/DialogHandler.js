@@ -67,7 +67,7 @@ sap.ui.define([
             const oDialog =  await this._dDialogCart;
 
             oDialog.open();
-            this._oController._setCartOnLoad();
+            this._oController._bindCartDataToFragment();
         },
 
         _closeCartDialog: function () { 

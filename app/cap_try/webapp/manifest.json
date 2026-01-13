@@ -20,7 +20,6 @@
         "uri": "/shop/",
         "type": "OData",
         "settings": {
-          "annotations": [],
           "odataVersion": "4.0"
         }
       },
@@ -56,7 +55,8 @@
       "minUI5Version": "1.134.0",
       "libs": {
         "sap.m": {},
-        "sap.ui.core": {}
+        "sap.ui.core": {},
+        "sap.ui.mdc": {}
       }
     },
     "contentDensities": {
@@ -75,6 +75,8 @@
         "preload": true,
         "settings": {
           "operationMode": "Server",
+          "groupId": "$auto",
+          "synchronizationMode": "None",
           "autoExpandSelect": true,
           "earlyRequests": true
         }

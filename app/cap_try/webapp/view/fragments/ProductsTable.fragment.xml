@@ -20,6 +20,18 @@
                     width="30%"
                     placeholder="Procurar por nome..."
                     liveChange="onSearch" />
+                <Button 
+                    press="openAddProductDialog" 
+                    visible="{= !!${globalModel>/selectedCompany/ID} }" 
+                    icon="sap-icon://add-product"/>
+                <ToolbarSeparator />
+                <Button
+                    icon="sap-icon://delete"
+                    type="Transparent"
+                    tooltip="{i18n>delete_selected_products}"
+                    class="sapUiTinyMarginBegin"
+                    press="onDeleteMultiplesProductsPress" />
+                <ToolbarSeparator />
                 <Button
                     icon="sap-icon://cart-4"
                     tooltip="Adicionar Produto ao Carrinho"

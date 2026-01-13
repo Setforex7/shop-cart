@@ -43,7 +43,8 @@ entity Products : managed { key ID      : UUID;
 entity Cart : managed { key ID              : UUID;
                         name                : Name;
                         company             : Association to Company; @mandatory
-                        items               : Composition of many CartItem on items.cart = $self; 
+                        items               : Composition of many CartItem on items.cart = $self;
+                        status              : String enum { Active; Ordered; Abandoned; } default 'Active'; 
                         virtual total_price : Decimal(10,2);
                         currency            : Currency @mandatory; }
 

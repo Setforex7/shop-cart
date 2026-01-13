@@ -4,6 +4,7 @@ const { errors } = require('@sap/cds');
 const ordersHandler = require('./handlers/orders.js');
 const cartHandler = require('./handlers/cart.js');
 const productsHandler = require('./handlers/products.js');
+const jobsHandler = require('./handlers/jobs.js');
 const e = require('express');
 
 class ShopCartService extends cds.ApplicationService { async init() {
@@ -11,11 +12,13 @@ class ShopCartService extends cds.ApplicationService { async init() {
   const db = await cds.connect.to('db')
   const { Products, Company, Cart, CartItem, Orders } = db.entities
 
+  cds.on('served', jobsHandler.onCdsServer);
+
   this.after('READ', 'Products', productsHandler.afterReadProducts);
 
   this.before('READ', 'Cart', cartHandler.beforeReadCart);
 
-  this.after('READ', 'Cart', cartHandler.afterReadProducts);
+  this.after('READ', 'Cart', cartHandler.afterReadCart);
 
   this.before('CREATE', 'Products', productsHandler.beforeCreateProducts);
 
@@ -23,7 +26,7 @@ class ShopCartService extends cds.ApplicationService { async init() {
 
   this.before('CREATE', 'Cart', cartHandler.beforeCreateCart);
 
-  this.on('finalizeProcess', ordersHandler.createOrder);
+  this.on('finalizeCart', cartHandler.finalizeCart);
 
   this.on('addProductsToCart', cartHandler.addProductToCart);
 

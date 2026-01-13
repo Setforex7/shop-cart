@@ -34,7 +34,7 @@ sap.ui.define([
         },
 
         stockIconColorFormatter: function (iCurrentStock, iMinStock) {
-            if (isNaN(iCurrentStock) || isNaN(iMinStock)) return 'None';
+            if (isNaN(iCurrentStock) || isNaN(iMinStock)) return 'Default';
 
             iCurrentStock = parseInt(iCurrentStock);
             iMinStock = parseInt(iMinStock);

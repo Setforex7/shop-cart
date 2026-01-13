@@ -1,12 +1,29 @@
-<mvc:View controllerName="cap_try.controller.View1"
+<mvc:View controllerName="cap_try.controller.Reports"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:table="sap.ui.table"
-    xmlns:l="sap.ui.layout"
-	xmlns:f="sap.ui.layout.form"
+    xmlns:mdc="sap.ui.mdc"
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
     
-    <Page id="page" title="{i18n>title}">
-        <Text text="Reports Page" /> 
-    </Page>
+    <VBox class="sapUiSmallMargin">
+
+        <mdc:FilterBar
+        id="fbReports"
+        delegate='{"name": "sap/ui/mdc/odata/v4/FilterBarDelegate"}'
+        filterConditions="{$filters>/conditions}"
+        p13nMode="Item,Value"
+        metaPath="/Orders"/>
+
+        <mdc:Table
+        id="tblReports"
+        header="Orders"
+        type="ResponsiveTable"
+        delegate='{"name": "sap/ui/mdc/odata/v4/TableDelegate"}'    
+        metaPath="/Orders"
+        filter="fbReports"
+        items="{ path: '/Orders' }">
+
+        <mdc:columns/>
+        </mdc:Table>
+
+    </VBox>
 </mvc:View>

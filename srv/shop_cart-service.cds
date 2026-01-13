@@ -1,31 +1,20 @@
 using { sap.capire.shop_cart as my } from '../db/schema';
-
-// ----------------------------------------------------------------------------
-// Input Types (Payloads)
-// ----------------------------------------------------------------------------
+using from './annotations';
 
 //? Payload for creating a product
-type sAddProduct { 
-  company_ID  : UUID;   
-  name        : String(50);
-  description : String(600);
-  price       : Decimal(10,2);
-  currency    : String(3);
-  stock       : Integer;      
-  stock_min   : Integer;
-};
+type sAddProduct { company_ID  : UUID;   
+                   name        : String(50);
+                   description : String(600);
+                   price       : Decimal(10,2);
+                   currency    : String(3);
+                   stock       : Integer;      
+                   stock_min   : Integer; };
 
 //? Payload for adding items to the Cart
-type sCartItemInput { 
-  cart_ID    : UUID;          
-  product_ID : UUID;          
-  quantity   : Integer;
-};
-
-type sFinalizeCart { 
-  cart_ID    : UUID; 
-};
-
+type sCartItemInput { cart_ID    : UUID;          
+                      product_ID : UUID;          
+                      quantity   : Integer; };
+type sFinalizeCart { cart_ID    : UUID; };
 type sDeleteProduct { ID: UUID };
 
 
@@ -38,7 +27,7 @@ service ShopCartService @(path:'/shop') {
       products : redirected to Products
   };
 
-  @restrict: [ { grant: [ 'READ', 'WRITE' ], to: 'authenticated-user' },
+  @restrict: [ { grant: [ 'READ' ], to: 'authenticated-user' },
                { grant: '*', to: 'admin' } ]
   entity Products as projection on my.Products {
     *,
@@ -46,7 +35,7 @@ service ShopCartService @(path:'/shop') {
     company : redirected to Company,
   };
 
-  @restrict: [ { grant: '*', to: 'any' } ]
+  @restrict: [ { grant: '*', where: 'createdBy = $user.id' }, ]
   entity Cart as projection on my.Cart as C { 
     *,
     (
@@ -57,6 +46,7 @@ service ShopCartService @(path:'/shop') {
     items : redirected to CartItem,
   } actions {
     action addProductsToCart( product_IDs : many UUID ) returns Cart;
+    action finalizeCart() returns Orders;
   }
 
   @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], where: 'createdBy = $user.id' } ]
@@ -78,30 +68,17 @@ service ShopCartService @(path:'/shop') {
 
   @cds.redirection.target 
   @readonly
-  @restrict: [ { grant: 'READ', where: 'createdBy = $user.id' } ]
+  @restrict: [ { grant: ['READ', 'WRITE'], to: 'authenticated-user', where: 'createdBy = $user.id' }, ]
   entity Orders as projection on my.Orders {
     *,
     items : redirected to OrderItems
-  };
+  }
 
   @readonly
-  @restrict: [ { grant: 'READ', where: 'createdBy = $user.id' } ]
+  @restrict: [ { grant: ['READ', 'WRITE'], to: 'authenticated-user', where: 'createdBy = $user.id' } ]
   entity OrderItems as projection on my.OrderItems;
 
   @readonly
   @restrict: [ { grant: 'READ', where: 'user = $user.id' } ] 
   entity PurchaseHistory as projection on my.PurchaseHistory;
-
-
-  @requires: 'authenticated-user'
-  action createProduct (product: sAddProduct) returns Products; 
-
-  @requires: 'authenticated-user'
-  action deleteProduct (product: sDeleteProduct) returns sDeleteProduct;
-
-  // @requires: 'authenticated-user'
-  // action addProductsToCart (products: many sCartItemInput) returns Cart;
-
-  @requires: 'authenticated-user'
-  action finalizeProcess (cart: sFinalizeCart) returns Orders; // [ALTERADO] Retorna a Encomenda criada, não o Carrinho
 }

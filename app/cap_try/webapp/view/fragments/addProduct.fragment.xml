@@ -8,17 +8,16 @@
         contentWidth="500px"
         contentHeight="auto"
         draggable="true"
-        resizable="true"
-        contentPadding="true">
+        resizable="true">
         
         <content>
-            <l:Form editable="true" binding="{globalModel>/product}" layout="ResponsiveGridLayout">
+            <l:Form editable="true" binding="{globalModel>/product}">
                 <l:layout>
                     <l:ResponsiveGridLayout
                         labelSpanL="4" labelSpanM="2"
                         emptySpanL="0" emptySpanM="0"
                         columnsL="2" columnsM="1" />
-                </l:layout>
+                    </l:layout>
                 <l:formContainers>
                     <l:FormContainer title="Product Details" expandable="true" expanded="true">
                         <l:formElements>

@@ -1,7 +1,5 @@
 <mvc:View controllerName="cap_try.controller.View1"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:table="sap.ui.table"
-    xmlns:l="sap.ui.layout"
 	xmlns:f="sap.ui.layout.form"
     xmlns:core="sap.ui.core"
     xmlns="sap.m">
@@ -18,7 +16,7 @@
                     <contentRight>
                         <Button icon="sap-icon://cart" press="openCartDialog" tooltip="{i18n>cart}" visible="{= !!${globalModel>/selectedCompany/ID} }" >
                             <customData>
-                                <BadgeCustomData animation="Update"  value="{= ${globalModel>/cart}.length }" />
+                                <BadgeCustomData animation="Update"  value="{= ${globalModel>/cartItemsQuantity} }" />
                             </customData>
                         </Button>
                     </contentRight>
@@ -32,7 +30,6 @@
                 <VBox>
                     <f:SimpleForm id="SimpleFormDisplay354"
                         editable="false"
-                        layout="ResponsiveGridLayout"
                         title="Company details"
                         labelSpanXL="3"
                         labelSpanL="3"
@@ -80,8 +77,6 @@
             <footer>
                 <Toolbar>
                     <Button visible="{= ${messageModel>/}.length !== 0}" press="toggleMessageView" icon="sap-icon://alert" text="{= ${messageModel>/}.length}" />
-                    <ToolbarSpacer />
-                    <Button press="openAddProductDialog" visible="{= !!${globalModel>/selectedCompany/ID} }" icon="sap-icon://add-product"/>
                 </Toolbar>
             </footer>
     </Page>

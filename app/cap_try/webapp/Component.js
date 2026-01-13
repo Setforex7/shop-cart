@@ -25,6 +25,7 @@ sap.ui.define([
                                                  selectedProduct: {},
                                                  selectedCart: [],
                                                  cart: {},
+                                                 cartItemsQuantity: 0,
                                                  products: [],
                                                  Companys: [],
                                                  carts: [] });    

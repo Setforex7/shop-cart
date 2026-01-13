@@ -1,7 +1,9 @@
 const cds = require('@sap/cds');
 const { afterReadProducts } = require('./products');
+const { foreach } = require('@sap/cds');
+const { it } = require('eslint/lib/rule-tester/rule-tester');
 
-const { Products, Cart, CartItem } = cds.entities;
+const { Company, Products, Cart, CartItem, Orders, OrderItems } = cds.entities;
 
 beforeReadCart = async req => { req.data.user_id = req.user.id };
 
@@ -28,9 +30,7 @@ beforeCreateCart = async req => {
 
 addProductToCart = async req => {
     const [ cart_ID ] = req.params;
-    console.log(cart_ID);
     const { product_IDs } = req.data;
-    const { id } = req.user; 
 
     const tx = cds.transaction(req); 
 
@@ -46,28 +46,90 @@ addProductToCart = async req => {
         const existingCartItem = await SELECT.one.from(CartItem).where({ cart_ID: cart_ID, product_ID: sProductId });
 
         if (existingCartItem) 
-            await tx.run(UPDATE(CartItem, existingCartItem.sProductId).with({ quantity: { '+=': 1 } }));
+            await tx.run(UPDATE(CartItem, existingCartItem.ID).with({ quantity: { '+=': 1 } }));
         else 
             await tx.run(INSERT.into(CartItem).entries({ cart_ID: cart_ID,
                                                          product_ID: sProductId,
                                                          quantity: 1,
                                                          price: product.price,
                                                          currency: product.currency }));
-          
-
-          await tx.run(UPDATE(Products, sProductId).with({ stock: { '-=': 1 } }));
       }
-      const cartItems = await tx.run(SELECT.from(CartItem).where({ cart_ID: cart_ID }));
-      const total_price = cartItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+    const cartItems = await tx.run(SELECT.from(CartItem).where({ cart_ID: cart_ID }));
+    const total_price = cartItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
 
-      await tx.run(UPDATE(Cart, cart_ID).with({ total_price: total_price }));
+    await tx.run(UPDATE(Cart, cart_ID).with({ total_price: total_price }));
 
-      const updatedCart = await tx.run(SELECT.one.from(Cart).where({ ID: cart_ID }));
+    const updatedCart = await tx.run(SELECT.one.from(Cart).where({ ID: cart_ID })
+                                                          .columns(c => { c('*'),          // Select all top-level fields of the Cart
+                                                                          c.items(it => {
+                                                                          it('*');}) }));
 
-      return updatedCart;
+    return updatedCart;
+}
+
+finalizeCart = async req => {
+    const [ cartID ] = req.params;
+    if(!cartID) return req.error(400, 'Cart ID not provided.');
+
+    const tx = cds.transaction(req);
+
+    const cart = await tx.run(SELECT.one.from(Cart).where({ ID: cartID }));
+
+    if (!cart) return req.error(404, `Cart with the ID ${cartID} not found!`);
+
+    const { ID, company_ID, status, currency_code } = cart;
+    if (status !== 'Active') return req.error(400, 'Only Active carts can be finalized.');
+
+    const cartItems = await tx.run(SELECT.from(CartItem).where({ cart_ID: cartID }));
+
+    if (cartItems.length === 0) return req.error(400, 'Cannot finalize an empty cart.');
+
+    console.log("EL CARRITO: ", cart);
+    console.log("carritos: ", cartItems);
+
+    const aItemsToCreate = [];
+
+    for(const item of cartItems) {
+        const { product_ID, quantity } = item;
+
+        const product = await tx.run(SELECT.one.from(Products).where({ ID: product_ID,
+                                                                           company_ID: company_ID }));
+        if(!product) return req.error(404, `Product with ID ${product_ID} not found.`);
+        console.log("PRODUTO:", product);
+        const { price } = product;
+
+        if (product.stock < quantity) return req.error(400, `Insufficient stock for product ${product.name}. Operation cancelled.`);
+        
+        aItemsToCreate.push({ product_ID: product_ID,
+                              price: price,
+                              price_at_create: price,
+                              total_price: price * quantity,
+                              quantity: quantity,
+                              currency_code: currency_code });
+        console.log("EL CURRENCY: ", currency_code);
+    }
+
+    const cartTotalPrice = aItemsToCreate.reduce((sum, item) => sum + item.total_price, 0);
+    
+    for(const product of aItemsToCreate){
+        const { product_ID, quantity } = product;
+        await tx.run(UPDATE(Products, product_ID).with({ stock: { '-=': quantity } }));
+    }
+
+    await tx.run(UPDATE(Cart, ID).with({ status: 'Finalized' }));
+    await tx.run(UPDATE(Company, company_ID).with({ capital: { '+=': cartTotalPrice } }));
+
+    const newOrder = await tx.run(INSERT.into(Orders).entries({ company_ID: company_ID,
+                                                                items: aItemsToCreate,
+                                                                type: "S",
+                                                                total_price: cartTotalPrice,
+                                                                currency_code: currency_code }));
+
+    return newOrder;
 }
 
 module.exports = { beforeReadCart,
-                   afterReadProducts,
+                   afterReadCart,
                    beforeCreateCart,
-                   addProductToCart };
+                   addProductToCart,
+                   finalizeCart };
