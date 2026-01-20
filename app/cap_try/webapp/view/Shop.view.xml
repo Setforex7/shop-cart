@@ -1,4 +1,4 @@
-<mvc:View controllerName="cap_try.controller.View1"
+<mvc:View controllerName="cap_try.controller.Shop"
     xmlns:mvc="sap.ui.core.mvc"
 	xmlns:f="sap.ui.layout.form"
     xmlns:core="sap.ui.core"
@@ -23,33 +23,34 @@
                 </Bar>
             </customHeader>
             <Panel expandable="true"
-                width="auto"
+                   width="auto"
                    class="sapUiResponsiveMargin"
                    expanded="true"
-                   headerText="Toggle Company Details">
+                   headerText="{i18n>toogle_company_details}">
                 <VBox>
                     <f:SimpleForm id="SimpleFormDisplay354"
-                        editable="false"
-                        title="Company details"
-                        labelSpanXL="3"
-                        labelSpanL="3"
-                        labelSpanM="3"
-                        labelSpanS="12"
-                        adjustLabelSpan="false"
-                        emptySpanXL="4"
-                        emptySpanL="4"
-                        emptySpanM="4"
-                        emptySpanS="0"
-                        columnsXL="1"
-                        columnsL="1"
-                        columnsM="1"
-                        binding="{globalModel>/selectedCompany}" >
+                                  editable="false"
+                                  title="{i18n>company_details}"
+                                  labelSpanXL="3"
+                                  labelSpanL="3"
+                                  labelSpanM="3"
+                                  labelSpanS="12"
+                                  adjustLabelSpan="false"
+                                  emptySpanXL="4"
+                                  emptySpanL="4"
+                                  emptySpanM="4"
+                                  emptySpanS="0"
+                                  columnsXL="1"
+                                  columnsL="1"
+                                  columnsM="1"
+                                  binding="{globalModel>/selectedCompany}" >
                         <f:content>
-                            <Label class="sapUiTinyMargin" text="Company name" />
+                            <Label class="sapUiTinyMargin" text="{i18n>name}" />
                             <HBox width="auto">
-                                <ComboBox width="auto" change="onCompanyChange" value="{globalModel>name}" id="companyComboBox" placeholder="Select a company..."
-                                items="{ path: '/Company',
-                                         sorter: { path: 'name' } }">
+                                <ComboBox width="auto" change="onCompanyChange" value="{globalModel>name}" 
+                                          id="companyComboBox" placeholder="{i18n>select_company}"
+                                          items="{ path: '/Company',
+                                                   sorter: { path: 'name' } }">
                                     <items>
                                         <core:Item key="{ID}" text="{name}" />
                                     </items>
@@ -57,12 +58,12 @@
                                 <Button text="{i18n>cancel}" type="Default" class="sapUiSmallMarginBegin" 
                                         visible="{= !!${globalModel>name} }" press="onCompanyCancelPress" />
                             </HBox>              
-                            <Label text="Name" />
+                            <Label text="{i18n>name}" />
                             <Text text="{globalModel>name}" />
-                            <Label text="Description" />
+                            <Label text="{i18n>description}" />
                             <Text text="{globalModel>description}" />
-                            <Label text="Capital" />
-                            <Text id="countryText" text="{globalModel>capital} {globalModel>currency}" />
+                            <Label text="{i18n>capital}" />
+                            <Text id="" text="{globalModel>capital} {globalModel>currency}" />
                         </f:content>
                     </f:SimpleForm>
                 </VBox>
@@ -76,7 +77,8 @@
             </content>
             <footer>
                 <Toolbar>
-                    <Button visible="{= ${messageModel>/}.length !== 0}" press="toggleMessageView" icon="sap-icon://alert" text="{= ${messageModel>/}.length}" />
+                    <Button visible="{= ${messageModel>/}.length !== 0}" press="toggleMessageView" 
+                            icon="sap-icon://alert" type="Emphasized" text="{= ${messageModel>/}.length}" />
                 </Toolbar>
             </footer>
     </Page>

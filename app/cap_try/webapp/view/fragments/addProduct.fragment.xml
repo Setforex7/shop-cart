@@ -3,7 +3,7 @@
     xmlns:l="sap.ui.layout.form"
     xmlns:core="sap.ui.core">
     <Dialog
-        id="addProduct"
+        id="AddProduct"
         title="{i18n>add_product}"
         contentWidth="500px"
         contentHeight="auto"
@@ -13,35 +13,34 @@
         <content>
             <l:Form editable="true" binding="{globalModel>/product}">
                 <l:layout>
-                    <l:ResponsiveGridLayout
-                        labelSpanL="4" labelSpanM="2"
-                        emptySpanL="0" emptySpanM="0"
-                        columnsL="2" columnsM="1" />
-                    </l:layout>
+                    <l:ResponsiveGridLayout labelSpanL="4" labelSpanM="2"
+                                            emptySpanL="0" emptySpanM="0"
+                                            columnsL="2" columnsM="1" />
+                </l:layout>
                 <l:formContainers>
-                    <l:FormContainer title="Product Details" expandable="true" expanded="true">
+                    <l:FormContainer title="{i18n>product_details}" expandable="true" expanded="true">
                         <l:formElements>
-                            <l:FormElement label="Name">
+                            <l:FormElement label="{i18n>name}">
                                 <l:fields>
-                                    <Input value="{globalModel>name}" type="Text" placeholder="Insert a name..." required="true" />
+                                    <Input value="{globalModel>name}" type="Text" placeholder="{i18n>insert_name}" required="true" />
                                 </l:fields>
                             </l:FormElement>
-                            <l:FormElement label="Description">
+                            <l:FormElement label="{i18n>description}">
                                 <l:fields>
-                                    <Input value="{globalModel>description}" type="Text" placeholder="Insert a description..." />
+                                    <Input value="{globalModel>description}" type="Text" placeholder="{i18n>insert_description}" />
                                 </l:fields>
                             </l:FormElement>
-                            <l:FormElement label="Price">
+                            <l:FormElement label="{i18n>price}">
                                 <l:fields>
                                     <Input type="Number" value="{globalModel>price}" required="true" />
                                 </l:fields>
                             </l:FormElement>
-                            <l:FormElement label="Stock Min">
+                            <l:FormElement label="{i18n>stock_min}">
                                 <l:fields>
                                     <Input type="Number" value="{globalModel>stock_min}" required="true" />
                                 </l:fields>
                             </l:FormElement>
-                            <l:FormElement label="Stock Atual">
+                            <l:FormElement label="{i18n>stock}">
                                 <l:fields>
                                     <Input type="Number" value="{globalModel>stock}" required="true" />
                                 </l:fields>
@@ -53,10 +52,10 @@
         </content>
         
         <beginButton>
-            <Button text="Create" type="Success" press="onCreateButtonPress" />
+            <Button text="{i18n>create}" type="Success" press="onCreateButtonPress" />
         </beginButton>
         <endButton>
-            <Button text="Cancel" press="closeAddProductDialog" />
+            <Button text="{i18n>cancel}" press="closeAddProductDialog" />
         </endButton>
     </Dialog>
 </core:FragmentDefinition>

@@ -1,29 +1,207 @@
-<mvc:View controllerName="cap_try.controller.Reports"
+<mvc:View
+    controllerName="cap_try.controller.Reports"
     xmlns:mvc="sap.ui.core.mvc"
-    xmlns:mdc="sap.ui.mdc"
+    xmlns="sap.m"
+    xmlns:f="sap.f"
     xmlns:core="sap.ui.core"
-    xmlns="sap.m">
-    
-    <VBox class="sapUiSmallMargin">
-
-        <mdc:FilterBar
-        id="fbReports"
-        delegate='{"name": "sap/ui/mdc/odata/v4/FilterBarDelegate"}'
-        filterConditions="{$filters>/conditions}"
-        p13nMode="Item,Value"
-        metaPath="/Orders"/>
-
-        <mdc:Table
-        id="tblReports"
-        header="Orders"
-        type="ResponsiveTable"
-        delegate='{"name": "sap/ui/mdc/odata/v4/TableDelegate"}'    
-        metaPath="/Orders"
-        filter="fbReports"
-        items="{ path: '/Orders' }">
-
-        <mdc:columns/>
-        </mdc:Table>
-
-    </VBox>
+    xmlns:table="sap.ui.table"
+>
+    <f:FlexibleColumnLayout id="fcl"
+                            layout="OneColumn" >
+        <f:beginColumnPages>
+            <Page title="{i18n>orders}" id="ordersPage">
+                <customHeader>
+                    <Bar>
+                        <contentLeft>
+                            <Button icon="sap-icon://menu2"
+                                    press="initializeMenu" />
+                        </contentLeft>
+                        <contentMiddle>
+                            <Title text="{i18n>shop}" />
+                        </contentMiddle>
+                        <contentRight>
+                        </contentRight>
+                    </Bar>
+                </customHeader>
+                <content>
+                    <table:Table id="ordersTable"
+                                 class="sapUiResponsiveMargin"
+                                 selectionMode="Single"
+                                 selectionBehavior="RowOnly"
+                                 cellClick="onOrderPress"
+                                 visibleRowCountMode="Auto" >
+                        <table:extension>
+                            <OverflowToolbar style="Clear">
+                                <Title text="{i18n>orders_report}" />
+                                <ToolbarSpacer />
+                                <Text text="{i18n>select_company_carts}" />
+                                <Select width="auto" change="onCompanyChange" forceSelection="false" id="companyComboBox"
+                                        items="{ path: '/Company',
+                                                 sorter: { path: 'name' } }" >
+                                    <items>
+                                        <core:Item key="{ID}" text="{name}" />
+                                    </items>
+                                </Select> 
+                                <Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onOrdersTableRefresh" />
+                                <Button icon="sap-icon://download" tooltip="{i18n>export}" press="onExportExcel" />
+                            </OverflowToolbar>
+                        </table:extension>
+                        <table:columns>
+                            <table:Column visible="false"
+                                          autoResizable="true"
+                                          sortProperty="ID"
+                                          filterProperty="ID" >
+                                <Label text="{i18n>id}" />
+                                <table:template>
+                                    <Text text="{ID}"
+                                          wrapping="false" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="status"
+                                          filterProperty="status" >
+                                <Label text="{i18n>status}" />
+                                <table:template>
+                                    <Text text="{status}"
+                                          wrapping="false" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="type"
+                                          filterProperty="type"
+                                          hAlign="Center" >
+                                <Label text="{i18n>type}" />
+                                <table:template>
+                                    <Text text="{type}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="company/name"
+                                          filterProperty="company/name" >
+                                <Label text="{i18n>company}" />
+                                <table:template>
+                                    <Text text="{company/name}"
+                                          wrapping="false" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="company/description"
+                                          filterProperty="company/description" >
+                                <Label text="{i18n>company_description}" />
+                                <table:template>
+                                    <Text text="{company/description}"
+                                          wrapping="false" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          hAlign="End"
+                                          sortProperty="total_price" >
+                                <Label text="{i18n>total}" />
+                                <table:template>
+                                    <ObjectNumber number="{total_price}"
+                                                  unit="{company/currency/code}"
+                                                  state="Success" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="createdBy" >
+                                <Label text="{i18n>created_by}" />
+                                <table:template>
+                                    <Text text="{createdBy}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="createdAt" >
+                                <Label text="{i18n>created_at}" />
+                                <table:template>
+                                    <Text text="{createdAt}" />
+                                </table:template>
+                            </table:Column>
+                        </table:columns>
+                    </table:Table>
+                </content>
+            </Page>
+        </f:beginColumnPages>
+        <f:midColumnPages>
+            <Page id="detailPage"
+                  title="{i18n>order_details}" >
+                <headerContent>
+                    <Button icon="sap-icon://decline"
+                            press="onCloseDetail"
+                            type="Transparent"/>
+                </headerContent>
+                <content>
+                    <table:Table id="itemsTable"
+                                 class="sapUiResponsiveMargin"
+                                 selectionMode="Single"
+                                 selectionBehavior="RowOnly"
+                                 cellClick="onOrderPress"
+                                 visibleRowCountMode="Auto">
+                        <table:columns>
+                            <table:Column visible="false"
+                                          autoResizable="true"
+                                          sortProperty="ID"
+                                          filterProperty="ID" >
+                                <Label text="{i18n>id}" />
+                                <table:template>
+                                    <Text text="{items/ID}"
+                                          wrapping="false" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="product/name"
+                                          filterProperty="product/name" >
+                                <Label text="{i18n>name}" />
+                                <table:template>
+                                    <Text text="{product/name}"
+                                          wrapping="false" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="product/price"
+                                          filterProperty="product/price" >
+                                <Label text="{i18n>price}" />
+                                <table:template>
+                                    <ObjectNumber number="{product/price}"
+                                                  unit="{product/currency}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="price_at_create"
+                                          filterProperty="price_at_create" >
+                                <Label text="{i18n>price_at_create}" />
+                                <table:template>
+                                    <ObjectNumber number="{price_at_create}"
+                                                  unit="{product/currency}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="total_price"
+                                          filterProperty="total_price" >
+                                <Label text="{i18n>total}" />
+                                <table:template>
+                                    <ObjectNumber number="{total_price}"
+                                                  unit="{product/currency}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="createdBy" >
+                                <Label text="{i18n>created_by}" />
+                                <table:template>
+                                    <Text text="{createdBy}" />
+                                </table:template>
+                            </table:Column>
+                            <table:Column autoResizable="true"
+                                          sortProperty="createdAt" >
+                                <Label text="{i18n>created_at}" />
+                                <table:template>
+                                    <Text text="{createdAt}" />
+                                </table:template>
+                            </table:Column>
+                        </table:columns>
+                    </table:Table>
+                </content>
+            </Page>
+        </f:midColumnPages>
+    </f:FlexibleColumnLayout>
 </mvc:View>

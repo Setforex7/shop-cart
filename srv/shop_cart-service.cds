@@ -15,9 +15,11 @@ type sCartItemInput { cart_ID    : UUID;
                       product_ID : UUID;          
                       quantity   : Integer; };
 type sFinalizeCart { cart_ID    : UUID; };
+
 type sDeleteProduct { ID: UUID };
 
-
+type UserRolesResponse { id    : String;
+                         roles : many String; };
 
 service ShopCartService @(path:'/shop') { 
 
@@ -68,10 +70,12 @@ service ShopCartService @(path:'/shop') {
 
   @cds.redirection.target 
   @readonly
-  @restrict: [ { grant: ['READ', 'WRITE'], to: 'authenticated-user', where: 'createdBy = $user.id' }, ]
+  @restrict: [ { grant: ['READ', 'WRITE'], to: 'authenticated-user', where: 'createdBy = $user.id' },
+               { grant: '*', to: 'admin' } ]
   entity Orders as projection on my.Orders {
     *,
-    items : redirected to OrderItems
+    items : redirected to OrderItems,
+    company : redirected to Company,
   }
 
   @readonly
@@ -81,4 +85,7 @@ service ShopCartService @(path:'/shop') {
   @readonly
   @restrict: [ { grant: 'READ', where: 'user = $user.id' } ] 
   entity PurchaseHistory as projection on my.PurchaseHistory;
+
+  @(requires: 'authenticated-user')
+  function getUserInfo() returns UserRolesResponse;
 }

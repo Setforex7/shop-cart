@@ -4,38 +4,38 @@
     xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table">
     
-    <Title text="Lista de Produtos" level="H3" />
-        <Table
-        id="productsWorklist"
-        mode="MultiSelect"
-        inset="false"
-        items="{ path: 'products',
-                 sorter: { path: 'name' } }"
+    <Title text="{i18n>products_list}" level="H3" />
+        <Table id="productsWorklist"
+               mode="MultiSelect"
+               inset="false"
+               items="{ path: 'products',
+                        sorter: { path: 'name' } }"
         alternateRowColors="true">
         <headerToolbar>
             <OverflowToolbar>
-                <Title text="Lista de Produtos" level="H2"/>
+                <Title text="{i18n>products_list}" level="H2"/>
                 <ToolbarSpacer />
                 <SearchField
                     width="30%"
-                    placeholder="Procurar por nome..."
+                    placeholder="{i18n>search_by_name}"
                     liveChange="onSearch" />
                 <Button 
                     press="openAddProductDialog" 
-                    visible="{= !!${globalModel>/selectedCompany/ID} }" 
-                    icon="sap-icon://add-product"/>
-                <ToolbarSeparator />
+                    visible="{= ${globalModel>/userInfo/roles}.includes('admin') }"
+                    icon="sap-icon://add-product"
+                    tooltip="{i18n>add_product}" />
+                <ToolbarSeparator visible="{= ${globalModel>/userInfo/roles}.includes('admin') }" />
                 <Button
                     icon="sap-icon://delete"
                     type="Transparent"
                     tooltip="{i18n>delete_selected_products}"
+                    visible="{= ${globalModel>/userInfo/roles}.includes('admin') }"
                     class="sapUiTinyMarginBegin"
                     press="onDeleteMultiplesProductsPress" />
-                <ToolbarSeparator />
-                <Button
-                    icon="sap-icon://cart-4"
-                    tooltip="Adicionar Produto ao Carrinho"
-                    press="addProductCart" />
+                <ToolbarSeparator visible="{= ${globalModel>/userInfo/roles}.includes('admin') }" />
+                <Button icon="sap-icon://cart-4"
+                        tooltip="{i18n>add_product_to_cart}"
+                        press="addProductCart" />
             </OverflowToolbar>
         </headerToolbar>
 
@@ -68,12 +68,16 @@
                     <Label text="{i18n>stock} / {i18n>stock_min}" />
                 </header>
             </Column>
-            <Column hAlign="Center" minScreenWidth="Tablet" demandPopin="true" width="10rem">
+            <Column hAlign="Center" minScreenWidth="Tablet" 
+                    demandPopin="true" width="10rem"
+                    visible="{= ${globalModel>/userInfo/roles}.includes('admin') }">
                 <header>
                     <Label text="{i18n>edit}" />
                 </header>
             </Column>
-            <Column hAlign="Center" minScreenWidth="Tablet" demandPopin="true" width="10rem">
+            <Column hAlign="Center" minScreenWidth="Tablet" 
+                    demandPopin="true" width="10rem"
+                    visible="{= ${globalModel>/userInfo/roles}.includes('admin') }">
                 <header>
                     <Label text="{i18n>delete}" />
                 </header>
@@ -82,21 +86,16 @@
 
         <items>
             <ColumnListItem vAlign="Middle"
-                type="Inactive"
-                highlight="{ parts: [ { 'path': 'stock', targetType: 'any' },
-                                      { 'path': 'stock_min', targetType: 'any' } ], 
-                                        formatter: '.formatter.stockStateFormatter'}">
+                            type="Inactive"
+                            highlight="{ parts: [ { 'path': 'stock', targetType: 'any' },
+                                       { 'path': 'stock_min', targetType: 'any' } ], formatter: '.formatter.stockStateFormatter'}">
                 <cells>
-                    <core:Icon
-                        src="{ parts: [ { 'path': 'stock', targetType: 'any' },
-                                        { 'path': 'stock_min', targetType: 'any' } ], 
-                                        formatter: '.formatter.stockIconFormatter'}"
-                        tooltip=""
-                        class="sapUiSmallMargin"
-                        color="{ parts: [ { 'path': 'stock', targetType: 'any' },
-                                          { 'path': 'stock_min', targetType: 'any' } ], 
-                                          formatter: '.formatter.stockIconColorFormatter'}"
-                        />
+                    <core:Icon src="{ parts: [ { 'path': 'stock', targetType: 'any' },
+                                    { 'path': 'stock_min', targetType: 'any' } ], formatter: '.formatter.stockIconFormatter'}"
+                               tooltip=""
+                               class="sapUiSmallMargin"
+                               color="{ parts: [ { 'path': 'stock', targetType: 'any' },
+                                      { 'path': 'stock_min', targetType: 'any' } ], formatter: '.formatter.stockIconColorFormatter'}" />
                     
                     <ObjectIdentifier title="{name}" />
 
@@ -115,16 +114,14 @@
                         <ObjectNumber number="{ path: 'stock_min', type: 'sap.ui.model.type.Integer' }" unit="Min" />
                     </VBox>
 
-                    <Button
-                        icon="sap-icon://edit"
-                        type="Transparent"
-                        tooltip="Editar Produto"
-                        press="onEditProductPress" />
-                    <Button
-                        icon="sap-icon://delete"
-                        type="Transparent"
-                        tooltip="Apagar Produto"
-                        press="onDeleteProductPress" />
+                    <Button icon="sap-icon://edit"
+                            type="Transparent"
+                            tooltip="{i18n>edit_product}"
+                            press="onEditProductPress" />
+                    <Button icon="sap-icon://delete"
+                            type="Transparent"
+                            tooltip="{i18n>delete_products}"
+                            press="onDeleteProductPress" />
                 </cells>
             </ColumnListItem>
         </items>

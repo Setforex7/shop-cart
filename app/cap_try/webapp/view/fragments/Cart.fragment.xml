@@ -3,19 +3,18 @@
 	xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table"
 >
-    <Dialog title="Shopping Cart" id="Cart">
+    <Dialog title="{i18n>shopping_cart}" id="Cart">
         <content>
-            <table:Table
-                id="cartTable"
-                visibleRowCount="5"
-                selectionMode="MultiToggle"
-                alternateRowColors="true"
-                class="sapUiSmallMargin">
+            <table:Table id="cartTable"
+                         visibleRowCount="5"
+                         selectionMode="MultiToggle"
+                         alternateRowColors="true"
+                         class="sapUiSmallMargin">
                 <table:extension>
                     <OverflowToolbar>
-                            <Button text="Add Cart" iconFirst="true" icon="sap-icon://add" press="onAddCartButtonPress" />
+                            <Button text="{i18n>add_cart}" iconFirst="true" icon="sap-icon://add" press="onAddCartButtonPress" />
                         <ToolbarSeparator />
-                            <Label text="Cart's" design="Bold" />
+                            <Label text="{i18n>carts}" design="Bold" />
                             <Select autoAdjustWidth="false" columnRatio="3:2" forceSelection="false" id="cartsSelect"
                                     icon="sap-icon://cart" maxWidth="100%" items="{ path: '/Cart',
                                                                                     filters: [ { path: 'status', operator: 'EQ', value1: 'Active' } ],
@@ -26,48 +25,47 @@
                                     <core:Item key="{ID}" text="{name}" />
                                 </items>
                             </Select>
-                            <Button
-                                icon="sap-icon://delete"
-                                type="Transparent"
-                                tooltip="{i18n>delete_current_cart}"
-                                class="sapUiTinyMarginBegin"
-                                press="onDeleteSelectedCartPress"
-                                enabled="true" />
+                            <Button icon="sap-icon://delete"
+                                    type="Transparent"
+                                    visible="{= Object.keys(${globalModel>/selectedCart}).length > 0}"
+                                    tooltip="{i18n>delete_current_cart}"
+                                    class="sapUiTinyMarginBegin"
+                                    press="onDeleteSelectedCartPress"
+                                    enabled="true" />
                         <ToolbarSpacer />
                         <ToolbarSpacer />
-                            <Title level="H2" text="Total" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
+                            <Title level="H2" text="{i18n>total}" titleStyle="Auto" width="" wrapping="false" wrappingType="Normal" />
                     </OverflowToolbar>
                 </table:extension>
                 <table:columns>
                     <table:Column width="20%">
-                        <Label text="Name" />
+                        <Label text="{i18n>name}" />
                         <table:template>
                             <Text text="{product/name}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
-                        <Label text="Description" />
+                        <Label text="{i18n>description}" />
                         <table:template>
                             <Text text="{product/description}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
-                        <Label text="Price" />
+                        <Label text="{i18n>price}" />
                         <table:template>
                             <ObjectNumber number="{product/price}"
                                           unit="{globalModel>/selectedCompany/currency}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
-                        <Label text="Quantity" />
+                        <Label text="{i18n>quantity}" />
                         <table:template>
                             <StepInput change="onProductCartQuantityChangePress" value="{quantity}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
-                        <Label text="Total" />
+                        <Label text="{i18n>total}" />
                         <table:template>
-                            <!-- <Text text="{= ${globalModel>quantity} * ${globalModel>price}}" /> -->
                             <ObjectNumber number="{total_price}"
                                           unit="{globalModel>/selectedCompany/currency}" />
                         </table:template>
@@ -75,30 +73,31 @@
                     <table:Column width="5rem">
                         <Label text="{i18n>delete}" />
                         <table:template >
-                            <Button
-                                icon="sap-icon://delete"
-                                type="Transparent"
-                                tooltip="{i18n>delete_cart_product}"
-                                press="onDeleteCartItemPress" />
+                            <Button icon="sap-icon://delete"
+                                    type="Transparent"
+                                    tooltip="{i18n>delete_cart_item}"
+                                    press="onDeleteCartItemPress" />
                         </table:template>
                     </table:Column>
                 </table:columns>
                 <table:footer>
                     <OverflowToolbar id="cartTableFooter">
-                        <Button icon="sap-icon://delete" text="{i18n>delete_products}" press="onDeleteMultipleCartItemPress" />
+                        <Button icon="sap-icon://delete" text="{i18n>delete_cart_items}"
+                                press="onDeleteMultipleCartItemPress" visible="{= ${globalModel>/cartItemsQuantity} > 0 }" />
                         <ToolbarSeparator visible="{= ${globalModel>/cart}.length === 0 ? false : true}" />
                         <ToolbarSpacer />
-                        <Label text="Total do Carrinho:" design="Bold" />
+                        <Label text="{i18n>cart_total}" design="Bold" />
                         <Text class="sapUiTinyMarginBegin" text="{cart_total}" />
                     </OverflowToolbar>
                 </table:footer>
             </table:Table>
         </content>
         <beginButton>
-            <Button text="Finalize Purchase" visible="{= ${globalModel>/cart}.length === 0 ? false : true}" press="onFinalizePurchasePress" type="Success" />
+            <Button text="{i18n>finalize_purchase}" visible="{= ${globalModel>/cartItemsQuantity} === 0 ? false : true}" 
+                    press="onFinalizePurchasePress" type="Success" />
         </beginButton>
         <endButton>
-            <Button text="Close" type="Default" press="closeCartDialog" />
+            <Button text="{i18n>close}" type="Default" press="closeCartDialog" />
         </endButton>
     </Dialog>
 </core:FragmentDefinition>

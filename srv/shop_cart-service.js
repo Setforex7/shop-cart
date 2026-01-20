@@ -1,6 +1,7 @@
 const cds = require('@sap/cds');
 const { SELECT, CREATE, UPDATE, SUM } = cds.ql;
 const { errors } = require('@sap/cds');
+const userHandler = require('./handlers/User.js');
 const ordersHandler = require('./handlers/orders.js');
 const cartHandler = require('./handlers/cart.js');
 const productsHandler = require('./handlers/products.js');
@@ -13,6 +14,8 @@ class ShopCartService extends cds.ApplicationService { async init() {
   const { Products, Company, Cart, CartItem, Orders } = db.entities
 
   cds.on('served', jobsHandler.onCdsServer);
+
+  this.on('getUserInfo', userHandler.getUserInfo);
 
   this.after('READ', 'Products', productsHandler.afterReadProducts);
 

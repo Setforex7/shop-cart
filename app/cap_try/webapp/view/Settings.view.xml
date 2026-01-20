@@ -1,0 +1,54 @@
+<mvc:View controllerName="cap_try.controller.Settings" 
+          xmlns:mvc="sap.ui.core.mvc"
+          xmlns="sap.m"
+          xmlns:c="sap.ui.core"
+          xmlns:tnt="sap.tnt"> 
+    <tnt:ToolPage id="toolPage">
+        <tnt:header>
+            <Bar>
+                <contentLeft>
+                    <Button icon="sap-icon://menu2" press="initializeMenu" />
+                </contentLeft>
+                <contentMiddle>
+                    <Title text="{i18n>admin_panel}" />
+                </contentMiddle>
+                <contentRight>
+                </contentRight>
+            </Bar>
+        </tnt:header>
+        <tnt:sideContent>
+            <tnt:SideNavigation expanded="true" itemSelect="onSideBarItemSelect">
+                <tnt:item>
+                    <tnt:NavigationList>
+                        <tnt:NavigationListItem text="{i18n>carts}" icon="sap-icon://cart-full" key="carts" />
+                        <tnt:NavigationListItem text="{i18n>companies}" icon="sap-icon://company-view" key="companies" />
+                    </tnt:NavigationList>
+                </tnt:item>
+                <tnt:fixedItem>
+                    <tnt:NavigationList>
+                        <tnt:NavigationListItem text="Ajuda" icon="sap-icon://sys-help" />
+                    </tnt:NavigationList>
+                </tnt:fixedItem>
+            </tnt:SideNavigation>
+        </tnt:sideContent>
+        
+        <tnt:mainContents>
+            <Page showHeader="false" backgroundDesign="Transparent">
+                <content>
+                    <NavContainer id="mainContainer">
+                    </NavContainer>
+                </content>
+                <footer>
+                    <OverflowToolbar>
+                        <Button visible="{= ${messageModel>/}.length !== 0}" 
+                                press="toggleMessageView" 
+                                icon="sap-icon://alert" 
+                                text="{= ${messageModel>/}.length}" 
+                                type="Emphasized" />
+                        <ToolbarSpacer />
+                    </OverflowToolbar>
+                </footer>
+            </Page>
+        </tnt:mainContents>
+    </tnt:ToolPage>
+</mvc:View>

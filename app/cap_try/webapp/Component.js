@@ -27,8 +27,9 @@ sap.ui.define([
                                                  cart: {},
                                                  cartItemsQuantity: 0,
                                                  products: [],
-                                                 Companys: [],
-                                                 carts: [] });    
+                                                 companies: [],
+                                                 carts: [],
+                                                 userInfo: {} });    
             this.setModel(oGlobalModel, "globalModel"); 
             this.setModel(new JSONModel(), "messageModel");    
             

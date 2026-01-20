@@ -43,20 +43,46 @@ sap.ui.define([
 ) => {
 	"use strict";
 
-
 	const sUserId = "1";
     const sEntityCompany = "/Company";
     const sEntityProducts = "/Products";
     const sEntityCart = "/Cart";
+	const sFunctionGetUserInfoPath = "/getUserInfo(...)";
 
 	return Controller.extend("cap_try.controller.BaseController", {
-		_onControllerLoad: function() {
+		_onControllerLoad: async function() {
 			//? Global declarations for all of the controllers
 			this._i18n = this.getOwnerComponent().getModel("i18n").getResourceBundle();
 			this._oDialogHandler = new DialogHandler(this);
 			this._oRouter = this.getOwnerComponent().getRouter();
+			
+			this.getView().setModel(this.getModel());
 
 			this._createMessageView();
+			await this._getUserInfo();
+		},
+
+		_onObjectMatched: function(){
+			this.setProp("globalModel", "/selectedCompany", {});
+            this.setProp("globalModel", "/selectedCart", {});
+            this.getModel("globalModel").refresh(true);
+		},
+
+		_getUserInfo: async function(){
+			const oView = this.getView();
+			oView.setBusy(true);
+			try{
+
+                const oUserContext = this.getModel().bindContext(sFunctionGetUserInfoPath);
+                await oUserContext.execute();
+                const oUserInfo = oUserContext.getBoundContext();
+                const { id, roles } = oUserInfo.getObject();
+                this.setProp("globalModel", "/userInfo", { id, roles});
+                this.getModel("globalModel").refresh(true);
+                console.log(this.getProp("globalModel", "/userInfo"));
+
+            }catch(oError){ console.error(oError); }
+            finally{ oView.setBusy(false); }
 		},
 
 		getRouter: function(){
@@ -89,18 +115,21 @@ sap.ui.define([
 
 		initializeMenu: function(oEvent){
             if (!this._oGlobalMenu) 
-                this._oGlobalMenu = new Menu({ items: [ new MenuItem({ text: "Start", icon: "sap-icon://home" }),
+                this._oGlobalMenu = new Menu({ items: [ new MenuItem({ text: "Start", 
+																	   icon: "sap-icon://home", }),
                                                         new MenuItem({ text: "Reports", icon: "sap-icon://product" }),
-                                                        new MenuItem({ text: "Settings", icon: "sap-icon://action-settings" }) ],
+                                                        new MenuItem({ text: "Settings", 
+																	   icon: "sap-icon://action-settings",
+																	   visible: this.getProp("globalModel", "/userInfo/roles").includes("admin") }) ],
                                                itemSelected: function(oEvent){ 
                                                    const sSelectedAction = oEvent.getParameter("item").getText() || "";
 
                                                    switch(sSelectedAction){
-                                                    case "Start": this.getRouter().navTo("View1");
+                                                    case "Start": this.getRouter().navTo("Shop");
                                                                   break;
                                                     case "Reports": this.getRouter().navTo("Reports");
                                                                     break;
-                                                    case "Settings": MessageToast.show("Feature still under maintance!");
+                                                    case "Settings": this.getRouter().navTo("Settings");
                                                                      break;
                                                    }
                                             }.bind(this) });
@@ -169,7 +198,7 @@ sap.ui.define([
 			this._oMessageView.getModel().refresh(true);
 		},
 
-		_handlePopoverPress: function (oEvent) {
+		toggleMessageView: function (oEvent) {
 			this._oMessageView.navigateBack();
 			this._oPopover.openBy(oEvent.getSource());
 		},
@@ -216,11 +245,23 @@ sap.ui.define([
 			}
 		},	
 
+		_createCompany: async function(oCompany){
+			console.log("CREATING COMPANY: ", oCompany);
+			try{
+				const oCompanyList = this.getModel().bindList(sEntityCompany);
+
+				const oNewCompany = oCompanyList.create(oCompany);
+				await oNewCompany.created();
+
+				console.log("Sucesouuuuu: ", oNewCompany, oNewCompany.getObject());
+			}catch(oError) { console.error(oError); }
+		},
+
 		_createProduct: async function(oProduct){
 			try{
-				const oListBinding = this.getOwnerComponent().getModel().bindList("/Products");
+				const oProductsList = this.getModel().bindList(sEntityProducts);
 				//? Sends the request to the backend
-				const oCreatedContext = oListBinding.create(oProduct);
+				const oCreatedContext = oProductsList.create(oProduct);
 				//? Fully awaits for the backend response
 				await oCreatedContext.created();
 				const { name } = oCreatedContext.getObject();
@@ -255,6 +296,26 @@ sap.ui.define([
 			this._addMessage({ type: "Success", 
 							   title: this.getI18nText("success"), 
 							   subtitle: this.getI18nText("edit_product_success", [name]) });
+		},
+
+		_editCompany: function(oCompany){
+			const { metadata, name, description, capital } = oCompany;
+
+			const oNewCompanyData = { name,
+									  description,
+									  capital };
+
+			for (const [sKey, sValue] of Object.entries(oNewCompanyData)) 
+				metadata.setProperty(sKey, sValue);
+
+			this._addMessage({ type: "Success", 
+							   title: this.getI18nText("success"), 
+							   subtitle: this.getI18nText("edit_company_success", [name]) });
+		},
+
+		_clearSelectedCompany: function(){
+			this.setProp("globalModel", "/selectedCompany", {});
+			this.getModel("globalModel").refresh(true);
 		},
 
 		//region Cart Methods

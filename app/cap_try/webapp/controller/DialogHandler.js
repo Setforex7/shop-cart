@@ -13,10 +13,48 @@ sap.ui.define([
 		_oController: undefined,
 		constructor: function(oController) {
 			this._oController = oController;
+            this._oCompaniesFragment = undefined;
+            this._oCartsFragment = undefined;
 			this._dDialogCart = undefined;
 			this._dDialogAddProduct = undefined;
             this._dDialogEditProduct = undefined;
 		},
+
+        _openCompaniesFragment: function () {
+            const oView = this._oController.getView();
+            const oMainContainer = oView.byId("mainContainer");
+
+            if (!this._oCompaniesFragment) {
+                this._oCompaniesFragment = Fragment.load({
+                    id: oView.getId(),
+                    name: "cap_try.view.fragments.Companies",
+                    controller: this._oController
+                }).then(function (oFragment) {
+                    oView.addDependent(oFragment);
+                    oMainContainer.addPage(oFragment);
+                    oMainContainer.to(oFragment); 
+                    return oFragment;
+                }.bind(this));
+            } else this._oCompaniesFragment.then(oFragment => oMainContainer.to(oFragment));
+        },
+
+        _openCartsFragment: function () {
+            const oView = this._oController.getView();
+            const oMainContainer = oView.byId("mainContainer");
+
+            if (!this._oCartsFragment) {
+                this._oCartsFragment = Fragment.load({
+                    id: oView.getId(),
+                    name: "cap_try.view.fragments.Carts",
+                    controller: this._oController
+                }).then(function (oFragment) {
+                    oView.addDependent(oFragment);
+                    oMainContainer.addPage(oFragment);
+                    oMainContainer.to(oFragment); 
+                    return oFragment;
+                }.bind(this));
+            } else this._oCartsFragment.then(oFragment => oMainContainer.to(oFragment));
+        },
 		
 		_openAddProductDialog: function () {
             if (!this._dDialogAddProduct) {
@@ -33,7 +71,7 @@ sap.ui.define([
         },
 
         _closeAddProductDialog: function () { 
-			this._oController.byId("addProduct").close();
+			this._oController.byId("AddProduct").close();
 		},
 
         _openEditProductDialog: function () {
@@ -61,6 +99,8 @@ sap.ui.define([
                 this._dDialogCart = await Fragment.load({ id: this._oController.getView().getId(),
                                                           name: "cap_try.view.fragments.Cart",
                                                           controller: this._oController });
+                this._dDialogCart.setModel(this._oController.getModel("globalModel"), "globalModel");
+                this._dDialogCart.setModel(this._oController.getModel("i18n"), "i18n");
                 this._dDialogCart.setModel(this._oController.getOwnerComponent().getModel());
             }   
 

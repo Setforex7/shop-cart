@@ -1,0 +1,76 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:table="sap.ui.table">
+    <VBox>
+        <IconTabBar id="companyManagmentTabBar"
+                    class="sapUiResponsiveContentPadding"
+                    select="onCompanyTabSelect"
+                    selectedKey="details">
+            <items>
+                <IconTabFilter key="edit"
+                               text="{i18n>edit_company}"
+                               icon="sap-icon://edit">
+                    <core:Fragment fragmentName="cap_try.view.fragments.EditCompany" type="XML" />
+                </IconTabFilter>
+                <IconTabFilter key="create"
+                               text="{i18n>create_company}"
+                               icon="sap-icon://add">
+                    <core:Fragment fragmentName="cap_try.view.fragments.AddCompany" type="XML" />
+                </IconTabFilter>
+
+            </items>
+        </IconTabBar>
+
+        <table:Table id="companiesTable"
+                     visibleRowCount="8"
+                     selectionMode="Single"
+                     selectionBehavior="Row"
+                     rowSelectionChange="onCompaniesTableSelection"
+                     alternateRowColors="true"
+                     class="sapUiResponsiveMargin"
+                     rows="{ path: '/Company',
+                             sorter: { path: 'name' } }">
+            <table:extension>
+                <OverflowToolbar>
+                    <Title text="{i18n>companies_Report}" />
+                    <ToolbarSeparator />
+                    <ToolbarSpacer />
+                    <ToolbarSpacer />
+                    <Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onCompaniesTableRefresh" />
+                    <Button icon="sap-icon://download" tooltip="{i18n>export}" press="onExportExcel" />
+                </OverflowToolbar>
+            </table:extension>
+            <table:columns>
+                <table:Column width="20%">
+                    <Label text="{i18n>company_id}" />
+                    <table:template>
+                        <Text text="{ID}" />
+                    </table:template>
+                </table:Column>
+                <table:Column width="20%">
+                    <Label text="{i18n>name}" />
+                    <table:template>
+                        <Text text="{name}" />
+                    </table:template>
+                </table:Column>
+                <table:Column width="20%">
+                    <Label text="{i18n>description}" />
+                    <table:template>
+                        <Text text="{description}" />
+                    </table:template>
+                </table:Column>
+                <table:Column width="20%">
+                    <Label text="{i18n>capital}" />
+                    <table:template>
+                        <ObjectNumber number="{capital}"
+                                        unit="{currency/code}" />
+                    </table:template>
+                </table:Column>
+            </table:columns>
+            <!-- <table:footer>
+            </table:footer> -->
+        </table:Table>
+    </VBox>
+</core:FragmentDefinition>

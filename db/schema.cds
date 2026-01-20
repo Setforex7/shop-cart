@@ -10,8 +10,9 @@ type OrderType : String enum { B;
 entity Orders : managed { key ID      : UUID;
                           company     : Association to Company;
                           items       : Composition of many OrderItems on items.order = $self; 
-                          type        : String enum { Buy = 'B'; 
-                                                      Sell = 'S'; }; 
+                          type        : String enum { Buy = 'B';    
+                                                      Sell = 'S'; };
+                          status      : String enum { Initiated; Shipping; Delivered; Canceled; } default 'Initiated';  
                           total_price : Decimal(10,2) @mandatory;
                           currency    : Currency @mandatory; }
 

@@ -1,0 +1,43 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+    xmlns:table="sap.ui.table"
+    xmlns:f="sap.ui.layout.form" >
+    <f:SimpleForm editable="false"
+                  labelSpanXL="3"
+                  labelSpanL="3"
+                  labelSpanM="3"
+                  labelSpanS="12"
+                  adjustLabelSpan="false"
+                  columnsXL="1"
+                  columnsL="1"
+                  columnsM="1"
+                  binding="{globalModel>/selectedCompany}">
+        <f:content>
+            <Label text="{i18n>name}" />
+            <Input value="{globalModel>name}" liveChange="onCreateCompanyNameChange"
+                   required="true" type="Text" width="60%" />
+
+            <Label text="{i18n>description}" />
+            <Input value="{globalModel>description}" liveChange="onCreateCompanyDescriptionChange" 
+                   type="Text" width="60%" />
+            <Label text="{i18n>capital}" />
+            <Input value="{globalModel>capital}" liveChange="onCreateCompanyCapitalChange" 
+                    required="true" type="Number" width="60%" />
+            <Label text="{i18n>capital}" />
+            <Input value="{globalModel>currency}" liveChange="onCreateCompanyCapitalChange" 
+                    required="true" type="Text" width="60%" />
+
+            <Label text="actions" visible="false" />
+            <HBox>
+                <Button text="{i18n>create}" enabled="{= ${globalModel>/selectedCompany/name} &amp;&amp; 
+                                                         ${globalModel>/selectedCompany/capital} ? true : false }" 
+                        class="sapUiSmallMarginEnd" type="Success" press="onCreateCompany" />
+                <Button text="{i18n>clear}" press="onClearSelectedCompanyData" type="Default"
+                        visible="{= ${globalModel>/selectedCompany/name} || 
+                                    ${globalModel>/selectedCompany/capital} ||
+                                    ${globalModel>/selectedCompany/description} ? true : false }"  /> 
+            </HBox>
+        </f:content>
+    </f:SimpleForm>
+</core:FragmentDefinition>

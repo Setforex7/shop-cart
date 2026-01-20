@@ -1,0 +1,38 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+    xmlns:table="sap.ui.table"
+    xmlns:f="sap.ui.layout.form" >
+    <f:SimpleForm editable="false"
+                  labelSpanXL="3"
+                  labelSpanL="3"
+                  labelSpanM="3"
+                  labelSpanS="12"
+                  adjustLabelSpan="false"
+                  columnsXL="1"
+                  columnsL="1"
+                  columnsM="1"
+                  binding="{globalModel>/selectedCompany}">
+        <f:content>
+            <Label text="{i18n>name}" />
+            <Input value="{globalModel>name}" type="Text" width="60%"
+                   enabled="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" />
+
+            <Label text="{i18n>description}" />
+            <Input value="{globalModel>description}" type="Text" width="60%"
+                   enabled="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" />
+
+            <Label text="{i18n>capital}" />
+            <Input value="{globalModel>capital}" type="Number" width="60%" 
+                   enabled="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" />
+
+            <Label text="actions" visible="false" />
+            <HBox>
+                <Button text="{i18n>edit}" press="onEditCompany" class="sapUiSmallMarginEnd" type="Success"
+                        visible="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" />
+                <Button text="{i18n>cancel}" press="onClearSelectedCompanyData" type="Default"
+                        visible="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" /> 
+            </HBox>
+        </f:content>
+    </f:SimpleForm>
+</core:FragmentDefinition>

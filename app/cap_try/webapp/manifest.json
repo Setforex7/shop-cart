@@ -5,7 +5,7 @@
     "type": "application",
     "i18n": "i18n/i18n.properties",
     "applicationVersion": {
-      "version": "0.0.1"
+      "version": "1.134.0"
     },
     "title": "{{appTitle}}",
     "description": "{{appDescription}}",
@@ -55,8 +55,7 @@
       "minUI5Version": "1.134.0",
       "libs": {
         "sap.m": {},
-        "sap.ui.core": {},
-        "sap.ui.mdc": {}
+        "sap.ui.core": {}
       }
     },
     "contentDensities": {
@@ -112,10 +111,10 @@
       },
       "routes": [
         {
-          "name": "View1",
+          "name": "Shop",
           "pattern": "",
           "target": [
-            "View1"
+            "Shop"
           ]
         },
         {
@@ -124,16 +123,27 @@
           "target": [
             "Reports"
           ]
+        },
+        {
+          "name": "Settings",
+          "pattern": "Settings",
+          "target": [
+            "Settings"
+          ]
         }
       ],
       "targets": {
-        "View1": {
-          "id": "View1",
-          "name": "View1"
+        "Shop": {
+          "id": "Shop",
+          "name": "Shop"
         },
         "Reports": {
           "id": "Reports",
           "name": "Reports"
+        },
+        "Settings": {
+          "id": "Settings",
+          "name": "Settings"
         }
       }
     },

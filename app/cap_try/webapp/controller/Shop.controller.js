@@ -17,15 +17,16 @@ sap.ui.define([
 	Sorter) => {
     "use strict";
 
-    const sUserId = "1";
     const sEntityCompany = "/Company";
     const sEntityProducts = "/Products";
     const sEntityCart = "/Cart";
 
-    return BaseController.extend("cap_try.controller.View1", {
+    return BaseController.extend("cap_try.controller.Shop", {
         formatter: Formatter,
-        onInit: function() {
+        onInit: async function() {
             this._onControllerLoad();
+
+            this.getRouter().getRoute("Shop").attachPatternMatched(this._onObjectMatched, this);
 
             this.getOwnerComponent().getModel().bindList(sEntityProducts).requestContexts().then(function(aContexts) {
                 aContexts.forEach(oContext => console.log("Produto: ", oContext.getObject()) );
@@ -40,6 +41,8 @@ sap.ui.define([
 
         onFinalizePurchasePress: function(oEvent) {
             const oSelectedCart = this.getProp("globalModel", "/selectedCart");
+
+            if(!Object.keys(oSelectedCart).length) return MessageToast.show(this.getI18nText("finalize_cart_selection_missing"));
 
             const { ID } = oSelectedCart.getObject();
             this._finalizeCart(ID);
@@ -153,7 +156,7 @@ sap.ui.define([
 
             const aSelectedProductsContexts = aSelectedProducts.map(oProduct => { return oProduct.getBindingContext().getObject().ID;  });
             
-            if(!this._validateCompanySelection()) return;
+            if(!this._validateCompanieselection()) return;
 
             if(!Object.keys(oSelectedCart).length)
                 MessageBox.confirm(this.getI18nText("create_cart_confirm_message"), {
@@ -173,7 +176,7 @@ sap.ui.define([
             }
         },
 
-        _validateCompanySelection: function() {
+        _validateCompanieselection: function() {
             const cCompanyComboBox = this.getView().byId("companyComboBox");
             const { name } = this.getProp("globalModel", "/selectedCompany");
 
@@ -202,8 +205,6 @@ sap.ui.define([
 
             this._bindCartDataToFragment();
         },
-
-        toggleMessageView: function (oEvent) { this._handlePopoverPress(oEvent); },
 
         onCreateButtonPress: async function() {
             const { name, description, price, stock_min, stock } = this.getProp("globalModel", "/product");
@@ -250,18 +251,18 @@ sap.ui.define([
 
         //#region Dialog OPEN/CLOSE
 
-        openAddProductDialog: function () { this._oDialogHandler._openAddProductDialog() },
+        openAddProductDialog: function () { this.getDialogHandler()._openAddProductDialog() },
 
-        closeAddProductDialog: function () { this._oDialogHandler._closeAddProductDialog() },
+        closeAddProductDialog: function () { this.getDialogHandler()._closeAddProductDialog() },
 
-        openEditProductDialog: function (oEvent) { this._oDialogHandler._openEditProductDialog() },
+        openEditProductDialog: function (oEvent) { this.getDialogHandler()._openEditProductDialog() },
 
-        closeEditProductDialog: function () { this._oDialogHandler._closeEditProductDialog() },
+        closeEditProductDialog: function () { this.getDialogHandler()._closeEditProductDialog() },
 
-        openCartDialog: async function () { if(!this._validateCompanySelection()) return;
-                                            await this._oDialogHandler._openCartDialog() },
+        openCartDialog: async function () { if(!this._validateCompanieselection()) return;
+                                            await this.getDialogHandler()._openCartDialog() },
 
-        closeCartDialog: function () { this._oDialogHandler._closeCartDialog() },
+        closeCartDialog: function () { this.getDialogHandler()._closeCartDialog() },
 
         //#endregion
     });
