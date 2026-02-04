@@ -68,6 +68,25 @@ sap.ui.define([
             this.getModel("globalModel").refresh(true);
 		},
 
+		_fileReader: function(oEvent, fDinamicProcess){
+			            const oFile = oEvent.getParameter("files")[0];
+            if (!oFile) return;
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const data = e.target.result;
+                const workbook = XLSX.read(data, { type: 'binary' });
+
+                const sSheetName = workbook.SheetNames[0];
+                const aData = XLSX.utils.sheet_to_json(workbook.Sheets[sSheetName]);
+
+                fDinamicProcess(aData);
+            }.bind(this);
+
+            reader.readAsBinaryString(oFile);
+		},
+
 		_getUserInfo: async function(){
 			const oView = this.getView();
 			oView.setBusy(true);
@@ -246,14 +265,11 @@ sap.ui.define([
 		},	
 
 		_createCompany: async function(oCompany){
-			console.log("CREATING COMPANY: ", oCompany);
 			try{
 				const oCompanyList = this.getModel().bindList(sEntityCompany);
 
 				const oNewCompany = oCompanyList.create(oCompany);
 				await oNewCompany.created();
-
-				console.log("Sucesouuuuu: ", oNewCompany, oNewCompany.getObject());
 			}catch(oError) { console.error(oError); }
 		},
 
@@ -280,7 +296,33 @@ sap.ui.define([
 			}
 		},
 
-		_editProduct: function(oProduct){
+		_createProducts: async function(aProducts){
+			const { ID } = this.getProp("globalModel", "/selectedCompany");
+			try{
+				const oProductsList = this.getModel().bindList(sEntityProducts, 
+															   undefined, 
+															   undefined, 
+															   undefined, 
+															   { batchGroupId: "editProducts" });
+				
+				aProducts.forEach(oProduct => { Object.assign(oProduct, { company_ID: ID });
+												oProductsList.create(oProduct); });
+				//? Sends the request to the backend
+				//? Fully awaits for the backend response
+				await this.getModel().submitBatch("editProducts");
+
+				aProducts.forEach(oProduct => { this._addMessage({ type: "Success",
+																	title: "Success",
+																	subtitle: this.getI18nText("product_created_success", [oProduct.name]) }); });
+				
+				MessageToast.show(this.getI18nText("excel_upload_success"));
+				this._getProducts();	
+			}catch(oError){
+				console.error(oError);
+			}
+		},
+
+		_editProduct: async function(oProduct){
 			const { metadata, name, description, price, stock, stock_min } = oProduct;
 
 			const oNewProductData = { name,
@@ -289,28 +331,47 @@ sap.ui.define([
 									  stock,
 									  stock_min };
 
-
 			for (const [sKey, sValue] of Object.entries(oNewProductData)) 
 				metadata.setProperty(sKey, sValue);
 
-			this._addMessage({ type: "Success", 
-							   title: this.getI18nText("success"), 
-							   subtitle: this.getI18nText("edit_product_success", [name]) });
+			try {
+				await this.getModel().submitBatch("updateProducts");
+				
+				this._addMessage({ type: "Success",
+								   title: this.getI18nText("success"),
+								   subtitle: this.getI18nText("edit_product_success", [name]) });
+
+			} catch (oError) {
+				this._addMessage({ type: "Error",
+								   title: "Error",
+								   subtitle: "Failed to update product" });
+			}
 		},
 
-		_editCompany: function(oCompany){
+		_editCompany: async function(oCompany){
 			const { metadata, name, description, capital } = oCompany;
+			const oFormatedCapital = parseFloat(capital);
+			
 
 			const oNewCompanyData = { name,
 									  description,
-									  capital };
-
+									  capital: oFormatedCapital };
+ 
 			for (const [sKey, sValue] of Object.entries(oNewCompanyData)) 
 				metadata.setProperty(sKey, sValue);
 
-			this._addMessage({ type: "Success", 
-							   title: this.getI18nText("success"), 
-							   subtitle: this.getI18nText("edit_company_success", [name]) });
+			try {
+				await this.getModel().submitBatch("updateCompanies");
+				
+				this._addMessage({ type: "Success", 
+							   	   title: this.getI18nText("success"), 
+							   	   subtitle: this.getI18nText("edit_company_success", [name]) });
+
+			} catch (oError) {
+				this._addMessage({ type: "Error",
+								   title: "Error",
+								   subtitle: "Failed to update product" });
+			}
 		},
 
 		_clearSelectedCompany: function(){

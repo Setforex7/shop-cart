@@ -4,8 +4,7 @@ namespace sap.capire.shop_cart;
 type Name : String(50);
 type Descriptions : String(600);
 type PriceCurrency : { amount : Decimal(10,2); currency : String(3); };
-type OrderType : String enum { B; 
-                               S }
+type OrderType : String enum { B; S; };
 
 entity Orders : managed { key ID      : UUID;
                           company     : Association to Company;

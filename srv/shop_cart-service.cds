@@ -29,7 +29,7 @@ service ShopCartService @(path:'/shop') {
       products : redirected to Products
   };
 
-  @restrict: [ { grant: [ 'READ' ], to: 'authenticated-user' },
+  @restrict: [ { grant: 'READ', to: 'authenticated-user' },
                { grant: '*', to: 'admin' } ]
   entity Products as projection on my.Products {
     *,
@@ -61,7 +61,7 @@ service ShopCartService @(path:'/shop') {
   };
 
   @readonly
-  @restrict: [ { grant: ['READ'], where: 'createdBy = $user.id' } ]
+  @restrict: [ { grant: 'READ', where: 'createdBy = $user.id' } ]
   entity UserSpend as select from my.Orders { 
     key company.ID as company_ID,
     company.name as company_name,
@@ -88,4 +88,11 @@ service ShopCartService @(path:'/shop') {
 
   @(requires: 'authenticated-user')
   function getUserInfo() returns UserRolesResponse;
+
+  @readonly
+  @GET
+  function downloadExcelTemplate() returns {
+      @Core.MediaType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      content: LargeBinary;
+  };
 }

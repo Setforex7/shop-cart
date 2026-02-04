@@ -91,6 +91,11 @@
       }
     },
     "resources": {
+      "js": [
+        {
+          "uri": "util/xlsx.full.min.js"
+        }
+      ],
       "css": [
         {
           "uri": "css/style.css"

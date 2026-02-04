@@ -35,9 +35,20 @@ sap.ui.define([
                 aContexts.forEach(oContext => console.log("Empresa: ", oContext.getObject()) );
             });
             this.getOwnerComponent().getModel().bindList(sEntityCart, undefined, undefined, undefined, { '$expand': 'items' }).requestContexts().then((aContexts) => {
-                aContexts.forEach(oContext => console.log("Cart: ", oContext.getObject()) );
+                aContexts.forEach(oContext => {
+                    console.log("Cart: ", oContext);
+                    console.log("CartContext: ", oContext.getObject());
+                });
             })
+            console.log("XLSX: ", XLSX);
         },
+
+        onDownloadTemplatePress: function(){
+            const sUrl = this.getModel().getServiceUrl() + "downloadExcelTemplate()/$value";
+            sap.m.URLHelper.redirect(sUrl, true);
+        },
+
+        onUploadTemplatePress: function(oEvent){ this._fileReader(oEvent, this._createProducts.bind(this)); },
 
         onFinalizePurchasePress: function(oEvent) {
             const oSelectedCart = this.getProp("globalModel", "/selectedCart");

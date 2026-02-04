@@ -2,13 +2,15 @@
 	xmlns="sap.m"
 	xmlns:c="sap.ui.core"
     xmlns:core="sap.ui.core"
-    xmlns:table="sap.ui.table">
+    xmlns:table="sap.ui.table"
+    xmlns:u="sap.ui.unified">
     
     <Title text="{i18n>products_list}" level="H3" />
         <Table id="productsWorklist"
                mode="MultiSelect"
                inset="false"
                items="{ path: 'products',
+                        parameters: { $$updateGroupId: 'updateProducts'},
                         sorter: { path: 'name' } }"
         alternateRowColors="true">
         <headerToolbar>
@@ -19,6 +21,18 @@
                     width="30%"
                     placeholder="{i18n>search_by_name}"
                     liveChange="onSearch" />
+                <u:FileUploader id="excelUploader"
+                                fileType="xlsx,xls"
+                                buttonOnly="true"
+                                iconOnly="true"
+                                icon="sap-icon://upload"
+                                sendXHR="true"
+                                useMultipart="false"
+                                change="onUploadTemplatePress" />
+                <Button 
+                    icon="sap-icon://download"
+                    press="onDownloadTemplatePress" />
+                <ToolbarSeparator />
                 <Button 
                     press="openAddProductDialog" 
                     visible="{= ${globalModel>/userInfo/roles}.includes('admin') }"

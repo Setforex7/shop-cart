@@ -15,18 +15,40 @@
                   binding="{globalModel>/selectedCompany}">
         <f:content>
             <Label text="{i18n>name}" />
-            <Input value="{globalModel>name}" liveChange="onCreateCompanyNameChange"
+            <Input value="{globalModel>name}" placeholder="Name..." liveChange="onCreateCompanyNameChange"
                    required="true" type="Text" width="60%" />
-
             <Label text="{i18n>description}" />
-            <Input value="{globalModel>description}" liveChange="onCreateCompanyDescriptionChange" 
+            <Input value="{globalModel>description}" placeholder="Description..." liveChange="onCreateCompanyDescriptionChange" 
                    type="Text" width="60%" />
-            <Label text="{i18n>capital}" />
-            <Input value="{globalModel>capital}" liveChange="onCreateCompanyCapitalChange" 
-                    required="true" type="Number" width="60%" />
-            <Label text="{i18n>capital}" />
-            <Input value="{globalModel>currency}" liveChange="onCreateCompanyCapitalChange" 
-                    required="true" type="Text" width="60%" />
+            <Label text="{i18n>capital}" required="true" />
+            <HBox alignItems="Center" width="60%">
+                <Input 
+                    value="{globalModel>capital}"
+                    placeholder="Capital..."
+                    liveChange="onCreateCompanyCapitalChange" 
+                    required="true" 
+                    type="Number" 
+                    width="90%"
+                    class=""> <layoutData>
+                        <FlexItemData growFactor="1" /> </layoutData>
+                </Input>
+                
+                <Select
+                    items="{ path: '/Currencies' }"
+                    required="true"
+                    width="80%"
+                    selectedKey="{globalModel>/selectedCompany/currency_code}"
+                    forceSelection="false"
+                    change="onCreateCompanyCurrencyChange">
+
+                    <layoutData>
+                        <FlexItemData growFactor="1" /> 
+                        </layoutData>
+                    <items>
+                        <core:Item key="{code}" text="{symbol} - {code}" />
+                    </items>
+                </Select>
+            </HBox>
 
             <Label text="actions" visible="false" />
             <HBox>

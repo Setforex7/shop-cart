@@ -6,7 +6,7 @@ const ordersHandler = require('./handlers/orders.js');
 const cartHandler = require('./handlers/cart.js');
 const productsHandler = require('./handlers/products.js');
 const jobsHandler = require('./handlers/jobs.js');
-const e = require('express');
+const excelHandler = require('./handlers/excel.js');
 
 class ShopCartService extends cds.ApplicationService { async init() {
 
@@ -32,6 +32,8 @@ class ShopCartService extends cds.ApplicationService { async init() {
   this.on('finalizeCart', cartHandler.finalizeCart);
 
   this.on('addProductsToCart', cartHandler.addProductToCart);
+
+  this.on('downloadExcelTemplate', excelHandler.excelProductTemplate);
 
   return super.init()
 }}
