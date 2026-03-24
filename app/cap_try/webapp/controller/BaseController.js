@@ -63,6 +63,7 @@ sap.ui.define([
 		},
 
 		_onObjectMatched: function(){
+			this.getModel().refresh();
 			this.setProp("globalModel", "/selectedCompany", {});
             this.setProp("globalModel", "/selectedCart", {});
             this.getModel("globalModel").refresh(true);

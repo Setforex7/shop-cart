@@ -51,7 +51,7 @@ service ShopCartService @(path:'/shop') {
     action finalizeCart() returns Orders;
   }
 
-  @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], where: 'createdBy = $user.id' } ]
+  @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], to: 'authenticated-user', where: 'createdBy = $user.id' } ]
   entity CartItem as projection on my.CartItem { 
     *,
     product: redirected to Products,
@@ -61,7 +61,7 @@ service ShopCartService @(path:'/shop') {
   };
 
   @readonly
-  @restrict: [ { grant: 'READ', where: 'createdBy = $user.id' } ]
+  @restrict: [ { grant: 'READ', to: 'authenticated-user', where: 'createdBy = $user.id' } ]
   entity UserSpend as select from my.Orders { 
     key company.ID as company_ID,
     company.name as company_name,
@@ -79,7 +79,7 @@ service ShopCartService @(path:'/shop') {
   }
 
   @readonly
-  @restrict: [ { grant: ['READ', 'WRITE'], to: 'authenticated-user', where: 'createdBy = $user.id' } ]
+  @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], to: 'authenticated-user', where: 'createdBy = $user.id' } ]
   entity OrderItems as projection on my.OrderItems;
 
   @readonly
