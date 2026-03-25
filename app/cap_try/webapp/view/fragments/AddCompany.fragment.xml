@@ -53,7 +53,8 @@
             <Label text="actions" visible="false" />
             <HBox>
                 <Button text="{i18n>create}" enabled="{= ${globalModel>/selectedCompany/name} &amp;&amp; 
-                                                         ${globalModel>/selectedCompany/capital} ? true : false }" 
+                                                         ${globalModel>/selectedCompany/capital} &amp;&amp;
+                                                         ${globalModel>/selectedCompany/currency_code} ? true : false }" 
                         class="sapUiSmallMarginEnd" type="Success" press="onCreateCompany" />
                 <Button text="{i18n>clear}" press="onClearSelectedCompanyData" type="Default"
                         visible="{= ${globalModel>/selectedCompany/name} || 

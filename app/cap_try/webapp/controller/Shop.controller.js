@@ -219,7 +219,11 @@ sap.ui.define([
 
         onCreateButtonPress: async function() {
             const { name, description, price, stock_min, stock } = this.getProp("globalModel", "/product");
-            const { ID, currency_code } = this.getProp("globalModel", "/selectedCompany");
+            const { ID } = this.getProp("globalModel", "/selectedCompany");
+
+            if(!name || !description || !price || !stock_min || !stock) 
+                return MessageToast.show(this.getI18nText("add_product_error_fields"));
+            
 
             this.getView().setBusy(true);
             const oResult = await this._createProduct({ name: name,

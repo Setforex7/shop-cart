@@ -91,5 +91,9 @@ sap.ui.define([
             }
         },
 
+        onCartAdminTableSelection: function(oEvent){
+            
+        }
+
     })
 });
