@@ -25,22 +25,7 @@ sap.ui.define([
         formatter: Formatter,
         onInit: async function() {
             this._onControllerLoad();
-
             this.getRouter().getRoute("Shop").attachPatternMatched(this._onObjectMatched, this);
-
-            this.getOwnerComponent().getModel().bindList(sEntityProducts).requestContexts().then(function(aContexts) {
-                aContexts.forEach(oContext => console.log("Produto: ", oContext.getObject()) );
-            });
-            this.getOwnerComponent().getModel().bindList(sEntityCompany).requestContexts().then(function(aContexts) {
-                aContexts.forEach(oContext => console.log("Empresa: ", oContext.getObject()) );
-            });
-            this.getOwnerComponent().getModel().bindList(sEntityCart, undefined, undefined, undefined, { '$expand': 'items' }).requestContexts().then((aContexts) => {
-                aContexts.forEach(oContext => {
-                    console.log("Cart: ", oContext);
-                    console.log("CartContext: ", oContext.getObject());
-                });
-            })
-            console.log("XLSX: ", XLSX);
         },
 
         onDownloadTemplatePress: function(){
@@ -205,12 +190,11 @@ sap.ui.define([
         },
 
         onCartsSelectChange: function(oEvent){
-            const oView = this.getView();
-            const oCartTable = Fragment.byId(oView.getId(), "cartTable");
-            const oSelectedCart = oEvent.getParameter("selectedItem").getBindingContext();
+            const oSelectedItem = oEvent.getParameter("selectedItem");
+            if (!oSelectedItem) return;
 
-            oCartTable.setBusy(true);
-            
+            const oSelectedCart = oSelectedItem.getBindingContext();
+
             this.setProp("globalModel", "/selectedCart", oSelectedCart);
             this.getModel("globalModel").refresh(true);
 
@@ -259,9 +243,28 @@ sap.ui.define([
         },
 
         onProductCartQuantityChangePress: function(oEvent){
+            const iNewQuantity = oEvent.getParameter("value");
+            const oContext = oEvent.getSource().getBindingContext();
+
+            if (!oContext || iNewQuantity < 1) return;
+
+            oContext.setProperty("quantity", iNewQuantity);
+
             const oFooterTable = Fragment.byId(this.getView().getId(), "cartTableFooter");
-            const oFooterTableModel = oFooterTable.getBindingContext();
-            oFooterTableModel.refresh();
+            const oFooterContext = oFooterTable.getBindingContext();
+            if (oFooterContext) oFooterContext.refresh();
+        },
+
+        onSearch: function(oEvent){
+            const sQuery = oEvent.getParameter("newValue");
+            const oProductsTable = this.getView().byId("productsWorklist");
+            const oBinding = oProductsTable.getBinding("items");
+
+            if (sQuery) {
+                oBinding.filter([new Filter("name", FilterOperator.Contains, sQuery)]);
+            } else {
+                oBinding.filter([]);
+            }
         },
 
         //#region Dialog OPEN/CLOSE

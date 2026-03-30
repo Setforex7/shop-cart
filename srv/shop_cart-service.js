@@ -1,8 +1,5 @@
 const cds = require('@sap/cds');
-const { SELECT, CREATE, UPDATE, SUM } = cds.ql;
-const { errors } = require('@sap/cds');
 const userHandler = require('./handlers/User.js');
-const ordersHandler = require('./handlers/orders.js');
 const cartHandler = require('./handlers/cart.js');
 const productsHandler = require('./handlers/products.js');
 const jobsHandler = require('./handlers/jobs.js');

@@ -37,25 +37,25 @@ const orderStatusJob = async () => {
 
         try {
             const shippingCount = await UPDATE(Orders)
-                .set({ status: 'S' })
-                .where({ 
-                    status: 'I', 
-                    modifiedAt: { '<': twoMinutesAgo } 
+                .set({ status: 'Shipping' })
+                .where({
+                    status: 'Initiated',
+                    modifiedAt: { '<': twoMinutesAgo }
                 });
 
             const deliveredCount = await UPDATE(Orders)
-                .set({ status: 'D' })
-                .where({ 
-                    status: 'S', 
-                    modifiedAt: { '<': fiveMinutesAgo } 
+                .set({ status: 'Delivered' })
+                .where({
+                    status: 'Shipping',
+                    modifiedAt: { '<': fiveMinutesAgo }
                 });
 
             if (shippingCount > 0 || deliveredCount > 0) {
-                console.log(`Logística: ${shippingCount} encomendas enviadas, ${deliveredCount} entregues.`);
+                console.log(`Logistics: ${shippingCount} orders shipped, ${deliveredCount} delivered.`);
             }
 
         } catch (err) {
-            console.error('Erro no Job de Logística:', err);
+            console.error('Logistics Job Error:', err);
         }
     });
 }

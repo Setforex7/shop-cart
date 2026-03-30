@@ -43,7 +43,6 @@ sap.ui.define([
 ) => {
 	"use strict";
 
-	const sUserId = "1";
     const sEntityCompany = "/Company";
     const sEntityProducts = "/Products";
     const sEntityCart = "/Cart";
@@ -99,7 +98,6 @@ sap.ui.define([
                 const { id, roles } = oUserInfo.getObject();
                 this.setProp("globalModel", "/userInfo", { id, roles});
                 this.getModel("globalModel").refresh(true);
-                console.log(this.getProp("globalModel", "/userInfo"));
 
             }catch(oError){ console.error(oError); }
             finally{ oView.setBusy(false); }
@@ -396,7 +394,6 @@ sap.ui.define([
 				//? Gets the return object from the action
 				const oReturnedResponse = oFinalizeCartAction.getBoundContext();
 
-				console.log("new order: ", oReturnedResponse.getObject());
 				this.setProp("globalModel", "/selectedCart", {});
 				this.getModel("globalModel").refresh(true);
 				

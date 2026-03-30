@@ -52,13 +52,12 @@ sap.ui.define([
             oOrdersTable.bindRows({ path: "/Orders",
                                     parameters: { $expand: "company,items" },
                                     filters: new Filter("company_ID", FilterOperator.EQ, ID), 
-                                    events: { dataReceived: function(oEvent) { console.log(oEvent); } } })
+                                    events: { dataReceived: function() {} } })
         },
 
         onOrdersTableRefresh: function(){
             const oOrdersTable = this.getView().byId("ordersTable");
             oOrdersTable.getBinding("rows").refresh();
-            console.log("atualizei");
         },
 
         onExportExcel: function(){

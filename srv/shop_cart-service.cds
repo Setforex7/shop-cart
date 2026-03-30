@@ -23,7 +23,7 @@ type UserRolesResponse { id    : String;
 
 service ShopCartService @(path:'/shop') { 
 
-  @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], to: 'authenticated-user' } ]
+  @restrict: [ { grant: ['READ'], to: 'authenticated-user' } ]
   entity Company as projection on my.Company {
       *,
       products : redirected to Products

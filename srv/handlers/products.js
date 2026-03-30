@@ -22,7 +22,7 @@ module.exports = { afterReadProducts,
 
 validateProductCreateData = product => {
     if(!product) return { status: false, message: 'Something went wrong creating the product' };
-    if(!product.name === "") return { status: false, message: 'Please insert a valid name' };
+    if(!product.name || product.name === "") return { status: false, message: 'Please insert a valid name' };
     if(!product.price || parseFloat(product.price) < 0) return { status: false, message: 'Please insert a valid price' };
     if(parseFloat(product.stock_min) < 0) return { status: false, message: 'Please insert a valid value for stock minimum' };
     if(parseFloat(product.stock) < 0) return { status: false, message: 'Please insert a valid value for stock' };

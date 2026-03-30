@@ -26,7 +26,7 @@
                 </tnt:item>
                 <tnt:fixedItem>
                     <tnt:NavigationList>
-                        <tnt:NavigationListItem text="Ajuda" icon="sap-icon://sys-help" />
+                        <tnt:NavigationListItem text="{i18n>help}" icon="sap-icon://sys-help" />
                     </tnt:NavigationList>
                 </tnt:fixedItem>
             </tnt:SideNavigation>
