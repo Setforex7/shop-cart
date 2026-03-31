@@ -1,59 +1,65 @@
 sap.ui.define([
     "cap_try/controller/BaseController",
+    "cap_try/service/CompanyService",
     "cap_try/formatters/formatter",
     "sap/ui/core/Fragment",
     "sap/ui/export/Spreadsheet",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator"
 ], function(
-	BaseController,
-	Formatter,
+    BaseController,
+    CompanyService,
+    Formatter,
     Fragment,
     Spreadsheet,
     Filter,
     FilterOperator
 ) {
-	"use strict";
+    "use strict";
 
-    const sEntityCompany = "/Company";
-    const sEntityProducts = "/Products";
-    const sEntityCart = "/Cart";
-
-	return BaseController.extend("cap_try.controller.Settings", {
+    return BaseController.extend("cap_try.controller.Settings", {
         onInit: function() {
             this._onControllerLoad();
             this.getRouter().getRoute("Settings").attachPatternMatched(this._onObjectMatched, this);
         },
 
-        onCreateCompany: function(){
-            this._createCompany(this.getProp("globalModel", "/selectedCompany"));
+        onExit: function() {
+            this.getRouter().getRoute("Settings").detachPatternMatched(this._onObjectMatched, this);
+        },
+
+        onCreateCompany: async function() {
+            const oCompanyData = this.getProp("globalModel", "/selectedCompany");
+            const { name, description, capital, currency_code } = oCompanyData;
+            await CompanyService.create(this, { name, description, capital, currency_code });
             this.onCompaniesTableRefresh();
             this.onClearSelectedCompanyData();
         },
 
-        onEditCompany: function(){
-            this._editCompany(this.getProp("globalModel", "/selectedCompany"));
+        onEditCompany: async function() {
+            const oSelectedCompany = this.getProp("globalModel", "/selectedCompany");
+            if (!oSelectedCompany?.metadata) return;
+            await CompanyService.edit(this, oSelectedCompany);
             this.onCompaniesTableRefresh();
         },
 
-        onCompanyTabSelect: function(oEvent){
-            this._clearSelectedCompany();
+        onCompanyTabSelect: function(oEvent) {
+            CompanyService.clearSelected(this);
             const oCompaniesTable = this.getView().byId("companiesTable");
             const oCompanySeletedTab = oEvent.getParameter("key");
             if(oCompanySeletedTab === "create") oCompaniesTable.setSelectionMode("None");
             else oCompaniesTable.setSelectionMode("Single");
         },
 
-        onCompaniesSelectedCancelPress: function(){ this._clearSelectedCompany(); },
+        onCompaniesSelectedCancelPress: function() { CompanyService.clearSelected(this); },
 
-        onCompaniesTableRefresh: function(){
+        onCompaniesTableRefresh: function() {
             const oCompaniesTable = this.getView().byId("companiesTable");
             oCompaniesTable.getBinding("rows").refresh();
         },
 
-        onCompaniesTableSelection: async function(oEvent){
+        onCompaniesTableSelection: async function(oEvent) {
             const oCompaniesSelected = oEvent.getParameter("rowContext");
-
+            if (!oCompaniesSelected) return;
             const oCompanyBinding = this.getModel().bindContext(oCompaniesSelected.getPath());
             const oCompanyContext = await oCompanyBinding.requestObject();
 
@@ -63,29 +69,30 @@ sap.ui.define([
             this.getModel("globalModel").refresh(true);
         },
 
-        onClearSelectedCompanyData: function(){
+        onClearSelectedCompanyData: function() {
             this.setProp("globalModel", "/selectedCompany", {});
             this.getModel("globalModel").refresh(true);
         },
 
-        onCreateCompanyNameChange: function(oEvent){
+        onCreateCompanyNameChange: function(oEvent) {
             const sName = oEvent.getParameter("value");
             this.setProp("globalModel", "/selectedCompany/name", sName);
         },
 
-        onCreateCompanyDescriptionChange: function(oEvent){
+        onCreateCompanyDescriptionChange: function(oEvent) {
             const sDescription = oEvent.getParameter("value");
             this.setProp("globalModel", "/selectedCompany/description", sDescription);
         },
 
-        onCreateCompanyCapitalChange: function(oEvent){
+        onCreateCompanyCapitalChange: function(oEvent) {
             const iCapital = oEvent.getParameter("value");
             this.setProp("globalModel", "/selectedCompany/capital", iCapital);
         },
 
-        onCreateCompanyCurrencyChange: function(oEvent){
-            const sCurrencyCode = oEvent.getParameter("selectedItem").getKey();
-            this.setProp("globalModel", "/selectedCompany/currency_code", sCurrencyCode);
+        onCreateCompanyCurrencyChange: function(oEvent) {
+            const oSelectedItem = oEvent.getParameter("selectedItem");
+            if (!oSelectedItem) return;
+            this.setProp("globalModel", "/selectedCompany/currency_code", oSelectedItem.getKey());
         },
 
         onSideBarItemSelect: function(oEvent) {
@@ -99,11 +106,13 @@ sap.ui.define([
             }
         },
 
-        onCompanyChange: function(oEvent){
+        onCompanyChange: function(oEvent) {
             const oView = this.getView();
             const sCompanyID = oEvent.getParameter("selectedItem")?.getKey();
             const oCartsTable = Fragment.byId(oView.getId(), "cartsFragmentTable");
             const oCartItemsTable = Fragment.byId(oView.getId(), "cartItemsFragmentTable");
+
+            if (!oCartItemsTable || !oCartsTable) return;
 
             oCartItemsTable.unbindRows();
 
@@ -117,10 +126,12 @@ sap.ui.define([
             ]);
         },
 
-        onCartAdminTableSelection: function(oEvent){
+        onCartAdminTableSelection: function(oEvent) {
             const oView = this.getView();
             const oRowContext = oEvent.getParameter("rowContext");
             const oCartItemsTable = Fragment.byId(oView.getId(), "cartItemsFragmentTable");
+
+            if (!oCartItemsTable) return;
 
             if (!oRowContext) {
                 oCartItemsTable.unbindRows();
@@ -133,7 +144,7 @@ sap.ui.define([
             });
         },
 
-        onExportExcel: function(){
+        onExportExcel: function() {
             const oCompaniesTable = this.getView().byId("companiesTable");
             const oRowBinding = oCompaniesTable.getBinding("rows");
 
@@ -154,6 +165,5 @@ sap.ui.define([
             const oExcelSheet = new Spreadsheet(oExcelSettings);
             oExcelSheet.build().finally(function() { oExcelSheet.destroy(); });
         }
-
     })
 });

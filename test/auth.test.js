@@ -13,7 +13,7 @@ const path = require('path');
  *   and that role-based access is enforced by CAP at the service level.
  */
 
-const { GET, POST, DELETE, axios } = cds.test(path.resolve(__dirname, '..'));
+const { GET, POST } = cds.test(path.resolve(__dirname, '..'));
 
 const COMPANY_ID = '8d828172-9bb7-4afe-9957-2f1c060f5b26';
 

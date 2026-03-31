@@ -23,7 +23,8 @@ type UserRolesResponse { id    : String;
 
 service ShopCartService @(path:'/shop') { 
 
-  @restrict: [ { grant: ['READ'], to: 'authenticated-user' } ]
+  @restrict: [ { grant: ['READ'], to: 'authenticated-user' },
+               { grant: '*', to: 'admin' } ]
   entity Company as projection on my.Company {
       *,
       products : redirected to Products
@@ -37,7 +38,8 @@ service ShopCartService @(path:'/shop') {
     company : redirected to Company,
   };
 
-  @restrict: [ { grant: '*', where: 'createdBy = $user.id' }, ]
+  @restrict: [ { grant: '*', where: 'createdBy = $user.id' },
+               { grant: '*', to: 'admin' } ]
   entity Cart as projection on my.Cart as C { 
     *,
     (
@@ -51,8 +53,9 @@ service ShopCartService @(path:'/shop') {
     action finalizeCart() returns Orders;
   }
 
-  @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], to: 'authenticated-user', where: 'createdBy = $user.id' } ]
-  entity CartItem as projection on my.CartItem { 
+  @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], to: 'authenticated-user', where: 'cart.createdBy = $user.id' },
+                { grant: '*', to: 'admin' } ]
+  entity CartItem as projection on my.CartItem {
     *,
     product: redirected to Products,
     product.name as name,
@@ -61,7 +64,8 @@ service ShopCartService @(path:'/shop') {
   };
 
   @readonly
-  @restrict: [ { grant: 'READ', to: 'authenticated-user', where: 'createdBy = $user.id' } ]
+  @restrict: [ { grant: 'READ', to: 'authenticated-user', where: 'createdBy = $user.id' },
+               { grant: '*', to: 'admin' } ]
   entity UserSpend as select from my.Orders { 
     key company.ID as company_ID,
     company.name as company_name,
@@ -81,10 +85,6 @@ service ShopCartService @(path:'/shop') {
   @readonly
   @restrict: [ { grant: ['READ', 'WRITE', 'DELETE'], to: 'authenticated-user', where: 'createdBy = $user.id' } ]
   entity OrderItems as projection on my.OrderItems;
-
-  @readonly
-  @restrict: [ { grant: 'READ', where: 'user = $user.id' } ] 
-  entity PurchaseHistory as projection on my.PurchaseHistory;
 
   @(requires: 'authenticated-user')
   function getUserInfo() returns UserRolesResponse;

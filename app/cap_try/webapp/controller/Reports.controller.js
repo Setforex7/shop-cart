@@ -5,23 +5,27 @@ sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator"
 ], function(
-	BaseController,
+    BaseController,
     Spreadsheet,
-	Formatter,
+    Formatter,
     Filter,
     FilterOperator
 ) {
-	"use strict";
+    "use strict";
 
     const sEntityCompany = "/Company";
 
-	return BaseController.extend("cap_try.controller.Reports", {
-        onInit: function() { 
+    return BaseController.extend("cap_try.controller.Reports", {
+        onInit: function() {
             this._onControllerLoad();
             this.getRouter().getRoute("Reports").attachPatternMatched(this._onObjectMatched, this);
         },
 
-        _getOrdersExcelFieldsConfig: function(){
+        onExit: function() {
+            this.getRouter().getRoute("Reports").detachPatternMatched(this._onObjectMatched, this);
+        },
+
+        _getOrdersExcelFieldsConfig: function() {
             return [ { label: this.getI18nText("order_id"), property: 'ID', type: 'string', width: 20 },
                      { label: this.getI18nText("created_at"), property: 'createdAt', type: 'date', format: 'dd-mm-yyyy HH:mm' },
                      { label: this.getI18nText("company"), property: 'company/name', type: 'string', width: 25 },
@@ -33,7 +37,7 @@ sap.ui.define([
                      { label: this.getI18nText("created_by"), property: 'createdBy', type: 'string' } ];
         },
 
-        onCompanyChange: async function(oEvent){
+        onCompanyChange: async function(oEvent) {
             const oView = this.getView();
             oView.setBusy(true);
 
@@ -45,30 +49,29 @@ sap.ui.define([
             oView.setBusy(false);
         },
 
-        _setOrderTableBinding: function(){
+        _setOrderTableBinding: function() {
             const oOrdersTable = this.getView().byId("ordersTable");
             const { ID } = this.getProp("globalModel", "/selectedCompany");
 
             oOrdersTable.bindRows({ path: "/Orders",
                                     parameters: { $expand: "company,items" },
-                                    filters: new Filter("company_ID", FilterOperator.EQ, ID), 
-                                    events: { dataReceived: function() {} } })
+                                    filters: new Filter("company_ID", FilterOperator.EQ, ID) })
         },
 
-        onOrdersTableRefresh: function(){
+        onOrdersTableRefresh: function() {
             const oOrdersTable = this.getView().byId("ordersTable");
             oOrdersTable.getBinding("rows").refresh();
         },
 
-        onExportExcel: function(){
-            const oOrdersTable = this.byId("ordersTable"); 
-            const oRowBinding = oOrdersTable.getBinding("rows"); 
+        onExportExcel: function() {
+            const oOrdersTable = this.byId("ordersTable");
+            const oRowBinding = oOrdersTable.getBinding("rows");
 
             const oExcelSettings = { workbook: { columns: this._getOrdersExcelFieldsConfig(),
                                                  context: { application: 'My Shopping App',
                                                             version: '1.0',
                                                             title: 'Orders Report' } },
-                                dataSource: oRowBinding, 
+                                dataSource: oRowBinding,
                                 fileName: 'Orders_Report.xlsx',
                                 worker: false };
 
@@ -77,7 +80,6 @@ sap.ui.define([
         },
 
         onOrderPress: function (oEvent) {
-
             const oOrderContext = oEvent.getParameter("rowBindingContext");
             if (!oOrderContext) return;
 
@@ -91,5 +93,5 @@ sap.ui.define([
         },
 
         onCloseDetail: function () { this.getView().byId("fcl").setLayout(sap.f.LayoutType.OneColumn); },
-	});
+    });
 });

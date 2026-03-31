@@ -118,6 +118,17 @@ describe('Cart', () => {
             expect(data.items.length).toBe(2);
         });
 
+        test('handles empty product_IDs array as no-op', async () => {
+            const { status, data } = await POST(
+                `/shop/Cart(${cartID})/ShopCartService.addProductsToCart`,
+                { product_IDs: [] },
+                AUTH_BOB
+            );
+
+            expect(status).toBe(200);
+            expect(data.items).toBeDefined();
+        });
+
         test('rejects adding a non-existent product', async () => {
             try {
                 await POST(
@@ -235,6 +246,60 @@ describe('Cart', () => {
                 fail('Should have rejected');
             } catch (e) {
                 expect(e.response.status).toBeGreaterThanOrEqual(400);
+            }
+        });
+    });
+
+    describe('Stock depletion safety', () => {
+        test('prevents overselling when stock is insufficient after first finalization', async () => {
+            // Create a product with stock = 1
+            const { data: product } = await POST('/shop/Products', {
+                name: 'Limited Stock Item',
+                company_ID: TECH_COMPANY_ID,
+                price: 10,
+                stock: 1,
+                stock_min: 0
+            }, AUTH_ALICE);
+
+            // Create two carts and add the same product to each
+            const { data: cart1 } = await POST('/shop/Cart', {
+                company_ID: TECH_COMPANY_ID,
+                currency_code: 'EUR'
+            }, AUTH_BOB);
+            await POST(
+                `/shop/Cart(${cart1.ID})/ShopCartService.addProductsToCart`,
+                { product_IDs: [product.ID] },
+                AUTH_BOB
+            );
+
+            const { data: cart2 } = await POST('/shop/Cart', {
+                company_ID: TECH_COMPANY_ID,
+                currency_code: 'EUR'
+            }, AUTH_BOB);
+            await POST(
+                `/shop/Cart(${cart2.ID})/ShopCartService.addProductsToCart`,
+                { product_IDs: [product.ID] },
+                AUTH_BOB
+            );
+
+            // First finalization succeeds — stock goes from 1 to 0
+            const { status: status1 } = await POST(
+                `/shop/Cart(${cart1.ID})/ShopCartService.finalizeCart`,
+                {},
+                AUTH_BOB
+            );
+            expect(status1).toBe(200);
+
+            // Second finalization fails — stock is now 0
+            try {
+                await POST(
+                    `/shop/Cart(${cart2.ID})/ShopCartService.finalizeCart`,
+                    {},
+                    AUTH_BOB
+                );
+                fail('Should have rejected due to insufficient stock');
+            } catch (e) {
+                expect(e.response.status).toBe(400);
             }
         });
     });

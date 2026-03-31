@@ -55,15 +55,3 @@ entity CartItem : managed { key ID              : UUID;
                             virtual price       : Decimal(10,2); 
                             virtual total_price : Decimal(10,2);
                             currency            : Currency @mandatory; }
-
-view PurchaseHistory as select from OrderItems { key ID,
-                                                 order.createdBy as user,
-                                                 order.company.ID as company_ID,
-                                                 order.company.name as company_name,
-                                                 order.ID as order_ID,
-                                                 order.createdAt as purchase_date,
-                                                 product.name as product_name,
-                                                 quantity,
-                                                 price_at_create as unit_price,
-                                                 total_price,
-                                                 currency };

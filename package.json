@@ -7,29 +7,27 @@
   "private": true,
   "dependencies": {
     "@sap/cds": "^8",
-    "@sap/eslint-plugin-ui5-jsdocs": "^2.0.5",
     "@sap/xssec": "^4",
-    "@sapui5/ts-types": "^1.92.2",
-    "cf": "^0.0.3",
-    "cli": "^1.0.1",
-    "eslint": "^7.32.0",
     "exceljs": "^4.4.0",
     "express": "^4",
-    "node-cron": "^4.2.1",
-    "xlsx": "^0.18.5"
+    "node-cron": "^4.2.1"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^0.4.1",
     "@cap-js/cds-types": "^0.9.0",
     "@cap-js/sqlite": "^1",
     "@sap/cds-dk": "^8",
+    "@eslint/js": "^9",
+    "@sap/eslint-plugin-ui5-jsdocs": "^2.0.5",
     "axios": "^1.14.0",
+    "eslint": "^9",
     "jest": "^30.3.0"
   },
   "scripts": {
     "start": "cds-serve",
     "watch-cap_try": "cds watch --open cap_try/webapp/index.html?sap-ui-xx-viewCache=false",
-    "test": "jest --runInBand --forceExit --detectOpenHandles"
+    "test": "jest --runInBand --forceExit --detectOpenHandles",
+    "lint": "eslint ."
   },
   "jest": {
     "testEnvironment": "node",

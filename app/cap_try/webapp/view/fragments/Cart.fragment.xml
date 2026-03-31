@@ -54,7 +54,7 @@
                         <Label text="{i18n>price}" />
                         <table:template>
                             <ObjectNumber number="{product/price}"
-                                          unit="{globalModel>/selectedCompany/currency}" />
+                                          unit="{globalModel>/selectedCompany/currency_code}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="20%">
@@ -67,7 +67,7 @@
                         <Label text="{i18n>total}" />
                         <table:template>
                             <ObjectNumber number="{total_price}"
-                                          unit="{globalModel>/selectedCompany/currency}" />
+                                          unit="{globalModel>/selectedCompany/currency_code}" />
                         </table:template>
                     </table:Column>
                     <table:Column width="5rem">
@@ -84,7 +84,7 @@
                     <OverflowToolbar id="cartTableFooter">
                         <Button icon="sap-icon://delete" text="{i18n>delete_cart_items}"
                                 press="onDeleteMultipleCartItemPress" visible="{= ${globalModel>/cartItemsQuantity} > 0 }" />
-                        <ToolbarSeparator visible="{= ${globalModel>/cart}.length === 0 ? false : true}" />
+                        <ToolbarSeparator visible="{= ${globalModel>/cartItemsQuantity} > 0}" />
                         <ToolbarSpacer />
                         <Label text="{i18n>cart_total}" design="Bold" />
                         <Text class="sapUiTinyMarginBegin" text="{cart_total}" />

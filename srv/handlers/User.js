@@ -1,4 +1,4 @@
-getUserInfo = req => {
+const getUserInfo = req => {
 
     if(!req.user) return req.reject(401, 'Unauthorized');
 

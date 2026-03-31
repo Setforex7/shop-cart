@@ -1,5 +1,47 @@
 {
-  "scopes": [],
+  "xsappname": "shop-cart",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.admin",
+      "description": "Admin scope"
+    },
+    {
+      "name": "$XSAPPNAME.User",
+      "description": "User scope"
+    }
+  ],
   "attributes": [],
-  "role-templates": []
+  "role-templates": [
+    {
+      "name": "admin",
+      "description": "Administrator",
+      "scope-references": [
+        "$XSAPPNAME.admin"
+      ]
+    },
+    {
+      "name": "User",
+      "description": "Standard user",
+      "scope-references": [
+        "$XSAPPNAME.User"
+      ]
+    }
+  ],
+  "role-collections": [
+    {
+      "name": "ShopCart_Admin",
+      "description": "Admin role collection",
+      "role-template-references": [
+        "$XSAPPNAME.admin"
+      ]
+    },
+    {
+      "name": "ShopCart_User",
+      "description": "User role collection",
+      "role-template-references": [
+        "$XSAPPNAME.User"
+      ]
+    }
+  ]
 }

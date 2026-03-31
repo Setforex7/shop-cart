@@ -1,25 +1,27 @@
 sap.ui.define([
     "cap_try/controller/BaseController",
+    "cap_try/service/ProductService",
+    "cap_try/service/CartService",
+    "cap_try/service/FileService",
     "cap_try/formatters/formatter",
     "sap/ui/core/Fragment",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/m/MessageToast",
-    "sap/m/MessageBox",
-    "sap/ui/model/Sorter"
+    "sap/m/MessageBox"
 ], (BaseController,
-	Formatter,
-	Fragment,
-	Filter,
-	FilterOperator,
-	MessageToast,
-	MessageBox,
-	Sorter) => {
+    ProductService,
+    CartService,
+    FileService,
+    Formatter,
+    Fragment,
+    Filter,
+    FilterOperator,
+    MessageToast,
+    MessageBox) => {
     "use strict";
 
     const sEntityCompany = "/Company";
-    const sEntityProducts = "/Products";
-    const sEntityCart = "/Cart";
 
     return BaseController.extend("cap_try.controller.Shop", {
         formatter: Formatter,
@@ -28,42 +30,46 @@ sap.ui.define([
             this.getRouter().getRoute("Shop").attachPatternMatched(this._onObjectMatched, this);
         },
 
-        onDownloadTemplatePress: function(){
+        onExit: function() {
+            this.getRouter().getRoute("Shop").detachPatternMatched(this._onObjectMatched, this);
+        },
+
+        onDownloadTemplatePress: function() {
             const sUrl = this.getModel().getServiceUrl() + "downloadExcelTemplate()/$value";
             sap.m.URLHelper.redirect(sUrl, true);
         },
 
-        onUploadTemplatePress: function(oEvent){ this._fileReader(oEvent, this._createProducts.bind(this)); },
+        onUploadTemplatePress: function(oEvent) {
+            FileService.read(this, oEvent, ProductService.createBatch.bind(ProductService, this));
+        },
 
-        onFinalizePurchasePress: function(oEvent) {
+        onFinalizePurchasePress: function() {
             const oSelectedCart = this.getProp("globalModel", "/selectedCart");
 
             if(!Object.keys(oSelectedCart).length) return MessageToast.show(this.getI18nText("finalize_cart_selection_missing"));
 
             const { ID } = oSelectedCart.getObject();
-            this._finalizeCart(ID);
+            CartService.finalize(this, ID);
         },
 
-        onAddCartButtonPress: function(){ 
+        onAddCartButtonPress: function() {
             const { ID } = this.getProp("globalModel", "/selectedCompany");
-            
-            this._createCart(ID);
+            CartService.create(this, ID);
         },
 
         onEditProductPress: function(oEvent) {
             const oSelectedProduct = oEvent.getSource().getBindingContext().getObject();
             oSelectedProduct.metadata = oEvent.getSource().getBindingContext();
-            
+
             this.setProp("globalModel", "/selectedProduct", oSelectedProduct);
             this.getModel("globalModel").refresh(true);
 
             this.getDialogHandler()._openEditProductDialog();
         },
 
-        onEditProduct: function(){
+        onEditProduct: function() {
             const oSelectedProduct = this.getProp("globalModel", "/selectedProduct");
-            this._editProduct(oSelectedProduct);
-
+            ProductService.edit(this, oSelectedProduct);
             this.getDialogHandler()._closeEditProductDialog();
         },
 
@@ -77,11 +83,11 @@ sap.ui.define([
                 actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
                 emphasizedAction: MessageBox.Action.YES,
                 onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { oView.setBusy(true);
-                                                                                           await this._deleteProduct(oCurrentProductBinding);
+                                                                                           await ProductService.delete(this, oCurrentProductBinding);
                                                                                            oView.setBusy(false) }}.bind(this)});
         },
 
-        onDeleteMultiplesProductsPress: async function(oEvent) {
+        onDeleteMultiplesProductsPress: async function() {
             const oView = this.getView();
             const oProductsTable = this.getView().byId("productsWorklist");
             const aSelectedProductsContexts = oProductsTable.getSelectedContexts();
@@ -93,7 +99,7 @@ sap.ui.define([
                 actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
                 emphasizedAction: MessageBox.Action.YES,
                 onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { oView.setBusy(true);
-                                                                                           await this._deleteProduct(aSelectedProductsContexts);
+                                                                                           await ProductService.delete(this, aSelectedProductsContexts);
                                                                                            oView.setBusy(false); }}.bind(this)});
         },
 
@@ -105,11 +111,12 @@ sap.ui.define([
                 title: this.getI18nText("confirmation_needed"),
                 actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
                 emphasizedAction: MessageBox.Action.YES,
-                onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { await this._deleteCartItem(oSelectedItemBinding); }}.bind(this)});
+                onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { await CartService.deleteItem(this, oSelectedItemBinding); }}.bind(this)});
         },
 
-        onDeleteMultipleCartItemPress: async function(oEvent) {
+        onDeleteMultipleCartItemPress: async function() {
             const oCartTable = Fragment.byId(this.getView().getId(), "cartTable");
+            if (!oCartTable) return;
             const aSelectedItemsIndices = oCartTable.getSelectedIndices();
 
             if(!aSelectedItemsIndices.length) return MessageToast.show(this.getI18nText("delete_product_null_selection"));
@@ -120,9 +127,8 @@ sap.ui.define([
                 title: this.getI18nText("confirmation_needed"),
                 actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
                 emphasizedAction: MessageBox.Action.YES,
-                onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { await this._deleteCartItem(aSelectedItems); }}.bind(this)});
+                onClose: async function(oAction) { if(oAction === MessageBox.Action.YES) { await CartService.deleteItem(this, aSelectedItems); }}.bind(this)});
         },
-
 
         onDeleteSelectedCartPress: async function() {
             const oSelectedCart = this.getProp("globalModel", "/selectedCart");
@@ -134,7 +140,7 @@ sap.ui.define([
                 actions: [MessageBox.Action.YES, MessageBox.Action.CANCEL],
                 emphasizedAction: MessageBox.Action.YES,
                 onClose: async function(oAction) {
-                    if (oAction === MessageBox.Action.YES) { await this._deleteCart(oSelectedCart); }
+                    if (oAction === MessageBox.Action.YES) { await CartService.delete(this, oSelectedCart); }
                 }.bind(this)
             });
         },
@@ -151,7 +157,7 @@ sap.ui.define([
             }
 
             const aSelectedProductsContexts = aSelectedProducts.map(oProduct => { return oProduct.getBindingContext().getObject().ID;  });
-            
+
             if(!this._validateCompanieselection()) return;
 
             if(!Object.keys(oSelectedCart).length)
@@ -161,13 +167,13 @@ sap.ui.define([
                     emphasizedAction: MessageBox.Action.YES,
                     onClose: async function(oAction) {
                         if(oAction === MessageBox.Action.YES) { await this.openCartDialog();
-                                                                await this._createCart(ID);
-                                                                await this._addProductsCart(aSelectedProductsContexts);
+                                                                await CartService.create(this, ID);
+                                                                await CartService.addProducts(this, aSelectedProductsContexts);
                                                                 oTable.removeSelections(); }
                     }.bind(this)
                 });
             else{
-                await this._addProductsCart(aSelectedProductsContexts);
+                await CartService.addProducts(this, aSelectedProductsContexts);
                 oTable.removeSelections();
             }
         },
@@ -189,7 +195,7 @@ sap.ui.define([
             return true;
         },
 
-        onCartsSelectChange: function(oEvent){
+        onCartsSelectChange: function(oEvent) {
             const oSelectedItem = oEvent.getParameter("selectedItem");
             if (!oSelectedItem) return;
 
@@ -198,36 +204,29 @@ sap.ui.define([
             this.setProp("globalModel", "/selectedCart", oSelectedCart);
             this.getModel("globalModel").refresh(true);
 
-            this._bindCartDataToFragment();
+            CartService.bindDataToFragment(this);
         },
 
         onCreateButtonPress: async function() {
             const { name, description, price, stock_min, stock } = this.getProp("globalModel", "/product");
             const { ID } = this.getProp("globalModel", "/selectedCompany");
 
-            if(!name || !description || !price || !stock_min || !stock) 
+            if(!name || !description || !price || !stock_min || !stock)
                 return MessageToast.show(this.getI18nText("add_product_error_fields"));
-            
 
             this.getView().setBusy(true);
-            const oResult = await this._createProduct({ name: name,
-                                                        description: description,
-                                                        company_ID: ID,
-                                                        price: price,
-                                                        stock_min: stock_min,
-                                                        stock: stock });
-            if(oResult) this.getView().byId("addProduct").close();
+            await ProductService.create(this, { name, description, company_ID: ID, price, stock_min, stock });
+            this.getView().setBusy(false);
         },
 
-        onCompanyCancelPress: function(oEvent) {
+        onCompanyCancelPress: function() {
             this.setProp("globalModel", "/selectedCompany", {});
             this.getView().unbindElement("/Company");
             this.getModel("globalModel").refresh(true);
         },
 
-        onCompanyChange: async function(oEvent){
+        onCompanyChange: async function(oEvent) {
             const oView = this.getView();
-
             oView.setBusy(true);
 
             oEvent.getSource().setValueState("None");
@@ -238,11 +237,11 @@ sap.ui.define([
             this.setProp("globalModel", "/cartItemsQuantity", 0);
             this.setProp("globalModel", "/cart", []);
             this.getModel("globalModel").refresh(true);
-            this._getProducts();
-            this._assignCartOnCompanyLoad();
+            ProductService.loadByCompany(this);
+            CartService.assignOnCompanyLoad(this);
         },
 
-        onProductCartQuantityChangePress: function(oEvent){
+        onProductCartQuantityChangePress: function(oEvent) {
             const iNewQuantity = oEvent.getParameter("value");
             const oContext = oEvent.getSource().getBindingContext();
 
@@ -251,11 +250,13 @@ sap.ui.define([
             oContext.setProperty("quantity", iNewQuantity);
 
             const oFooterTable = Fragment.byId(this.getView().getId(), "cartTableFooter");
-            const oFooterContext = oFooterTable.getBindingContext();
-            if (oFooterContext) oFooterContext.refresh();
+            if (oFooterTable) {
+                const oFooterContext = oFooterTable.getBindingContext();
+                if (oFooterContext) oFooterContext.refresh();
+            }
         },
 
-        onSearch: function(oEvent){
+        onSearch: function(oEvent) {
             const sQuery = oEvent.getParameter("newValue");
             const oProductsTable = this.getView().byId("productsWorklist");
             const oBinding = oProductsTable.getBinding("items");
@@ -273,7 +274,7 @@ sap.ui.define([
 
         closeAddProductDialog: function () { this.getDialogHandler()._closeAddProductDialog() },
 
-        openEditProductDialog: function (oEvent) { this.getDialogHandler()._openEditProductDialog() },
+        openEditProductDialog: function () { this.getDialogHandler()._openEditProductDialog() },
 
         closeEditProductDialog: function () { this.getDialogHandler()._closeEditProductDialog() },
 

@@ -11,7 +11,7 @@
                      alternateRowColors="true"
                      class="sapUiResponsiveMargin"
                      rows="{ path: '/Cart',
-                             parameters: { expand: 'items,company' },
+                             parameters: { $expand: 'items,company' },
                              sorter: { path: 'createdAt', descending: false } }">
             <table:extension>
                 <OverflowToolbar>
@@ -55,7 +55,7 @@
                     <Label text="{i18n>total}" />
                     <table:template>
                         <ObjectNumber number="{cart_total}"
-                                        unit="{currency/code}" />
+                                        unit="{currency_code}" />
                     </table:template>
                 </table:Column>
             </table:columns>
@@ -79,7 +79,7 @@
                     <Label text="{i18n>price}" />
                     <table:template>
                         <ObjectNumber number="{product/price}"
-                                      unit="{currency/code}" />
+                                      unit="{currency_code}" />
                     </table:template>
                 </table:Column>
                 <table:Column width="20%">
@@ -92,7 +92,7 @@
                     <Label text="{i18n>total}" />
                     <table:template>
                         <ObjectNumber number="{total_price}"
-                                      unit="{currency/code}" />
+                                      unit="{currency_code}" />
                     </table:template>
                 </table:Column>
             </table:columns>

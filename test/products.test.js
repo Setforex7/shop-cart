@@ -118,6 +118,64 @@ describe('Products', () => {
             }
         });
 
+        test('accepts product with price = 0 (free/sample products)', async () => {
+            const { status, data } = await POST('/shop/Products', {
+                name: 'Free Sample Product',
+                description: 'A free product for testing',
+                company_ID: TECH_COMPANY_ID,
+                price: 0,
+                stock: 10,
+                stock_min: 1
+            }, { auth: { username: 'alice' } });
+
+            expect(status).toBe(201);
+            expect(data.price).toBe(0);
+        });
+
+        test('accepts product with stock = 0', async () => {
+            const { status, data } = await POST('/shop/Products', {
+                name: 'Out of Stock Product',
+                description: 'No stock yet',
+                company_ID: TECH_COMPANY_ID,
+                price: 50,
+                stock: 0,
+                stock_min: 5
+            }, { auth: { username: 'alice' } });
+
+            expect(status).toBe(201);
+            expect(data.stock).toBe(0);
+        });
+
+        test('rejects product with whitespace-only name', async () => {
+            try {
+                await POST('/shop/Products', {
+                    name: '   ',
+                    company_ID: TECH_COMPANY_ID,
+                    price: 10,
+                    stock: 5,
+                    stock_min: 1
+                }, { auth: { username: 'alice' } });
+                fail('Should have rejected');
+            } catch (e) {
+                expect(e.response.status).toBe(400);
+            }
+        });
+
+        test('rejects duplicate product name within same company', async () => {
+            try {
+                await POST('/shop/Products', {
+                    name: 'Smartphone X',
+                    company_ID: TECH_COMPANY_ID,
+                    price: 10,
+                    stock: 5,
+                    stock_min: 1
+                }, { auth: { username: 'alice' } });
+                fail('Should have rejected');
+            } catch (e) {
+                expect(e.response.status).toBeGreaterThanOrEqual(400);
+            }
+        });
+
         test('accepts valid product data', async () => {
             const { status, data } = await POST('/shop/Products', {
                 name: 'Valid Product',

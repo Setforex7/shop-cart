@@ -135,7 +135,6 @@
                                  class="sapUiResponsiveMargin"
                                  selectionMode="Single"
                                  selectionBehavior="RowOnly"
-                                 cellClick="onOrderPress"
                                  visibleRowCountMode="Auto">
                         <table:columns>
                             <table:Column visible="false"

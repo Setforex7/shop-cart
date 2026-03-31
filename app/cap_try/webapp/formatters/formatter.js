@@ -1,6 +1,4 @@
-sap.ui.define([
-    "sap/ui/core/format/NumberFormat" 
-], function(NumberFormat) {
+sap.ui.define([], function() {
     "use strict";
 
     return {
@@ -14,22 +12,22 @@ sap.ui.define([
             const iWarningStockPercentage = iMinStock * 0.20;
             const iWarningStock = iMinStock + iWarningStockPercentage;
 
-            if (iCurrentStock < iMinStock) return 'Error'; 
-            else if (iCurrentStock <= iWarningStock) return 'Warning'; 
+            if (iCurrentStock < iMinStock) return 'Error';
+            else if (iCurrentStock <= iWarningStock) return 'Warning';
             else return 'Success';
         },
 
         stockIconFormatter: function (iCurrentStock, iMinStock) {
             if (isNaN(iCurrentStock) || isNaN(iMinStock)) return '';
-            
+
             iCurrentStock = parseInt(iCurrentStock);
             iMinStock = parseInt(iMinStock);
 
             const iWarningStockPercentage = iMinStock * 0.20;
             const iWarningStock = iMinStock + iWarningStockPercentage;
 
-            if (iCurrentStock < iMinStock) return 'sap-icon://error'; 
-            else if (iCurrentStock <= iWarningStock) return 'sap-icon://alert'; 
+            if (iCurrentStock < iMinStock) return 'sap-icon://error';
+            else if (iCurrentStock <= iWarningStock) return 'sap-icon://alert';
             else return 'sap-icon://sys-enter-2';
         },
 
@@ -42,8 +40,8 @@ sap.ui.define([
             const iWarningStockPercentage = iMinStock * 0.20;
             const iWarningStock = iMinStock + iWarningStockPercentage;
 
-            if (iCurrentStock < iMinStock) return 'Negative'; 
-            else if (iCurrentStock <= iWarningStock) return 'Critical'; 
+            if (iCurrentStock < iMinStock) return 'Negative';
+            else if (iCurrentStock <= iWarningStock) return 'Critical';
             else return 'Positive';
         },
 

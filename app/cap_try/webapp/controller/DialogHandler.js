@@ -1,24 +1,28 @@
 sap.ui.define([
-	"sap/ui/base/Object",
-	"sap/ui/core/Fragment",
+    "sap/ui/base/Object",
+    "sap/ui/core/Fragment",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
+    "sap/ui/model/FilterOperator",
+    "cap_try/service/CartService",
+    "sap/base/Log"
   ], (BaseObject,
-	  Fragment,
+      Fragment,
       Filter,
-      FilterOperator) => {
-	"use strict";
-  
-	return BaseObject.extend("cap_try.controller.DialogHandler", {
-		_oController: undefined,
-		constructor: function(oController) {
-			this._oController = oController;
+      FilterOperator,
+      CartService,
+      Log) => {
+    "use strict";
+
+    return BaseObject.extend("cap_try.controller.DialogHandler", {
+        _oController: undefined,
+        constructor: function(oController) {
+            this._oController = oController;
             this._oCompaniesFragment = undefined;
             this._oCartsFragment = undefined;
-			this._dDialogCart = undefined;
-			this._dDialogAddProduct = undefined;
+            this._dDialogCart = undefined;
+            this._dDialogAddProduct = undefined;
             this._dDialogEditProduct = undefined;
-		},
+        },
 
         _openCompaniesFragment: function () {
             const oView = this._oController.getView();
@@ -32,8 +36,11 @@ sap.ui.define([
                 }).then(function (oFragment) {
                     oView.addDependent(oFragment);
                     oMainContainer.addPage(oFragment);
-                    oMainContainer.to(oFragment); 
+                    oMainContainer.to(oFragment);
                     return oFragment;
+                }.bind(this)).catch(function(oError) {
+                    Log.error("Failed to load Companies fragment:", oError);
+                    this._oCompaniesFragment = undefined;
                 }.bind(this));
             } else this._oCompaniesFragment.then(oFragment => oMainContainer.to(oFragment));
         },
@@ -50,29 +57,35 @@ sap.ui.define([
                 }).then(function (oFragment) {
                     oView.addDependent(oFragment);
                     oMainContainer.addPage(oFragment);
-                    oMainContainer.to(oFragment); 
+                    oMainContainer.to(oFragment);
                     return oFragment;
+                }.bind(this)).catch(function(oError) {
+                    Log.error("Failed to load Carts fragment:", oError);
+                    this._oCartsFragment = undefined;
                 }.bind(this));
             } else this._oCartsFragment.then(oFragment => oMainContainer.to(oFragment));
         },
-		
-		_openAddProductDialog: function () {
+
+        _openAddProductDialog: function () {
             if (!this._dDialogAddProduct) {
                 this._dDialogAddProduct = Fragment.load({ id: this._oController.getView().getId(),
-                                                		  name: "cap_try.view.fragments.AddProduct",
-                                                		  controller: this._oController })
+                                                          name: "cap_try.view.fragments.AddProduct",
+                                                          controller: this._oController })
                 .then(function (oDialog) {
                     this._oController.getView().addDependent(oDialog);
                     return oDialog;
+                }.bind(this)).catch(function(oError) {
+                    Log.error("Failed to load AddProduct fragment:", oError);
+                    this._dDialogAddProduct = undefined;
                 }.bind(this));
             }
 
-            this._dDialogAddProduct.then(oDialog => oDialog.open() );
+            if (this._dDialogAddProduct) this._dDialogAddProduct.then(oDialog => oDialog.open());
         },
 
-        _closeAddProductDialog: function () { 
-			this._oController.byId("AddProduct").close();
-		},
+        _closeAddProductDialog: function () {
+            this._oController.byId("AddProduct").close();
+        },
 
         _openEditProductDialog: function () {
             if (!this._dDialogEditProduct) {
@@ -82,36 +95,41 @@ sap.ui.define([
                 .then(function (oDialog) {
                     this._oController.getView().addDependent(oDialog);
                     return oDialog;
+                }.bind(this)).catch(function(oError) {
+                    Log.error("Failed to load EditProduct fragment:", oError);
+                    this._dDialogEditProduct = undefined;
                 }.bind(this));
             }
 
-            this._dDialogEditProduct.then(oDialog => { 
-                oDialog.open(); 
-            });
+            if (this._dDialogEditProduct) this._dDialogEditProduct.then(oDialog => oDialog.open());
         },
 
-        _closeEditProductDialog: function () { 
+        _closeEditProductDialog: function () {
             this._oController.byId("editProduct").close();
         },
 
-		_openCartDialog: async function () {
-            if (!this._dDialogCart) {
-                this._dDialogCart = await Fragment.load({ id: this._oController.getView().getId(),
-                                                          name: "cap_try.view.fragments.Cart",
-                                                          controller: this._oController });
-                this._dDialogCart.setModel(this._oController.getModel("globalModel"), "globalModel");
-                this._dDialogCart.setModel(this._oController.getModel("i18n"), "i18n");
-                this._dDialogCart.setModel(this._oController.getOwnerComponent().getModel());
-            }   
+        _openCartDialog: async function () {
+            try {
+                if (!this._dDialogCart) {
+                    this._dDialogCart = await Fragment.load({ id: this._oController.getView().getId(),
+                                                              name: "cap_try.view.fragments.Cart",
+                                                              controller: this._oController });
+                    this._dDialogCart.setModel(this._oController.getModel("globalModel"), "globalModel");
+                    this._dDialogCart.setModel(this._oController.getModel("i18n"), "i18n");
+                    this._dDialogCart.setModel(this._oController.getOwnerComponent().getModel());
+                }
 
-            const oDialog =  await this._dDialogCart;
-
-            oDialog.open();
-            this._oController._bindCartDataToFragment();
+                const oDialog = await this._dDialogCart;
+                oDialog.open();
+                CartService.bindDataToFragment(this._oController);
+            } catch(oError) {
+                Log.error("Failed to load Cart fragment:", oError);
+                this._dDialogCart = undefined;
+            }
         },
 
-        _closeCartDialog: function () { 
-			this._oController.byId("Cart").close();
-		},
-	});
+        _closeCartDialog: function () {
+            this._oController.byId("Cart").close();
+        },
+    });
 });

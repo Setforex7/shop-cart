@@ -2,25 +2,30 @@ const cds = require('@sap/cds');
 const cron = require('node-cron');
 
 const onCdsServer = async () => {
+    if (process.env.NODE_ENV === 'test') return;
+
     const { Cart } = cds.entities;
+    let isCartJobRunning = false;
 
     cron.schedule('* * * * *', async () => {
-        const oneMinuteAgo = new Date(Date.now() - 1 * 60 * 1000).toISOString();
+        if (isCartJobRunning) return;
+        isCartJobRunning = true;
 
         try {
+            const oneMinuteAgo = new Date(Date.now() - 1 * 60 * 1000).toISOString();
             const updatedCount = await UPDATE(Cart)
                   .set({ status: 'Abandoned' })
-                  .where({ 
+                  .where({
                       status: 'Active',
                       modifiedAt: { '<': oneMinuteAgo } });
 
             if (updatedCount > 0) {
                 console.log(`Action: Successfully moved ${updatedCount} carts to Abandoned.`);
-            } else {
-                console.log(`Result: No inactive carts found.`);
             }
         } catch (err) {
             console.error('Cron Job Error:', err);
+        } finally {
+            isCartJobRunning = false;
         }
     });
     await orderStatusJob();
@@ -28,14 +33,17 @@ const onCdsServer = async () => {
 
 const orderStatusJob = async () => {
     const { Orders } = cds.entities;
+    let isOrderJobRunning = false;
 
-    // Cron Job: Corre a cada 2 minutos (ajusta conforme necessário)
     cron.schedule('*/2 * * * *', async () => {
-        const now = new Date();
-        const twoMinutesAgo = new Date(now - 2 * 60 * 1000).toISOString();
-        const fiveMinutesAgo = new Date(now - 5 * 60 * 1000).toISOString();
+        if (isOrderJobRunning) return;
+        isOrderJobRunning = true;
 
         try {
+            const now = new Date();
+            const twoMinutesAgo = new Date(now - 2 * 60 * 1000).toISOString();
+            const fiveMinutesAgo = new Date(now - 5 * 60 * 1000).toISOString();
+
             const shippingCount = await UPDATE(Orders)
                 .set({ status: 'Shipping' })
                 .where({
@@ -56,6 +64,8 @@ const orderStatusJob = async () => {
 
         } catch (err) {
             console.error('Logistics Job Error:', err);
+        } finally {
+            isOrderJobRunning = false;
         }
     });
 }

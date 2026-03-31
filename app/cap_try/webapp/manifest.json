@@ -22,14 +22,6 @@
         "settings": {
           "odataVersion": "4.0"
         }
-      },
-      "adminService": {
-        "uri": "/odata/v4/admin/",
-        "type": "OData",
-        "settings": {
-          "annotations": [],
-          "odataVersion": "4.0"
-        }
       }
     }
   },
@@ -76,15 +68,6 @@
           "operationMode": "Server",
           "groupId": "$auto",
           "synchronizationMode": "None",
-          "autoExpandSelect": true,
-          "earlyRequests": true
-        }
-      },
-      "admin": {
-        "dataSource": "adminService",
-        "preload": true,
-        "settings": {
-          "operationMode": "Server",
           "autoExpandSelect": true,
           "earlyRequests": true
         }

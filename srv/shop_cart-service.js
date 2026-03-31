@@ -7,8 +7,7 @@ const excelHandler = require('./handlers/excel.js');
 
 class ShopCartService extends cds.ApplicationService { async init() {
 
-  const db = await cds.connect.to('db')
-  const { Products, Company, Cart, CartItem, Orders } = db.entities
+  await cds.connect.to('db')
 
   cds.on('served', jobsHandler.onCdsServer);
 
