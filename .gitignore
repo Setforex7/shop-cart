@@ -7,7 +7,6 @@ default-*.json
 .cdsrc-private.json
 gen/
 node_modules/
-CLAUDE.md
 target/
 
 # Web IDE, App Studio
