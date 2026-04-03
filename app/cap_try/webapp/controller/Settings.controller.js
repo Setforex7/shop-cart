@@ -158,7 +158,7 @@ sap.ui.define([
                     ]
                 },
                 dataSource: oRowBinding,
-                fileName: "Companies_Report.xlsx",
+                fileName: this.getI18nText("excel_companies_report_filename"),
                 worker: false
             };
 

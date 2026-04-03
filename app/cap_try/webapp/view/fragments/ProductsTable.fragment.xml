@@ -125,7 +125,7 @@
                                       state="{ parts: [ { path: 'stock', targetType: 'any' }, 
                                                         { path: 'stock_min', targetType: 'any' } ], 
                                                formatter: '.formatter.stockStateFormatter' }" />
-                        <ObjectNumber number="{ path: 'stock_min', type: 'sap.ui.model.type.Integer' }" unit="Min" />
+                        <ObjectNumber number="{ path: 'stock_min', type: 'sap.ui.model.type.Integer' }" unit="{i18n>stock_min_short}" />
                     </VBox>
 
                     <Button icon="sap-icon://edit"

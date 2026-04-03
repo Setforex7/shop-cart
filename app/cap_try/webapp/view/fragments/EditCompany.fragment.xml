@@ -26,7 +26,7 @@
             <Input value="{globalModel>capital}" type="Number" width="60%" 
                    enabled="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" />
 
-            <Label text="actions" visible="false" />
+            <Label text="{i18n>actions}" visible="false" />
             <HBox>
                 <Button text="{i18n>edit}" press="onEditCompany" class="sapUiSmallMarginEnd" type="Success"
                         visible="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" />

@@ -68,11 +68,11 @@ sap.ui.define([
             const oRowBinding = oOrdersTable.getBinding("rows");
 
             const oExcelSettings = { workbook: { columns: this._getOrdersExcelFieldsConfig(),
-                                                 context: { application: 'My Shopping App',
-                                                            version: '1.0',
-                                                            title: 'Orders Report' } },
+                                                 context: { application: this.getI18nText("excel_app_name"),
+                                                            version: this.getI18nText("excel_app_version"),
+                                                            title: this.getI18nText("excel_orders_report_title") } },
                                 dataSource: oRowBinding,
-                                fileName: 'Orders_Report.xlsx',
+                                fileName: this.getI18nText("excel_orders_report_filename"),
                                 worker: false };
 
             const oExcelSheet = new Spreadsheet(oExcelSettings);

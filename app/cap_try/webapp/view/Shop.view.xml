@@ -26,7 +26,7 @@
                    width="auto"
                    class="sapUiResponsiveMargin"
                    expanded="true"
-                   headerText="{i18n>toogle_company_details}">
+                   headerText="{i18n>toggle_company_details}">
                 <VBox>
                     <f:SimpleForm id="SimpleFormDisplay354"
                                   editable="false"

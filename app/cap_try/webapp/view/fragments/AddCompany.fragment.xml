@@ -50,7 +50,7 @@
                 </Select>
             </HBox>
 
-            <Label text="actions" visible="false" />
+            <Label text="{i18n>actions}" visible="false" />
             <HBox>
                 <Button text="{i18n>create}" enabled="{= ${globalModel>/selectedCompany/name} &amp;&amp; 
                                                          ${globalModel>/selectedCompany/capital} &amp;&amp;
