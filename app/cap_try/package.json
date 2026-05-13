@@ -18,5 +18,8 @@
   },
   "scripts": {
     "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf"
+  },
+  "dependencies": {
+    "karma": "^6.4.4"
   }
 }
