@@ -14,9 +14,12 @@
     "@sapui5/ts-types": "~1.134.0",
     "@ui5/cli": "^3.0.0",
     "@ui5/linter": "^1.21.0",
-    "eslint": "8.57.0"
+    "eslint": "8.57.0",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-ui5": "^4.1.0"
   },
   "scripts": {
+    "test": "karma start",
     "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf"
   },
   "dependencies": {
