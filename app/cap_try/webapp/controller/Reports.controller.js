@@ -3,13 +3,15 @@ sap.ui.define([
     "sap/ui/export/Spreadsheet",
     "cap_try/formatters/formatter",
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
+    "sap/ui/model/FilterOperator",
+    "sap/f/library"
 ], function(
     BaseController,
     Spreadsheet,
     Formatter,
     Filter,
-    FilterOperator
+    FilterOperator,
+    fLibrary
 ) {
     "use strict";
 
@@ -89,9 +91,9 @@ sap.ui.define([
 
             oOrderItemsTable.bindRows({ path: sOrderPath + "/items" });
 
-            oFCL.setLayout(sap.f.LayoutType.TwoColumnsMidExpanded);
+            oFCL.setLayout(fLibrary.LayoutType.TwoColumnsMidExpanded);
         },
 
-        onCloseDetail: function () { this.getView().byId("fcl").setLayout(sap.f.LayoutType.OneColumn); },
+        onCloseDetail: function () { this.getView().byId("fcl").setLayout(fLibrary.LayoutType.OneColumn); },
     });
 });

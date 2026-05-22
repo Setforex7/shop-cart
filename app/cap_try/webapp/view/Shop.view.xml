@@ -8,13 +8,13 @@
             <customHeader>
                 <Bar>
                     <contentLeft>
-                        <Button icon="sap-icon://menu2" press="initializeMenu" />
+                        <Button icon="sap-icon://menu2" press=".initializeMenu" />
                     </contentLeft>
                     <contentMiddle>
                         <Title text="{i18n>shop}" />
                     </contentMiddle>
                     <contentRight>
-                        <Button icon="sap-icon://cart" press="openCartDialog" tooltip="{i18n>cart}" visible="{= !!${globalModel>/selectedCompany/ID} }" >
+                        <Button icon="sap-icon://cart" press=".openCartDialog" tooltip="{i18n>cart}" visible="{= !!${globalModel>/selectedCompany/ID} }" >
                             <customData>
                                 <BadgeCustomData animation="Update"  value="{= ${globalModel>/cartItemsQuantity} }" />
                             </customData>
@@ -47,7 +47,7 @@
                         <f:content>
                             <Label class="sapUiTinyMargin" text="{i18n>name}" />
                             <HBox width="auto">
-                                <ComboBox width="auto" change="onCompanyChange" value="{globalModel>name}" 
+                                <ComboBox width="auto" change=".onCompanyChange" value="{globalModel>name}" 
                                           id="companyComboBox" placeholder="{i18n>select_company}"
                                           items="{ path: '/Company',
                                                    sorter: { path: 'name' } }">
@@ -56,7 +56,7 @@
                                     </items>
                                 </ComboBox>  
                                 <Button text="{i18n>cancel}" type="Default" class="sapUiSmallMarginBegin" 
-                                        visible="{= !!${globalModel>name} }" press="onCompanyCancelPress" />
+                                        visible="{= !!${globalModel>name} }" press=".onCompanyCancelPress" />
                             </HBox>              
                             <Label text="{i18n>name}" />
                             <Text text="{globalModel>name}" />
@@ -77,7 +77,7 @@
             </content>
             <footer>
                 <Toolbar>
-                    <Button visible="{= ${messageModel>/}.length !== 0}" press="toggleMessageView" 
+                    <Button visible="{= ${messageModel>/}.length !== 0}" press=".toggleMessageView" 
                             icon="sap-icon://alert" type="Emphasized" text="{= ${messageModel>/}.length}" />
                 </Toolbar>
             </footer>

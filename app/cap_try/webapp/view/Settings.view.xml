@@ -7,7 +7,7 @@
         <tnt:header>
             <Bar>
                 <contentLeft>
-                    <Button icon="sap-icon://menu2" press="initializeMenu" />
+                    <Button icon="sap-icon://menu2" press=".initializeMenu" />
                 </contentLeft>
                 <contentMiddle>
                     <Title text="{i18n>admin_panel}" />
@@ -17,7 +17,7 @@
             </Bar>
         </tnt:header>
         <tnt:sideContent>
-            <tnt:SideNavigation expanded="true" itemSelect="onSideBarItemSelect">
+            <tnt:SideNavigation expanded="true" itemSelect=".onSideBarItemSelect">
                 <tnt:item>
                     <tnt:NavigationList>
                         <tnt:NavigationListItem text="{i18n>carts}" icon="sap-icon://cart-full" key="carts" />
@@ -41,7 +41,7 @@
                 <footer>
                     <OverflowToolbar>
                         <Button visible="{= ${messageModel>/}.length !== 0}" 
-                                press="toggleMessageView" 
+                                press=".toggleMessageView" 
                                 icon="sap-icon://alert" 
                                 text="{= ${messageModel>/}.length}" 
                                 type="Emphasized" />

@@ -8,7 +8,8 @@ sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/m/MessageToast",
-    "sap/m/MessageBox"
+    "sap/m/MessageBox",
+    "sap/m/library"
 ], (BaseController,
     ProductService,
     CartService,
@@ -18,7 +19,8 @@ sap.ui.define([
     Filter,
     FilterOperator,
     MessageToast,
-    MessageBox) => {
+    MessageBox,
+    mLibrary) => {
     "use strict";
 
     const sEntityCompany = "/Company";
@@ -36,7 +38,7 @@ sap.ui.define([
 
         onDownloadTemplatePress: function() {
             const sUrl = this.getModel().getServiceUrl() + "downloadExcelTemplate()/$value";
-            sap.m.URLHelper.redirect(sUrl, true);
+            mLibrary.URLHelper.redirect(sUrl, true);
         },
 
         onUploadTemplatePress: function(oEvent) {

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 2,
+  "command": "generate",
+  "startedAt": "2026-05-22T21:50:47.141Z",
+  "finishedAt": "2026-05-22T21:50:59.646Z",
+  "durationMs": 12505,
+  "llmCallCount": 0,
+  "llmCallBudget": 50,
+  "exitReason": {
+    "kind": "baseline-failed"
+  },
+  "exitCode": 1,
+  "files": [],
+  "generatedTests": []
+}

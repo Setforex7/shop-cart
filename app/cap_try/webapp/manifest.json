@@ -67,7 +67,6 @@
         "settings": {
           "operationMode": "Server",
           "groupId": "$auto",
-          "synchronizationMode": "None",
           "autoExpandSelect": true,
           "earlyRequests": true
         }

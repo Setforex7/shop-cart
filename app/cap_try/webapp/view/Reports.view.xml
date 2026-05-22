@@ -5,6 +5,7 @@
     xmlns:f="sap.f"
     xmlns:core="sap.ui.core"
     xmlns:table="sap.ui.table"
+    xmlns:rowmodes="sap.ui.table.rowmodes"
 >
     <f:FlexibleColumnLayout id="fcl"
                             layout="OneColumn" >
@@ -14,7 +15,7 @@
                     <Bar>
                         <contentLeft>
                             <Button icon="sap-icon://menu2"
-                                    press="initializeMenu" />
+                                    press=".initializeMenu" />
                         </contentLeft>
                         <contentMiddle>
                             <Title text="{i18n>shop}" />
@@ -28,22 +29,24 @@
                                  class="sapUiResponsiveMargin"
                                  selectionMode="Single"
                                  selectionBehavior="RowOnly"
-                                 cellClick="onOrderPress"
-                                 visibleRowCountMode="Auto" >
+                                 cellClick=".onOrderPress" >
+                        <table:rowMode>
+                            <rowmodes:Auto />
+                        </table:rowMode>
                         <table:extension>
                             <OverflowToolbar style="Clear">
                                 <Title text="{i18n>orders_report}" />
                                 <ToolbarSpacer />
                                 <Text text="{i18n>select_company_carts}" />
-                                <Select width="auto" change="onCompanyChange" forceSelection="false" id="companyComboBox"
+                                <Select width="auto" change=".onCompanyChange" forceSelection="false" id="companyComboBox"
                                         items="{ path: '/Company',
                                                  sorter: { path: 'name' } }" >
                                     <items>
                                         <core:Item key="{ID}" text="{name}" />
                                     </items>
                                 </Select> 
-                                <Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onOrdersTableRefresh" />
-                                <Button icon="sap-icon://download" tooltip="{i18n>export}" press="onExportExcel" />
+                                <Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press=".onOrdersTableRefresh" />
+                                <Button icon="sap-icon://download" tooltip="{i18n>export}" press=".onExportExcel" />
                             </OverflowToolbar>
                         </table:extension>
                         <table:columns>
@@ -127,15 +130,17 @@
                   title="{i18n>order_details}" >
                 <headerContent>
                     <Button icon="sap-icon://decline"
-                            press="onCloseDetail"
+                            press=".onCloseDetail"
                             type="Transparent"/>
                 </headerContent>
                 <content>
                     <table:Table id="itemsTable"
                                  class="sapUiResponsiveMargin"
                                  selectionMode="Single"
-                                 selectionBehavior="RowOnly"
-                                 visibleRowCountMode="Auto">
+                                 selectionBehavior="RowOnly" >
+                        <table:rowMode>
+                            <rowmodes:Auto />
+                        </table:rowMode>
                         <table:columns>
                             <table:Column visible="false"
                                           autoResizable="true"
