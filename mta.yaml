@@ -70,7 +70,7 @@ modules:
       requires:
         - name: shopcartcap_try
           artifacts:
-            - cap_try.zip
+            - shopcartcap_try.zip
           target-path: app/
 
   - name: shopcartcap_try

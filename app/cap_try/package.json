@@ -16,7 +16,8 @@
     "@ui5/linter": "^1.21.0",
     "eslint": "8.57.0",
     "karma-chrome-launcher": "^3.2.0",
-    "karma-ui5": "^4.1.0"
+    "karma-ui5": "^4.1.0",
+    "ui5-task-zipper": "^3.6.1"
   },
   "scripts": {
     "test": "karma start",
@@ -25,5 +26,11 @@
   },
   "dependencies": {
     "karma": "^6.4.4"
+  },
+  "ui5": {
+    "dependencies": [
+      "ui5-task-zipper",
+      "@sap/ux-ui5-tooling"
+    ]
   }
 }

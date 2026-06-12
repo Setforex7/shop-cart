@@ -6,6 +6,14 @@ metadata:
   name: cap_try
 type: application
 builder:
+  customTasks:
+    # Zip the build output so the MTA com.sap.application.content deployer can
+    # pick up `shopcartcap_try.zip` (must match the artifact name in mta.yaml).
+    - name: ui5-task-zipper
+      afterTask: generateComponentPreload
+      configuration:
+        archiveName: shopcartcap_try
+        keepResources: true
   resources:
     excludes:
       - "/test/**"
