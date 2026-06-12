@@ -3,8 +3,9 @@ sap.ui.define([
     "cap_try/controller/DialogHandler",
     "sap/ui/core/Fragment",
     "cap_try/service/CartService",
+    "sap/base/Log",
     "sap/ui/thirdparty/sinon"
-], function (DialogHandler, Fragment, CartService, sinon) {
+], function (DialogHandler, Fragment, CartService, Log, sinon) {
     "use strict";
 
     QUnit.module("cap_try.controller.DialogHandler", {
@@ -197,6 +198,7 @@ sap.ui.define([
     QUnit.test("_openCartDialog resets the cache when fragment loading fails", function (assert) {
         const done = assert.async();
         this.sandbox.stub(Fragment, "load").returns(Promise.reject(new Error("load failed")));
+        this.sandbox.stub(Log, "error");
         const oBindStub = this.sandbox.stub(CartService, "bindDataToFragment");
 
         this.oDialogHandler._openCartDialog().then(function () {

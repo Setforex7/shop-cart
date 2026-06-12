@@ -15,10 +15,6 @@ class ShopCartService extends cds.ApplicationService { async init() {
 
   this.after('READ', 'Products', productsHandler.afterReadProducts);
 
-  this.before('READ', 'Cart', cartHandler.beforeReadCart);
-
-  this.after('READ', 'Cart', cartHandler.afterReadCart);
-
   this.before('CREATE', 'Products', productsHandler.beforeCreateProducts);
 
   this.before("DELETE", "Products", productsHandler.beforeDeleteProducts);

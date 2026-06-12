@@ -1,6 +1,6 @@
 const cds = require('@sap/cds');
 
-const { CartItem } = cds.entities;
+const { CartItem, OrderItems } = cds.entities;
 
 const validateProductCreateData = product => {
     if(!product) return { status: false, message: 'Something went wrong creating the product' };
@@ -22,6 +22,10 @@ const beforeCreateProducts = async req => {
 
 const beforeDeleteProducts = async req => {
     const { ID } = req.data;
+
+    const [{ count }] = await SELECT.from(OrderItems).where({ product_ID: ID }).columns('count(*) as count');
+    if (count > 0) return req.reject(409, 'Cannot delete a product that is referenced by existing orders.');
+
     await DELETE.from(CartItem).where({ product_ID: ID });
 };
 

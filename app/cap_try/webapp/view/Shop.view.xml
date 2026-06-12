@@ -63,7 +63,7 @@
                             <Label text="{i18n>description}" />
                             <Text text="{globalModel>description}" />
                             <Label text="{i18n>capital}" />
-                            <Text id="" text="{globalModel>capital} {globalModel>currency}" />
+                            <Text id="" text="{globalModel>capital} {globalModel>currency_code}" />
                         </f:content>
                     </f:SimpleForm>
                 </VBox>

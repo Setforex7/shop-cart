@@ -33,7 +33,10 @@
   },
   "jest": {
     "testEnvironment": "node",
-    "testTimeout": 20000
+    "testTimeout": 20000,
+    "modulePathIgnorePatterns": [
+      "<rootDir>/gen/"
+    ]
   },
   "cds": {
     "requires": {

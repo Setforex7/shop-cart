@@ -2,25 +2,11 @@ const cds = require('@sap/cds');
 
 const { Company, Products, Cart, CartItem, Orders } = cds.entities;
 
-const beforeReadCart = async req => { req.data.user_id = req.user.id };
-
-const afterReadCart = async (carts) => {
-    if (!Array.isArray(carts)) carts = [carts];
-
-    for (const cart of carts) {
-      const products = await SELECT.from(CartItem)
-        .where({ cart_ID: cart.ID })
-        .columns(['quantity', 'price']);
-
-      cart.total_price = products.reduce((sum, product) => sum + (product.quantity * product.price), 0);
-    }
-}
-
 const beforeCreateCart = async req => {
     const cart = req.data;
     const tx = cds.transaction(req);
 
-    const carts = await tx.run(SELECT.from(Cart).orderBy({ createdAt: 'desc' }));
+    const carts = await tx.run(SELECT.from(Cart).where({ createdBy: req.user.id }).orderBy({ createdAt: 'desc' }));
 
     const match = carts.length > 0 ? carts[0]?.name?.match(/(\d+)\s*$/) : null;
     const lastNumber = match ? parseInt(match[1], 10) : 0;
@@ -59,15 +45,9 @@ const addProductToCart = async req => {
             await tx.run(INSERT.into(CartItem).entries({ cart_ID: cart_ID,
                                                          product_ID: sProductId,
                                                          quantity: 1,
-                                                         price: product.price,
                                                          currency_code: company.currency_code }));
         }
     }
-
-    const cartItems = await tx.run(SELECT.from(CartItem).where({ cart_ID: cart_ID }));
-    const total_price = cartItems.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-
-    await tx.run(UPDATE(Cart, cart_ID).with({ total_price: total_price }));
 
     const updatedCart = await tx.run(SELECT.one.from(Cart).where({ ID: cart_ID })
                                                           .columns(c => { c('*'),
@@ -132,8 +112,6 @@ const finalizeCart = async req => {
     return newOrder;
 }
 
-module.exports = { beforeReadCart,
-                   afterReadCart,
-                   beforeCreateCart,
+module.exports = { beforeCreateCart,
                    addProductToCart,
                    finalizeCart };

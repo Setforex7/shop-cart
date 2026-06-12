@@ -219,5 +219,41 @@ describe('Products', () => {
                 expect(e.response.status).toBe(403);
             }
         });
+
+        test('rejects deletion of a product referenced by an order (409)', async () => {
+            const { data: product } = await POST('/shop/Products', {
+                name: 'Ordered Product',
+                company_ID: TECH_COMPANY_ID,
+                price: 15,
+                stock: 10,
+                stock_min: 1
+            }, { auth: { username: 'alice' } });
+
+            const { data: cart } = await POST('/shop/Cart', {
+                company_ID: TECH_COMPANY_ID,
+                currency_code: 'EUR'
+            }, { auth: { username: 'alice' } });
+
+            await POST(
+                `/shop/Cart(${cart.ID})/ShopCartService.addProductsToCart`,
+                { product_IDs: [product.ID] },
+                { auth: { username: 'alice' } }
+            );
+
+            await POST(
+                `/shop/Cart(${cart.ID})/ShopCartService.finalizeCart`,
+                {},
+                { auth: { username: 'alice' } }
+            );
+
+            try {
+                await DELETE(`/shop/Products(${product.ID})`, {
+                    auth: { username: 'alice' }
+                });
+                fail('Should have rejected');
+            } catch (e) {
+                expect(e.response.status).toBe(409);
+            }
+        });
     });
 });

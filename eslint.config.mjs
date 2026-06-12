@@ -8,7 +8,8 @@ export default [
             'gen/',
             'app/router/',
             'app/cap_try/webapp/util/',
-            'app/cap_try/webapp/test/'
+            'app/cap_try/webapp/test/',
+            'app/cap_try/dist/'
         ]
     },
     {

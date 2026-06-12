@@ -1,5 +1,3 @@
-/* eslint-env node */
-
 // Karma configuration for cap_try.
 //
 // Added so `sapui5-validate generate` has a working test runner to verify the

@@ -80,7 +80,7 @@ sap.ui.define([
                 }.bind(this));
             }
 
-            if (this._dDialogAddProduct) this._dDialogAddProduct.then(oDialog => oDialog.open());
+            if (this._dDialogAddProduct) this._dDialogAddProduct.then(oDialog => { if (oDialog) oDialog.open(); });
         },
 
         _closeAddProductDialog: function () {
@@ -101,7 +101,7 @@ sap.ui.define([
                 }.bind(this));
             }
 
-            if (this._dDialogEditProduct) this._dDialogEditProduct.then(oDialog => oDialog.open());
+            if (this._dDialogEditProduct) this._dDialogEditProduct.then(oDialog => { if (oDialog) oDialog.open(); });
         },
 
         _closeEditProductDialog: function () {

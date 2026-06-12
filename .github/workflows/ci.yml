@@ -37,3 +37,29 @@ jobs:
 
       - name: Test
         run: npm test
+
+  frontend-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: app/cap_try
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: app/cap_try/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test (QUnit via Karma)
+        run: npm test
