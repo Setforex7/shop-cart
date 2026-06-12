@@ -10,7 +10,8 @@
     "@sap/xssec": "^4",
     "exceljs": "^4.4.0",
     "express": "^4",
-    "node-cron": "^4.2.1"
+    "node-cron": "^4.2.1",
+    "@cap-js/hana": "^1"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^0.4.1",
@@ -49,7 +50,15 @@
             ]
           }
         }
-      }
+      },
+      "[production]": {
+        "db": "hana",
+        "auth": "xsuaa"
+      },
+      "html5-runtime": true
+    },
+    "sql": {
+      "native_hana_associations": false
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "welcomeFile": "/cap_try/index.html",
+  "welcomeFile": "/index.html",
   "authenticationMethod": "route",
   "routes": [
     {

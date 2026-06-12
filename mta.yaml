@@ -4,6 +4,7 @@ version: 1.0.0
 description: "A simple CAP project."
 parameters:
   enable-parallel-deployments: true
+  deploy_mode: html5-repo
 build-parameters:
   before-all:
     - builder: custom
@@ -42,6 +43,12 @@ modules:
           url: ~{srv-url}
           forwardAuthToken: true
       - name: shop-cart-auth
+      - name: shop-cart-html5-runtime
+    provides:
+      - name: app-api
+        properties:
+          app-protocol: ${protocol}
+          app-uri: ${default-uri}
 
   - name: shop-cart-db-deployer
     type: hdb
@@ -50,6 +57,33 @@ modules:
       buildpack: nodejs_buildpack
     requires:
       - name: shop-cart-db
+
+  - name: shop-cart-app-deployer
+    type: com.sap.application.content
+    path: gen
+    requires:
+      - name: shop-cart-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: app/
+      requires:
+        - name: shopcartcap_try
+          artifacts:
+            - cap_try.zip
+          target-path: app/
+
+  - name: shopcartcap_try
+    type: html5
+    path: app/cap_try
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms:
+        []
 
 resources:
   - name: shop-cart-db
@@ -66,3 +100,14 @@ resources:
       config:
         xsappname: shop-cart-${org}-${space}
         tenant-mode: dedicated
+
+  - name: shop-cart-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+  - name: shop-cart-html5-runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime

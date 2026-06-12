@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+# Build configuration for Cloud Foundry / HTML5 App Repository deployment.
+# Excludes local test assets so they are not shipped to the repo.
+specVersion: "3.1"
+metadata:
+  name: cap_try
+type: application
+builder:
+  resources:
+    excludes:
+      - "/test/**"
+      - "/localService/**"
