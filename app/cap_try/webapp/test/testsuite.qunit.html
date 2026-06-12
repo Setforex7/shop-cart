@@ -15,7 +15,19 @@
   <script>
     QUnit.config.autostart = false;
     sap.ui.require([
-      "cap_try/test/unit/AllTests.qunit"
+      "cap_try/test/unit/AllTests.qunit",
+      "cap_try/test/unit/controller/App.controller.qunit",
+      "cap_try/test/unit/controller/BaseController.qunit",
+      "cap_try/test/unit/controller/DialogHandler.qunit",
+      "cap_try/test/unit/controller/Settings.controller.qunit",
+      "cap_try/test/unit/formatters/formatter.qunit",
+      "cap_try/test/unit/model/models.qunit",
+      "cap_try/test/unit/controller/Shop.controller.qunit",
+      "cap_try/test/unit/service/CompanyService.qunit",
+      "cap_try/test/unit/service/CartService.qunit",
+      "cap_try/test/unit/service/FileService.qunit",
+      "cap_try/test/unit/service/MessageService.qunit",
+      "cap_try/test/unit/service/ProductService.qunit"
     ], function () {
       QUnit.start();
     });
