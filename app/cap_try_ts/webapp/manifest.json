@@ -1,0 +1,143 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "cap_try_ts",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "1.134.0"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.17.0",
+      "toolsId": "32d91f92-b2c7-4fc7-9bc8-aa601d20eabf"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/shop/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "dependencies": {
+      "minUI5Version": "1.136.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "cap_try_ts.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "groupId": "$auto",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "js": [
+        {
+          "uri": "util/xlsx.full.min.js"
+        }
+      ],
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "controlAggregation": "pages",
+        "controlId": "app",
+        "transition": "slide",
+        "type": "View",
+        "viewType": "XML",
+        "path": "cap_try_ts.view",
+        "async": true,
+        "viewPath": "cap_try_ts.view"
+      },
+      "routes": [
+        {
+          "name": "Shop",
+          "pattern": "",
+          "target": [
+            "Shop"
+          ]
+        },
+        {
+          "name": "Reports",
+          "pattern": "Reports",
+          "target": [
+            "Reports"
+          ]
+        },
+        {
+          "name": "Settings",
+          "pattern": "Settings",
+          "target": [
+            "Settings"
+          ]
+        }
+      ],
+      "targets": {
+        "Shop": {
+          "id": "Shop",
+          "name": "Shop"
+        },
+        "Reports": {
+          "id": "Reports",
+          "name": "Reports"
+        },
+        "Settings": {
+          "id": "Settings",
+          "name": "Settings"
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "cap_try_ts.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}

@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "3.1"
+metadata:
+  name: cap_try_ts
+type: application
+builder:
+  customTasks:
+    # Transpile webapp/**/*.ts -> JavaScript during `ui5 build`.
+    - name: ui5-tooling-transpile-task
+      afterTask: replaceVersion
+      configuration:
+        debug: true
+        omitSourceMaps: false
+        transpileAsync: true
+        transpileDependencies: false
+server:
+  customMiddleware:
+    # Transpile *.ts on the fly so `ui5 serve` (and karma-ui5) deliver JS.
+    # Must run before the proxy so app sources are transpiled locally.
+    - name: ui5-tooling-transpile-middleware
+      afterMiddleware: compression
+      configuration:
+        debug: true
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertError: false # If set to true, certificate errors will be ignored. E.g. self-signed certificates will be accepted
+        # Forward the OData service to the local CAP backend (cds watch).
+        backend:
+          - path: /shop
+            url: http://localhost:4004
+        ui5:
+          path:
+            - /resources
+            - /test-resources
+          url: https://sapui5.hana.ondemand.com
+    - name: fiori-tools-appreload
+      afterMiddleware: compression
+      configuration:
+        port: 35729
+        path: webapp
+        delay: 300

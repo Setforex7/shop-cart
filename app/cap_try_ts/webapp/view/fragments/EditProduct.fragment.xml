@@ -1,0 +1,63 @@
+<core:FragmentDefinition 
+    xmlns="sap.m" 
+    xmlns:l="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
+    <Dialog id="editProduct"
+            title="{i18n>edit_product}"
+            contentWidth="500px"
+            contentHeight="auto"
+            draggable="true"
+            resizable="true">
+        
+        <content>
+            <l:Form editable="true" binding="{globalModel>/selectedProduct}" >
+                <l:layout>
+                    <l:ResponsiveGridLayout labelSpanL="4" labelSpanM="2"
+                                            emptySpanL="0" emptySpanM="0"
+                                            columnsL="2" columnsM="1" />
+                </l:layout>
+                <l:formContainers>
+                    <l:FormContainer title="{i18n>product_details}" expandable="true" expanded="true">
+                        <l:formElements>
+                            <l:FormElement label="{i18n>name}">
+                                <l:fields>
+                                    <Input value="{globalModel>name}" type="Text" placeholder="{i18n>insert_name}" required="true" />
+                                </l:fields>
+                            </l:FormElement>
+                            <l:FormElement label="{i18n>description}">
+                                <l:fields>
+                                    <Input value="{globalModel>description}" type="Text" placeholder="{i18n>insert_description}" />
+                                </l:fields>
+                            </l:FormElement>
+                            <l:FormElement label="{i18n>price}">
+                                <l:fields>
+                                    <Input value="{ path: 'globalModel>price',
+                                                    type: 'sap.ui.model.type.Float',
+                                                    formatOptions: { minFractionDigits: 2,
+                                                                     maxFractionDigits: 2 } }" required="true" />
+                                </l:fields>
+                            </l:FormElement>
+                            <l:FormElement label="{i18n>stock_min}">
+                                <l:fields>
+                                    <Input value="{globalModel>stock_min}" type="Number" required="true" />
+                                </l:fields>
+                            </l:FormElement>
+                            <l:FormElement label="{i18n>stock}"> 
+                                <l:fields>
+                                    <Input value="{globalModel>stock}" type="Number" required="true" />
+                                </l:fields>
+                            </l:FormElement>
+                        </l:formElements>
+                    </l:FormContainer>
+                </l:formContainers>
+            </l:Form>
+        </content>
+        
+        <beginButton>
+            <Button text="{i18n>edit}" type="Success" press="onEditProduct" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press="closeEditProductDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

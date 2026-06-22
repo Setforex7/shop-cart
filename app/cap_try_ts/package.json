@@ -1,0 +1,48 @@
+{
+  "name": "cap_try_ts",
+  "version": "0.0.1",
+  "description": "An SAP Fiori application. TypeScript replica of cap_try, built with ui5-tooling-transpile.",
+  "keywords": [
+    "ui5",
+    "openui5",
+    "sapui5",
+    "typescript"
+  ],
+  "main": "webapp/index.html",
+  "scripts": {
+    "build": "ui5 build --config ui5-deploy.yaml --clean-dest --dest dist",
+    "build:open": "ui5 build --config ui5-deploy.yaml --clean-dest --dest dist && node -e \"const u='http://localhost:4004/cap_try_ts/dist/index.html';const{exec}=require('child_process');const c=process.platform==='win32'?'start \\\"\\\" \\\"'+u+'\\\"':process.platform==='darwin'?'open \\\"'+u+'\\\"':'xdg-open \\\"'+u+'\\\"';console.log('Built. Opening '+u+' (cds must be running at the repo root).');exec(c,()=>{});\"",
+    "start": "ui5 serve --config ui5.yaml --open index.html",
+    "ts-typecheck": "tsc --noEmit",
+    "lint": "ui5lint",
+    "test": "karma start",
+    "deploy-config": "npx -p @sap/ux-ui5-tooling fiori add deploy-config cf"
+  },
+  "devDependencies": {
+    "@sap/eslint-plugin-ui5-jsdocs": "2.0.5",
+    "@sap/ux-ui5-tooling": "1",
+    "@sapui5/types": "~1.136.0",
+    "@types/qunit": "^2.19.10",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@ui5/cli": "^3.0.0",
+    "@ui5/linter": "^1.21.0",
+    "eslint": "8.57.0",
+    "karma": "^6.4.4",
+    "karma-chrome-launcher": "^3.2.0",
+    "karma-ui5": "^4.1.0",
+    "typescript": "^5.5.4",
+    "ui5-task-zipper": "^3.6.1",
+    "ui5-tooling-transpile": "^3.5.0"
+  },
+  "ui5": {
+    "dependencies": [
+      "ui5-task-zipper",
+      "ui5-tooling-transpile",
+      "@sap/ux-ui5-tooling"
+    ]
+  },
+  "dependencies": {
+    "shop-cart": "file:../.."
+  }
+}

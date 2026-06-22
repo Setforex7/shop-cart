@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "es2022",
+    "moduleResolution": "node",
+    "lib": ["es2022", "dom"],
+    "strict": true,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "rootDir": "webapp",
+    "baseUrl": "./",
+    "paths": {
+      "cap_try_ts/*": ["./webapp/*"]
+    },
+    "types": [
+      "@sapui5/types",
+      "qunit"
+    ],
+    "noEmit": true
+  },
+  "include": ["webapp/**/*.ts"],
+  "exclude": ["node_modules", "dist", "webapp/util/**"]
+}

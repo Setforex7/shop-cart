@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+# Build configuration for Cloud Foundry / HTML5 App Repository deployment.
+# Transpiles TypeScript, then zips the build output. Excludes local test assets.
+specVersion: "3.1"
+metadata:
+  name: cap_try_ts
+type: application
+builder:
+  customTasks:
+    # Transpile webapp/**/*.ts -> JavaScript before the standard build tasks
+    # consume the sources (preload, zipper).
+    - name: ui5-tooling-transpile-task
+      afterTask: replaceVersion
+      configuration:
+        debug: true
+        omitSourceMaps: false
+        transpileAsync: true
+        transpileDependencies: false
+    # Zip the build output so the MTA com.sap.application.content deployer can
+    # pick up `shopcartcap_try_ts.zip`.
+    - name: ui5-task-zipper
+      afterTask: generateComponentPreload
+      configuration:
+        archiveName: shopcartcap_try_ts
+        keepResources: true
+  resources:
+    excludes:
+      - "/test/**"
+      - "/localService/**"

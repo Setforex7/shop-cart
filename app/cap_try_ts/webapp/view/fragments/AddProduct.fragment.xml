@@ -1,0 +1,61 @@
+<core:FragmentDefinition 
+    xmlns="sap.m" 
+    xmlns:l="sap.ui.layout.form"
+    xmlns:core="sap.ui.core">
+    <Dialog
+        id="AddProduct"
+        title="{i18n>add_product}"
+        contentWidth="500px"
+        contentHeight="auto"
+        draggable="true"
+        resizable="true">
+        
+        <content>
+            <l:Form editable="true" binding="{globalModel>/product}">
+                <l:layout>
+                    <l:ResponsiveGridLayout labelSpanL="4" labelSpanM="2"
+                                            emptySpanL="0" emptySpanM="0"
+                                            columnsL="2" columnsM="1" />
+                </l:layout>
+                <l:formContainers>
+                    <l:FormContainer title="{i18n>product_details}" expandable="true" expanded="true">
+                        <l:formElements>
+                            <l:FormElement label="{i18n>name}">
+                                <l:fields>
+                                    <Input value="{globalModel>name}" type="Text" placeholder="{i18n>insert_name}" required="true" />
+                                </l:fields>
+                            </l:FormElement>
+                            <l:FormElement label="{i18n>description}">
+                                <l:fields>
+                                    <Input value="{globalModel>description}" type="Text" placeholder="{i18n>insert_description}" />
+                                </l:fields>
+                            </l:FormElement>
+                            <l:FormElement label="{i18n>price}">
+                                <l:fields>
+                                    <Input type="Number" value="{globalModel>price}" required="true" />
+                                </l:fields>
+                            </l:FormElement>
+                            <l:FormElement label="{i18n>stock_min}">
+                                <l:fields>
+                                    <Input type="Number" value="{globalModel>stock_min}" required="true" />
+                                </l:fields>
+                            </l:FormElement>
+                            <l:FormElement label="{i18n>stock}">
+                                <l:fields>
+                                    <Input type="Number" value="{globalModel>stock}" required="true" />
+                                </l:fields>
+                            </l:FormElement>
+                        </l:formElements>
+                    </l:FormContainer>
+                </l:formContainers>
+            </l:Form>
+        </content>
+        
+        <beginButton>
+            <Button text="{i18n>create}" type="Success" press="onCreateButtonPress" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press="closeAddProductDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
