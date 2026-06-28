@@ -10,6 +10,11 @@
             height: 100%;
         }
     </style>
+    <!-- SheetJS (community build) for the Excel import in service/FileService.ts.
+         Loaded as a plain global script before the UI5 bootstrap so that window.XLSX
+         is available. Replaces the deprecated sap.ui5/resources/js manifest entry
+         that was removed during the manifest v2 migration. -->
+    <script src="util/xlsx.full.min.js"></script>
     <script
         id="sap-ui-bootstrap"
         src="https://sapui5.hana.ondemand.com/1.136.2/resources/sap-ui-core.js"

@@ -1,6 +1,5 @@
 import BaseController from "cap_try_ts/controller/BaseController";
 import CompanyService from "cap_try_ts/service/CompanyService";
-import Formatter from "cap_try_ts/formatters/formatter";
 import Fragment from "sap/ui/core/Fragment";
 import Spreadsheet from "sap/ui/export/Spreadsheet";
 import Filter from "sap/ui/model/Filter";
@@ -9,7 +8,10 @@ import Event from "sap/ui/base/Event";
 import Table from "sap/ui/table/Table";
 import ListBinding from "sap/ui/model/ListBinding";
 import ODataModel from "sap/ui/model/odata/v4/ODataModel";
+import Context from "sap/ui/model/odata/v4/Context";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import Item from "sap/ui/core/Item";
+import NavigationListItem from "sap/tnt/NavigationListItem";
 
 /**
  * @namespace cap_try_ts.controller
@@ -39,7 +41,7 @@ export default class Settings extends BaseController {
         this.onCompaniesTableRefresh();
     }
 
-    public onCompanyTabSelect(oEvent: Event<Record<string, any>>): void {
+    public onCompanyTabSelect(oEvent: Event<Record<string, unknown>>): void {
         CompanyService.clearSelected(this);
         const oCompaniesTable = this.getView()!.byId("companiesTable") as Table;
         const oCompanySeletedTab = oEvent.getParameter("key");
@@ -54,8 +56,8 @@ export default class Settings extends BaseController {
         (oCompaniesTable.getBinding("rows") as ListBinding).refresh();
     }
 
-    public async onCompaniesTableSelection(oEvent: Event<Record<string, any>>): Promise<void> {
-        const oCompaniesSelected = oEvent.getParameter("rowContext");
+    public async onCompaniesTableSelection(oEvent: Event<Record<string, unknown>>): Promise<void> {
+        const oCompaniesSelected = oEvent.getParameter("rowContext") as Context | undefined;
         if (!oCompaniesSelected) return;
         const oCompanyBinding = (this.getModel() as ODataModel).bindContext(oCompaniesSelected.getPath());
         const oCompanyContext = await oCompanyBinding.requestObject();
@@ -71,29 +73,29 @@ export default class Settings extends BaseController {
         (this.getModel("globalModel") as JSONModel).refresh(true);
     }
 
-    public onCreateCompanyNameChange(oEvent: Event<Record<string, any>>): void {
+    public onCreateCompanyNameChange(oEvent: Event<Record<string, unknown>>): void {
         const sName = oEvent.getParameter("value");
         this.setProp("globalModel", "/selectedCompany/name", sName);
     }
 
-    public onCreateCompanyDescriptionChange(oEvent: Event<Record<string, any>>): void {
+    public onCreateCompanyDescriptionChange(oEvent: Event<Record<string, unknown>>): void {
         const sDescription = oEvent.getParameter("value");
         this.setProp("globalModel", "/selectedCompany/description", sDescription);
     }
 
-    public onCreateCompanyCapitalChange(oEvent: Event<Record<string, any>>): void {
+    public onCreateCompanyCapitalChange(oEvent: Event<Record<string, unknown>>): void {
         const iCapital = oEvent.getParameter("value");
         this.setProp("globalModel", "/selectedCompany/capital", iCapital);
     }
 
-    public onCreateCompanyCurrencyChange(oEvent: Event<Record<string, any>>): void {
-        const oSelectedItem = oEvent.getParameter("selectedItem");
+    public onCreateCompanyCurrencyChange(oEvent: Event<Record<string, unknown>>): void {
+        const oSelectedItem = oEvent.getParameter("selectedItem") as Item | undefined;
         if (!oSelectedItem) return;
         this.setProp("globalModel", "/selectedCompany/currency_code", oSelectedItem.getKey());
     }
 
-    public onSideBarItemSelect(oEvent: Event<Record<string, any>>): void {
-        const sSelectedItem = oEvent.getParameter("item").getKey();
+    public onSideBarItemSelect(oEvent: Event<Record<string, unknown>>): void {
+        const sSelectedItem = (oEvent.getParameter("item") as NavigationListItem).getKey();
 
         switch (sSelectedItem) {
             case "carts": this.getDialogHandler()._openCartsFragment();
@@ -103,9 +105,9 @@ export default class Settings extends BaseController {
         }
     }
 
-    public onCompanyChange(oEvent: Event<Record<string, any>>): void {
+    public onCompanyChange(oEvent: Event<Record<string, unknown>>): void {
         const oView = this.getView()!;
-        const sCompanyID = oEvent.getParameter("selectedItem")?.getKey();
+        const sCompanyID = (oEvent.getParameter("selectedItem") as Item | undefined)?.getKey();
         const oCartsTable = Fragment.byId(oView.getId(), "cartsFragmentTable") as Table;
         const oCartItemsTable = Fragment.byId(oView.getId(), "cartItemsFragmentTable") as Table;
 
@@ -123,9 +125,9 @@ export default class Settings extends BaseController {
         ]);
     }
 
-    public onCartAdminTableSelection(oEvent: Event<Record<string, any>>): void {
+    public onCartAdminTableSelection(oEvent: Event<Record<string, unknown>>): void {
         const oView = this.getView()!;
-        const oRowContext = oEvent.getParameter("rowContext");
+        const oRowContext = oEvent.getParameter("rowContext") as Context | undefined;
         const oCartItemsTable = Fragment.byId(oView.getId(), "cartItemsFragmentTable") as Table;
 
         if (!oCartItemsTable) return;

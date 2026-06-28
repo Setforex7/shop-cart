@@ -7,11 +7,29 @@ import type Context from "sap/ui/model/odata/v4/Context";
 
 const sEntityProducts = "/Products";
 
+interface ProductCreateData {
+    name: string;
+    description: string;
+    company_ID: string;
+    price: number;
+    stock_min: number;
+    stock: number;
+}
+
+interface ProductEditData {
+    metadata: Context;
+    name: string;
+    description: string;
+    price: number;
+    stock: number;
+    stock_min: number;
+}
+
 /**
  * @namespace cap_try_ts.service
  */
 export default {
-    async create(oController: BaseController, oProduct: any): Promise<void> {
+    async create(oController: BaseController, oProduct: ProductCreateData): Promise<void> {
         try {
             const oProductsList = (oController.getModel() as ODataModel).bindList(sEntityProducts);
             const oCreatedContext = oProductsList.create(oProduct);
@@ -24,7 +42,7 @@ export default {
             });
             MessageBox.success(oController.getI18nText("product_created_success", [name]));
             oController.setProp("globalModel", "/product", {});
-            (oController.getDialogHandler() as any)._closeAddProductDialog();
+            oController.getDialogHandler()._closeAddProductDialog();
             this.loadByCompany(oController);
         } catch {
             oController._addMessage({
@@ -36,18 +54,19 @@ export default {
         }
     },
 
-    async createBatch(oController: BaseController, aProducts: any[]): Promise<void> {
+    async createBatch(oController: BaseController, aProducts: unknown[]): Promise<void> {
         const { ID } = oController.getProp("globalModel", "/selectedCompany");
         try {
             const oProductsList = (oController.getModel() as ODataModel).bindList(sEntityProducts,
                 undefined,
                 undefined,
                 undefined,
-                { batchGroupId: "editProducts" } as any);
+                { batchGroupId: "editProducts" } as object);
 
             aProducts.forEach(oProduct => {
-                Object.assign(oProduct, { company_ID: ID });
-                oProductsList.create(oProduct);
+                const oRow = oProduct as Record<string, unknown>;
+                Object.assign(oRow, { company_ID: ID });
+                oProductsList.create(oRow);
             });
             await (oController.getModel() as ODataModel).submitBatch("editProducts");
 
@@ -55,7 +74,7 @@ export default {
                 oController._addMessage({
                     type: "Success",
                     title: oController.getI18nText("success"),
-                    subtitle: oController.getI18nText("product_created_success", [oProduct.name])
+                    subtitle: oController.getI18nText("product_created_success", [(oProduct as { name?: string }).name])
                 });
             });
 
@@ -71,7 +90,7 @@ export default {
         }
     },
 
-    async edit(oController: BaseController, oProduct: any): Promise<void> {
+    async edit(oController: BaseController, oProduct: ProductEditData): Promise<void> {
         const { metadata, name, description, price, stock, stock_min } = oProduct;
 
         const oNewProductData = { name, description, price, stock, stock_min };

@@ -30,7 +30,7 @@ export default {
 
         try {
             const oFinalizeCartAction = oDataModel.bindContext(sEntityCart + `(${sCartID})/ShopCartService.finalizeCart(...)`) as ODataContextBinding;
-            await oFinalizeCartAction.execute();
+            await oFinalizeCartAction.invoke();
 
             await this.assignOnCompanyLoad(oController);
             this.bindDataToFragment(oController);
@@ -94,7 +94,7 @@ export default {
         try {
             const oAddManyToCartAction = oDataModel.bindContext(sEntityCart + `(${ID})/ShopCartService.addProductsToCart(...)`) as ODataContextBinding;
             oAddManyToCartAction.setParameter("product_IDs", aProducts);
-            await oAddManyToCartAction.execute();
+            await oAddManyToCartAction.invoke();
             const oReturnedResponse = oAddManyToCartAction.getBoundContext();
             const { items } = oReturnedResponse.getObject();
 

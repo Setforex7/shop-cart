@@ -1,6 +1,5 @@
 import BaseController from "cap_try_ts/controller/BaseController";
 import Spreadsheet from "sap/ui/export/Spreadsheet";
-import Formatter from "cap_try_ts/formatters/formatter";
 import Filter from "sap/ui/model/Filter";
 import FilterOperator from "sap/ui/model/FilterOperator";
 import { LayoutType } from "sap/f/library";
@@ -9,6 +8,7 @@ import Table from "sap/ui/table/Table";
 import Select from "sap/m/Select";
 import FlexibleColumnLayout from "sap/f/FlexibleColumnLayout";
 import ListBinding from "sap/ui/model/ListBinding";
+import Context from "sap/ui/model/odata/v4/Context";
 
 const sEntityCompany = "/Company";
 
@@ -37,7 +37,7 @@ export default class Reports extends BaseController {
                  { label: this.getI18nText("created_by"), property: 'createdBy', type: 'string' } ];
     }
 
-    public async onCompanyChange(oEvent: Event<Record<string, any>>): Promise<void> {
+    public async onCompanyChange(oEvent: Event<Record<string, unknown>>): Promise<void> {
         const oView = this.getView()!;
         oView.setBusy(true);
 
@@ -79,8 +79,8 @@ export default class Reports extends BaseController {
         oExcelSheet.build().finally(function() { oExcelSheet.destroy(); });
     }
 
-    public onOrderPress(oEvent: Event<Record<string, any>>): void {
-        const oOrderContext = oEvent.getParameter("rowBindingContext");
+    public onOrderPress(oEvent: Event<Record<string, unknown>>): void {
+        const oOrderContext = oEvent.getParameter("rowBindingContext") as Context | undefined;
         if (!oOrderContext) return;
 
         const sOrderPath = oOrderContext.getPath();

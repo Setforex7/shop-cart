@@ -31,8 +31,9 @@
                             </l:FormElement>
                             <l:FormElement label="{i18n>price}">
                                 <l:fields>
-                                    <Input value="{ path: 'globalModel>price',
-                                                    type: 'sap.ui.model.type.Float',
+                                    <Input core:require="{ Float: 'sap/ui/model/type/Float' }"
+                                           value="{ path: 'globalModel>price',
+                                                    type: 'Float',
                                                     formatOptions: { minFractionDigits: 2,
                                                                      maxFractionDigits: 2 } }" required="true" />
                                 </l:fields>
@@ -54,10 +55,10 @@
         </content>
         
         <beginButton>
-            <Button text="{i18n>edit}" type="Success" press="onEditProduct" />
+            <Button text="{i18n>edit}" type="Success" press=".onEditProduct" />
         </beginButton>
         <endButton>
-            <Button text="{i18n>cancel}" press="closeEditProductDialog" />
+            <Button text="{i18n>cancel}" press=".closeEditProductDialog" />
         </endButton>
     </Dialog>
 </core:FragmentDefinition>

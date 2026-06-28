@@ -2,6 +2,8 @@ import Controller from "sap/ui/core/mvc/Controller";
 import DialogHandler from "cap_try_ts/controller/DialogHandler";
 import MessageService from "cap_try_ts/service/MessageService";
 import JSONModel from "sap/ui/model/json/JSONModel";
+import Filter from "sap/ui/model/Filter";
+import Sorter from "sap/ui/model/Sorter";
 import Menu from "sap/m/Menu";
 import MenuItem from "sap/m/MenuItem";
 import MessageBox from "sap/m/MessageBox";
@@ -52,7 +54,7 @@ export default class BaseController extends Controller {
         oView.setBusy(true);
         try {
             const oUserContext = (this.getModel() as ODataModel).bindContext(sFunctionGetUserInfoPath);
-            await oUserContext.execute();
+            await oUserContext.invoke();
             const oUserInfo = oUserContext.getBoundContext();
             const { id, roles } = oUserInfo.getObject() as { id: string; roles: string[] };
             this.setProp("globalModel", "/userInfo", { id, roles });
@@ -76,7 +78,7 @@ export default class BaseController extends Controller {
         return this._i18n;
     }
 
-    getI18nText(sValue: string, aParameters?: any[]): string {
+    getI18nText(sValue: string, aParameters?: unknown[]): string {
         return this.getI18n().getText(sValue, aParameters) as string;
     }
 
@@ -88,7 +90,7 @@ export default class BaseController extends Controller {
         (this.getOwnerComponent()!.getModel(sAlias) as JSONModel).setProperty(sProperty, uValue);
     }
 
-    getProp(sAlias: string, sProperty: string): any {
+    getProp(sAlias: string, sProperty: string) {
         return (this.getOwnerComponent()!.getModel(sAlias) as JSONModel).getProperty(sProperty);
     }
 
@@ -126,11 +128,11 @@ export default class BaseController extends Controller {
         this._messageService.toggleMessageView(oEvent);
     }
 
-    async _getEntityContexts(sEntity: string, sKey: string): Promise<any> {
+    async _getEntityContexts(sEntity: string, sKey: string) {
         return await (this.getOwnerComponent()!.getModel() as ODataModel).bindContext(sEntity + `('${sKey}')`).requestObject();
     }
 
-    async _getEntitySetContexts(sPath: string, oContext?: any, aSorters?: any, aFilters?: any, oParameters?: object): Promise<Context[]> {
+    async _getEntitySetContexts(sPath: string, oContext?: Context, aSorters?: Sorter | Sorter[], aFilters?: Filter | Filter[], oParameters?: object): Promise<Context[]> {
         const aEntity = await (this.getOwnerComponent()!.getModel() as ODataModel).bindList(sPath,
                                                                            oContext || undefined,
                                                                            aSorters || undefined,

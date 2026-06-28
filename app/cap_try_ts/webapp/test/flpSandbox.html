@@ -7,6 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{appTitle}}</title>
 
+    <!-- ui5lint-disable csp-unsafe-inline-script -- Generated FLP sandbox harness for local development/demo only (never used productively). The inline ushell-config and renderer-init scripts are the standard SAP sandbox bootstrap pattern and are intentional here. -->
+
+
     <!-- Bootstrap the unified shell in sandbox mode for standalone usage.
 
          The renderer is specified in the global Unified Shell configuration object "sap-ushell-config".
@@ -55,6 +58,10 @@
         };
     </script>
 
+    <!-- SheetJS (community build) for the Excel import in service/FileService.ts; loaded
+         before the bootstrap so window.XLSX is available (mirrors index.html; replaces the
+         sap.ui5/resources/js manifest entry removed during the manifest v2 migration). -->
+    <script src="../util/xlsx.full.min.js"></script>
     <script src="https://sapui5.hana.ondemand.com/1.136.2/test-resources/sap/ushell/bootstrap/sandbox.js" id="sap-ushell-bootstrap"></script>
     <!-- Bootstrap the UI5 core library. 'data-sap-ui-frameOptions="allow"'' is a NON-SECURE setting for test environments -->
     <script id="sap-ui-bootstrap"
