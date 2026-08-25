@@ -9,7 +9,10 @@ export default [
             'app/router/',
             'app/cap_try/webapp/util/',
             'app/cap_try/webapp/test/',
-            'app/cap_try/dist/'
+            'app/cap_try/dist/',
+            'app/cap_try_ts/webapp/util/',
+            'app/cap_try_ts/webapp/test/',
+            'app/cap_try_ts/dist/'
         ]
     },
     {
