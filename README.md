@@ -1,6 +1,8 @@
 # Shop Cart - SAP CAP + SAPUI5
 
-![CI](https://github.com/Setforex7/shop-cart/actions/workflows/ci.yml/badge.svg)
+![CI backend](https://github.com/Setforex7/shop-cart/actions/workflows/ci-backend.yml/badge.svg)
+![CI cap_try](https://github.com/Setforex7/shop-cart/actions/workflows/ci-cap_try.yml/badge.svg)
+![CI cap_try_ts](https://github.com/Setforex7/shop-cart/actions/workflows/ci-cap_try_ts.yml/badge.svg)
 
 A full-stack application simulating company buy/sell operations with role-based access control, multi-cart support, and order lifecycle management. Built with SAP Cloud Application Programming Model (CAP) on the backend and SAPUI5 on the frontend, deployed to SAP BTP Cloud Foundry.
 

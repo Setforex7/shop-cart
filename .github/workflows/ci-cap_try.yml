@@ -1,21 +1,27 @@
-name: CI
+name: CI cap_try
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'app/cap_try/**'
+      - 'eslint.config.mjs'
+      - '.github/workflows/ci-cap_try.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'app/cap_try/**'
+      - 'eslint.config.mjs'
+      - '.github/workflows/ci-cap_try.yml'
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
-  lint-and-test:
+  # The root ESLint config also covers app/cap_try's JS sources, so a scoped
+  # lint runs here — otherwise cap_try-only changes would go unlinted.
+  lint:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [22]
 
     steps:
       - name: Checkout repository
@@ -23,22 +29,19 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 22
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
+      - name: Lint (root ESLint, scoped to cap_try)
+        run: npx eslint app/cap_try
 
-      - name: Test
-        run: npm test
-
-  frontend-test:
+  test:
     runs-on: ubuntu-latest
 
     defaults:
@@ -51,7 +54,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Setup Node.js
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
