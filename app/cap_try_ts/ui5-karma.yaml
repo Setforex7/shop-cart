@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+# Karma-only server config (karma.conf.js -> ui5.configPath).
+#
+# Why not the main ui5.yaml: its fiori-tools-proxy points /resources at the
+# SAPUI5 CDN (sapui5.hana.ondemand.com), which does NOT serve the test
+# resources (sap/ui/thirdparty/qunit-2.js, sap/ui/qunit/qunit-junit.js both
+# 404), so QUnit never loads under karma. This config keeps the SAME
+# ui5-tooling-transpile-middleware (webapp/**/*.ts -> JS on the fly, so the
+# testsuite's *.qunit module ids resolve) but proxies the UI5 runtime + test
+# resources to the OpenUI5 CDN instead, which serves both. No OData backend or
+# appreload here — unit tests stub their services with sinon.
+specVersion: "3.1"
+metadata:
+  name: cap_try_ts
+type: application
+server:
+  customMiddleware:
+    - name: ui5-tooling-transpile-middleware
+      afterMiddleware: compression
+      configuration:
+        debug: false
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertError: false
+        ui5:
+          path:
+            - /resources
+            - /test-resources
+          # SAPUI5 CDN, same as the app's runtime target. The old karma.conf
+          # claim that it 404s the QUnit test files is no longer true (probed
+          # 2026-08-26: qunit-2.js, qunit-junit.js AND sap/ui/export/* all 200,
+          # versioned and unversioned). The OpenUI5 CDN is NOT usable here: it
+          # does not ship the commercial sap.ui.export library, which
+          # Reports.controller imports — the module load hangs the whole suite.
+          # No `version:` override — the proxy pins the manifest's
+          # minUI5Version (1.136.0), which the SAPUI5 CDN serves.
+          url: https://sapui5.hana.ondemand.com

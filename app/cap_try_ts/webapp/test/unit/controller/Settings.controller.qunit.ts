@@ -413,7 +413,12 @@ QUnit.test("onCompanyChange returns early when the fragment tables are missing",
 	const oController = this.controller as Settings;
 	const makeEvent = this.makeEvent as (m: Record<string, unknown>) => never;
 
-	(this.fragmentById as SinonStub).returns(undefined);
+	// The beforeEach configures withArgs(...) behaviours, which take precedence
+	// over the default — a bare .returns(undefined) would leave them serving the
+	// fake tables and the controller's guard would never see the missing-table
+	// case. Re-configure the same matchers instead.
+	(this.fragmentById as SinonStub).withArgs("settingsView", "cartsFragmentTable").returns(undefined);
+	(this.fragmentById as SinonStub).withArgs("settingsView", "cartItemsFragmentTable").returns(undefined);
 
 	oController.onCompanyChange(makeEvent({ selectedItem: undefined }));
 
