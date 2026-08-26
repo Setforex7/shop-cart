@@ -28,9 +28,9 @@
 
             <Label text="{i18n>actions}" visible="false" />
             <HBox>
-                <Button text="{i18n>edit}" press="onEditCompany" class="sapUiSmallMarginEnd" type="Success"
+                <Button text="{i18n>edit}" press=".onEditCompany" class="sapUiSmallMarginEnd" type="Success"
                         visible="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" />
-                <Button text="{i18n>cancel}" press="onClearSelectedCompanyData" type="Default"
+                <Button text="{i18n>cancel}" press=".onClearSelectedCompanyData" type="Default"
                         visible="{= Object.keys(${globalModel>/selectedCompany}).length !== 0}" /> 
             </HBox>
         </f:content>

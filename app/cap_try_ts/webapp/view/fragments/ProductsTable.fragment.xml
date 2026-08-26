@@ -20,7 +20,7 @@
                 <SearchField
                     width="30%"
                     placeholder="{i18n>search_by_name}"
-                    liveChange="onSearch" />
+                    liveChange=".onSearch" />
                 <u:FileUploader id="excelUploader"
                                 fileType="xlsx,xls"
                                 buttonOnly="true"
@@ -28,13 +28,13 @@
                                 icon="sap-icon://upload"
                                 sendXHR="true"
                                 useMultipart="false"
-                                change="onUploadTemplatePress" />
-                <Button 
+                                change=".onUploadTemplatePress" />
+                <Button
                     icon="sap-icon://download"
-                    press="onDownloadTemplatePress" />
+                    press=".onDownloadTemplatePress" />
                 <ToolbarSeparator />
-                <Button 
-                    press="openAddProductDialog" 
+                <Button
+                    press=".openAddProductDialog"
                     visible="{= ${globalModel>/userInfo/roles}.includes('admin') }"
                     icon="sap-icon://add-product"
                     tooltip="{i18n>add_product}" />
@@ -45,11 +45,11 @@
                     tooltip="{i18n>delete_selected_products}"
                     visible="{= ${globalModel>/userInfo/roles}.includes('admin') }"
                     class="sapUiTinyMarginBegin"
-                    press="onDeleteMultiplesProductsPress" />
+                    press=".onDeleteMultiplesProductsPress" />
                 <ToolbarSeparator visible="{= ${globalModel>/userInfo/roles}.includes('admin') }" />
                 <Button icon="sap-icon://cart-4"
                         tooltip="{i18n>add_product_to_cart}"
-                        press="addProductCart" />
+                        press=".addProductCart" />
             </OverflowToolbar>
         </headerToolbar>
 
@@ -115,27 +115,30 @@
 
                     <ObjectIdentifier text="{description}" />
                     
-                    <ObjectNumber number="{ parts: [ { path: 'price' },
+                    <ObjectNumber core:require="{ Currency: 'sap/ui/model/type/Currency' }"
+                                  number="{ parts: [ { path: 'price' },
                                                      { path: 'globalModel>/selectedCompany/currency_code' }  ],
-                                            type: 'sap.ui.model.type.Currency',
+                                            type: 'Currency',
                                             formatOptions: { showMeasure: false } }" unit="{currency}" />
                     
                     <VBox alignItems="End"> 
-                        <ObjectNumber number="{ path: 'stock', type: 'sap.ui.model.type.Integer' }"
-                                      state="{ parts: [ { path: 'stock', targetType: 'any' }, 
-                                                        { path: 'stock_min', targetType: 'any' } ], 
+                        <ObjectNumber core:require="{ Integer: 'sap/ui/model/type/Integer' }"
+                                      number="{ path: 'stock', type: 'Integer' }"
+                                      state="{ parts: [ { path: 'stock', targetType: 'any' },
+                                                        { path: 'stock_min', targetType: 'any' } ],
                                                formatter: '.formatter.stockStateFormatter' }" />
-                        <ObjectNumber number="{ path: 'stock_min', type: 'sap.ui.model.type.Integer' }" unit="{i18n>stock_min_short}" />
+                        <ObjectNumber core:require="{ Integer: 'sap/ui/model/type/Integer' }"
+                                      number="{ path: 'stock_min', type: 'Integer' }" unit="{i18n>stock_min_short}" />
                     </VBox>
 
                     <Button icon="sap-icon://edit"
                             type="Transparent"
                             tooltip="{i18n>edit_product}"
-                            press="onEditProductPress" />
+                            press=".onEditProductPress" />
                     <Button icon="sap-icon://delete"
                             type="Transparent"
                             tooltip="{i18n>delete_products}"
-                            press="onDeleteProductPress" />
+                            press=".onDeleteProductPress" />
                 </cells>
             </ColumnListItem>
         </items>

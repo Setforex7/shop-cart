@@ -198,7 +198,7 @@ export default class Shop extends BaseController {
         return true;
     }
 
-    onCartsSelectChange(oEvent: Event<Record<string, any>>): void {
+    onCartsSelectChange(oEvent: Event<Record<string, unknown>>): void {
         const oSelectedItem = oEvent.getParameter("selectedItem") as ManagedObject | null;
         if (!oSelectedItem) return;
 
@@ -245,7 +245,7 @@ export default class Shop extends BaseController {
         CartService.assignOnCompanyLoad(this);
     }
 
-    onProductCartQuantityChangePress(oEvent: Event<Record<string, any>>): void {
+    onProductCartQuantityChangePress(oEvent: Event<Record<string, unknown>>): void {
         const iNewQuantity = oEvent.getParameter("value") as number;
         const oContext = (oEvent.getSource() as Control).getBindingContext() as Context | null;
 
@@ -260,7 +260,7 @@ export default class Shop extends BaseController {
         }
     }
 
-    onSearch(oEvent: Event<Record<string, any>>): void {
+    onSearch(oEvent: Event<Record<string, unknown>>): void {
         const sQuery = oEvent.getParameter("newValue") as string;
         const oProductsTable = this.getView()!.byId("productsWorklist") as Table;
         const oBinding = oProductsTable.getBinding("items") as ReturnType<Table["getBinding"]> & { filter(aFilters: Filter[]): void };

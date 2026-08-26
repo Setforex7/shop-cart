@@ -1,6 +1,5 @@
 import IconPool from "sap/ui/core/IconPool";
 import type Control from "sap/ui/core/Control";
-import Link from "sap/m/Link";
 import MessageItem from "sap/m/MessageItem";
 import MessageView from "sap/m/MessageView";
 import Button from "sap/m/Button";

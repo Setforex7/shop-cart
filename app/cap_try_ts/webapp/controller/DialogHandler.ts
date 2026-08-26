@@ -1,7 +1,5 @@
 import BaseObject from "sap/ui/base/Object";
 import Fragment from "sap/ui/core/Fragment";
-import Filter from "sap/ui/model/Filter";
-import FilterOperator from "sap/ui/model/FilterOperator";
 import CartService from "cap_try_ts/service/CartService";
 import Log from "sap/base/Log";
 import Control from "sap/ui/core/Control";

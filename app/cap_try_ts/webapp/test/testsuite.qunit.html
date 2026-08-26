@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <!-- ui5lint-disable prefer-test-starter, csp-unsafe-inline-script -- Validator fixture: the SAPUI5 CLI validator appends the unit tests it generates to the inline bootstrap script below. Migrating to the Test Starter concept or externalizing that script would break the validator's test-injection mechanism, so these patterns are intentional here. -->
   <title>QUnit test suite for cap_try_ts</title>
   <meta charset="utf-8">
   <script
@@ -17,7 +18,20 @@
     // Default scaffold: only the harness smoke test is registered. The SAPUI5
     // CLI validator appends the unit tests it generates to this list.
     sap.ui.require([
-      "cap_try_ts/test/unit/AllTests.qunit"
+      "cap_try_ts/test/unit/AllTests.qunit",
+      "cap_try_ts/test/unit/controller/App.controller.qunit",
+      "cap_try_ts/test/unit/controller/BaseController.qunit",
+      "cap_try_ts/test/unit/controller/DialogHandler.qunit",
+      "cap_try_ts/test/unit/controller/Reports.controller.qunit",
+      "cap_try_ts/test/unit/controller/Settings.controller.qunit",
+      "cap_try_ts/test/unit/controller/Shop.controller.qunit",
+      "cap_try_ts/test/unit/formatters/formatter.qunit",
+      "cap_try_ts/test/unit/model/models.qunit",
+      "cap_try_ts/test/unit/service/CartService.qunit",
+      "cap_try_ts/test/unit/service/CompanyService.qunit",
+      "cap_try_ts/test/unit/service/FileService.qunit",
+      "cap_try_ts/test/unit/service/MessageService.qunit",
+      "cap_try_ts/test/unit/service/ProductService.qunit"
     ], function () {
       QUnit.start();
     });

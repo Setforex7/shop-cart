@@ -1,5 +1,5 @@
 {
-  "_version": "1.65.0",
+  "_version": "2.0.0",
   "sap.app": {
     "id": "cap_try_ts",
     "type": "application",
@@ -72,11 +72,6 @@
       }
     },
     "resources": {
-      "js": [
-        {
-          "uri": "util/xlsx.full.min.js"
-        }
-      ],
       "css": [
         {
           "uri": "css/style.css"
@@ -92,7 +87,6 @@
         "type": "View",
         "viewType": "XML",
         "path": "cap_try_ts.view",
-        "async": true,
         "viewPath": "cap_try_ts.view"
       },
       "routes": [
@@ -136,8 +130,7 @@
     "rootView": {
       "viewName": "cap_try_ts.view.App",
       "type": "XML",
-      "id": "App",
-      "async": true
+      "id": "App"
     }
   }
 }

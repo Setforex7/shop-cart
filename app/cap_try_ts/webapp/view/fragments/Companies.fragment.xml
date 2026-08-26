@@ -2,11 +2,12 @@
 	xmlns="sap.m"
 	xmlns:core="sap.ui.core"
     xmlns:f="sap.ui.layout.form"
-    xmlns:table="sap.ui.table">
+    xmlns:table="sap.ui.table"
+    xmlns:rowmodes="sap.ui.table.rowmodes">
     <VBox>
         <IconTabBar id="companyManagmentTabBar"
                     class="sapUiResponsiveContentPadding"
-                    select="onCompanyTabSelect"
+                    select=".onCompanyTabSelect"
                     selectedKey="details">
             <items>
                 <IconTabFilter key="edit"
@@ -24,23 +25,25 @@
         </IconTabBar>
 
         <table:Table id="companiesTable"
-                     visibleRowCount="8"
                      selectionMode="Single"
                      selectionBehavior="Row"
-                     rowSelectionChange="onCompaniesTableSelection"
+                     rowSelectionChange=".onCompaniesTableSelection"
                      alternateRowColors="true"
                      class="sapUiResponsiveMargin"
                      rows="{ path: '/Company',
                              parameters: { $$updateGroupId: 'updateCompanies' },
                              sorter: { path: 'name' } }">
+            <table:rowMode>
+                <rowmodes:Fixed rowCount="8" />
+            </table:rowMode>
             <table:extension>
                 <OverflowToolbar>
                     <Title text="{i18n>companies_Report}" />
                     <ToolbarSeparator />
                     <ToolbarSpacer />
                     <ToolbarSpacer />
-                    <Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onCompaniesTableRefresh" />
-                    <Button icon="sap-icon://download" tooltip="{i18n>export}" press="onExportExcel" />
+                    <Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press=".onCompaniesTableRefresh" />
+                    <Button icon="sap-icon://download" tooltip="{i18n>export}" press=".onExportExcel" />
                 </OverflowToolbar>
             </table:extension>
             <table:columns>

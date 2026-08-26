@@ -15,14 +15,16 @@ module.exports = function (config) {
     // entry — listing 'qunit' here is rejected by karma-ui5.
     frameworks: ["ui5"],
 
-    // Where karma-ui5 fetches the UI5 runtime + the QUnit test resources from.
-    // Must be the OpenUI5 CDN: the SAPUI5 CDN (sapui5.hana.ondemand.com) serves
-    // the runtime for app delivery but NOT the test resources
-    // (sap/ui/thirdparty/qunit-2.js, sap/ui/qunit/qunit-junit.js — both 404),
-    // so QUnit never loads. OpenUI5 ships every control cap_try_ts uses; for
-    // controller unit tests the OpenUI5/SAPUI5 distinction is irrelevant.
+    // Boot the UI5 dev server from ui5-karma.yaml instead of proxying a CDN
+    // directly (`ui5: { url }`). The url mode short-circuits the ui5.yaml
+    // middleware chain entirely (karma-ui5 framework.js: `if (config.ui5.url)`
+    // installs only an http-proxy), so ui5-tooling-transpile never ran and
+    // every webapp/test/**/*.qunit.js request 404'd — the suite could not even
+    // load. ui5-karma.yaml keeps the transpile middleware (TS -> JS on the
+    // fly) and proxies /resources + /test-resources to the OpenUI5 CDN, which
+    // (unlike the SAPUI5 CDN) serves qunit-2.js and qunit-junit.js.
     ui5: {
-      url: "https://sdk.openui5.org"
+      configPath: "ui5-karma.yaml"
     },
 
     // Headless Chrome — no visible window. Requires karma-chrome-launcher

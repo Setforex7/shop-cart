@@ -15,17 +15,17 @@
                   binding="{globalModel>/selectedCompany}">
         <f:content>
             <Label text="{i18n>name}" />
-            <Input value="{globalModel>name}" placeholder="{i18n>insert_name}" liveChange="onCreateCompanyNameChange"
+            <Input value="{globalModel>name}" placeholder="{i18n>insert_name}" liveChange=".onCreateCompanyNameChange"
                    required="true" type="Text" width="60%" />
             <Label text="{i18n>description}" />
-            <Input value="{globalModel>description}" placeholder="{i18n>insert_description}" liveChange="onCreateCompanyDescriptionChange"
+            <Input value="{globalModel>description}" placeholder="{i18n>insert_description}" liveChange=".onCreateCompanyDescriptionChange"
                    type="Text" width="60%" />
             <Label text="{i18n>capital}" required="true" />
             <HBox alignItems="Center" width="60%">
                 <Input 
                     value="{globalModel>capital}"
                     placeholder="{i18n>capital}"
-                    liveChange="onCreateCompanyCapitalChange" 
+                    liveChange=".onCreateCompanyCapitalChange"
                     required="true" 
                     type="Number" 
                     width="90%"
@@ -39,7 +39,7 @@
                     width="80%"
                     selectedKey="{globalModel>/selectedCompany/currency_code}"
                     forceSelection="false"
-                    change="onCreateCompanyCurrencyChange">
+                    change=".onCreateCompanyCurrencyChange">
 
                     <layoutData>
                         <FlexItemData growFactor="1" /> 
@@ -55,8 +55,8 @@
                 <Button text="{i18n>create}" enabled="{= ${globalModel>/selectedCompany/name} &amp;&amp; 
                                                          ${globalModel>/selectedCompany/capital} &amp;&amp;
                                                          ${globalModel>/selectedCompany/currency_code} ? true : false }" 
-                        class="sapUiSmallMarginEnd" type="Success" press="onCreateCompany" />
-                <Button text="{i18n>clear}" press="onClearSelectedCompanyData" type="Default"
+                        class="sapUiSmallMarginEnd" type="Success" press=".onCreateCompany" />
+                <Button text="{i18n>clear}" press=".onClearSelectedCompanyData" type="Default"
                         visible="{= ${globalModel>/selectedCompany/name} || 
                                     ${globalModel>/selectedCompany/capital} ||
                                     ${globalModel>/selectedCompany/description} ? true : false }"  /> 

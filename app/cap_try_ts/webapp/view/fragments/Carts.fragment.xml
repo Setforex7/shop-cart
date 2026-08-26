@@ -6,7 +6,7 @@
     <Panel class="sapUiSmallMargin" expandable="true" expanded="true" expandAnimation="true" width="auto" headerText="{i18n>carts}">
         <table:Table id="cartsFragmentTable"
                      selectionMode="Single"
-                     rowSelectionChange="onCartAdminTableSelection"
+                     rowSelectionChange=".onCartAdminTableSelection"
                      selectionBehavior="RowOnly"
                      alternateRowColors="true"
                      class="sapUiResponsiveMargin"
@@ -17,7 +17,7 @@
                 <OverflowToolbar>
                     <ToolbarSpacer />
                     <Text text="{i18n>select_company_carts}" />
-                    <Select width="auto" change="onCompanyChange" forceSelection="false" id="companyComboBox"
+                    <Select width="auto" change=".onCompanyChange" forceSelection="false" id="companyComboBox"
                             items="{ path: '/Company',
                                     sorter: { path: 'name' } }" >
                         <items>
