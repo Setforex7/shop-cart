@@ -1,42 +1,63 @@
-import QUnit from "sap/ui/thirdparty/qunit-2";
 import DialogHandler from "cap_try_ts/controller/DialogHandler";
-import type BaseController from "cap_try_ts/controller/BaseController";
+import BaseObject from "sap/ui/base/Object";
 
-// DialogHandler extends sap.ui.base.Object and exposes only private ("_"-prefixed)
-// methods. Per the spec, no public method warrants its own QUnit.test, so the public
-// surface under test is the constructor / instantiation contract.
-//
-// NOTE: The bundled "sap/ui/thirdparty/sinon" module ships no TypeScript type
-// declarations (TS2307), and this test does not actually stub anything — the former
-// sandbox was a no-op. It is therefore removed rather than worked around.
-QUnit.module("DialogHandler", {
-	beforeEach: function (this: any) {
-		// Minimal stub of BaseController. The constructor only stores this reference;
-		// no SAPUI5 controls are instantiated here, so nothing needs destroying beyond
-		// the handler itself.
-		this.oControllerStub = {
-			getView: function () { return null; },
-			byId: function () { return null; },
-			getModel: function () { return null; },
-			getOwnerComponent: function () { return null; }
-		} as unknown as BaseController;
+let oControllerStub: any;
+let oDialogHandler: DialogHandler;
 
-		this.oDialogHandler = new DialogHandler(this.oControllerStub);
-	},
-	afterEach: function (this: any) {
-		if (this.oDialogHandler && typeof this.oDialogHandler.destroy === "function") {
-			this.oDialogHandler.destroy();
-		}
-		this.oDialogHandler = null;
-	}
+QUnit.module("cap_try_ts.controller.DialogHandler", {
+    beforeEach: function () {
+        oControllerStub = {};
+        oDialogHandler = new DialogHandler(oControllerStub);
+    },
+    afterEach: function () {
+        oDialogHandler = undefined as unknown as DialogHandler;
+        oControllerStub = undefined;
+    }
 });
 
-QUnit.test("constructor creates a DialogHandler instance", function (this: any, assert) {
-	assert.ok(this.oDialogHandler, "DialogHandler instance is truthy");
-	assert.ok(this.oDialogHandler instanceof DialogHandler, "Instance is a DialogHandler");
-	assert.strictEqual(
-		typeof this.oDialogHandler.destroy,
-		"function",
-		"DialogHandler inherits the BaseObject lifecycle (destroy)"
-	);
+QUnit.test("Constructor: should create an instance of DialogHandler", function (assert) {
+    assert.ok(oDialogHandler instanceof DialogHandler, "The created object is an instance of DialogHandler");
+});
+
+QUnit.test("Constructor: should create an instance of sap.ui.base.Object", function (assert) {
+    assert.ok(oDialogHandler instanceof BaseObject, "DialogHandler extends sap.ui.base.Object");
+});
+
+QUnit.test("Constructor: should store the given controller reference internally", function (assert) {
+    const oAny = oDialogHandler as unknown as { _oController: unknown };
+    assert.strictEqual(oAny._oController, oControllerStub, "The controller instance passed to the constructor is stored on the instance");
+});
+
+QUnit.test("Constructor: should initialize fragment and dialog references as undefined", function (assert) {
+    const oAny = oDialogHandler as unknown as {
+        _oCompaniesFragment: unknown;
+        _oCartsFragment: unknown;
+        _dDialogCart: unknown;
+        _dDialogAddProduct: unknown;
+        _dDialogEditProduct: unknown;
+    };
+
+    assert.strictEqual(oAny._oCompaniesFragment, undefined, "_oCompaniesFragment starts out undefined");
+    assert.strictEqual(oAny._oCartsFragment, undefined, "_oCartsFragment starts out undefined");
+    assert.strictEqual(oAny._dDialogCart, undefined, "_dDialogCart starts out undefined");
+    assert.strictEqual(oAny._dDialogAddProduct, undefined, "_dDialogAddProduct starts out undefined");
+    assert.strictEqual(oAny._dDialogEditProduct, undefined, "_dDialogEditProduct starts out undefined");
+});
+
+QUnit.test("isA: should identify the instance as a sap.ui.base.Object", function (assert) {
+    assert.strictEqual(oDialogHandler.isA("sap.ui.base.Object"), true, "isA reports the instance as a sap.ui.base.Object");
+});
+
+QUnit.test("isA: should return false for an unrelated type name", function (assert) {
+    assert.strictEqual(oDialogHandler.isA("sap.ui.core.mvc.Controller"), false, "isA reports false for an unrelated type name");
+});
+
+QUnit.test("getMetadata: should return a metadata object for the instance", function (assert) {
+    const oMetadata = oDialogHandler.getMetadata();
+    assert.ok(oMetadata, "getMetadata returns a truthy metadata object");
+});
+
+QUnit.test("getInterface: should return a facade object for the instance", function (assert) {
+    const oInterface = oDialogHandler.getInterface();
+    assert.ok(oInterface, "getInterface returns a truthy facade object");
 });

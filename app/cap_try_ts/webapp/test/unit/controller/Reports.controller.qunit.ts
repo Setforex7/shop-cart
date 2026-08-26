@@ -1,146 +1,160 @@
 import Reports from "cap_try_ts/controller/Reports.controller";
-import QUnit from "sap/ui/thirdparty/qunit-2";
-// @ts-ignore - the bundled thirdparty sinon (1.17) ships no type declarations
+// @ts-ignore - sap/ui/thirdparty/sinon ships no type declarations; the UI5 loader resolves this module at runtime.
 import sinon from "sap/ui/thirdparty/sinon";
+import Event from "sap/ui/base/Event";
 import Table from "sap/ui/table/Table";
-import Select from "sap/m/Select";
 import FlexibleColumnLayout from "sap/f/FlexibleColumnLayout";
-import Spreadsheet from "sap/ui/export/Spreadsheet";
 import { LayoutType } from "sap/f/library";
+import Spreadsheet from "sap/ui/export/Spreadsheet";
 
-let oController: Reports;
-let oSandbox: any;
-let oOrdersTable: Table;
-let oItemsTable: Table;
-let oFCL: FlexibleColumnLayout;
-let oSelect: Select;
-let oView: any;
-let oRouter: any;
-let oRoute: any;
-let oGlobalModel: any;
-let oRowsBinding: any;
-let oCompany: any;
+interface TestContext {
+    sandbox: any;
+    oController: Reports;
+    oOrdersTable: Table;
+    oItemsTable: Table;
+    oFcl: FlexibleColumnLayout;
+    oViewStub: { byId: any; setBusy: any };
+    oByIdStub: any;
+    oSetPropStub: any;
+    oGetPropStub: any;
+}
 
 QUnit.module("cap_try_ts.controller.Reports", {
-    beforeEach: function () {
-        oSandbox = sinon.sandbox.create();
+    beforeEach: function (this: TestContext) {
+        this.sandbox = sinon.sandbox.create();
 
-        oOrdersTable = new Table();
-        oItemsTable = new Table();
-        oFCL = new FlexibleColumnLayout();
-        oSelect = new Select();
+        this.oController = new Reports("Reports");
 
-        oRowsBinding = { refresh: oSandbox.stub() };
-        oSandbox.stub(oOrdersTable, "bindRows");
-        oSandbox.stub(oOrdersTable, "getBinding").returns(oRowsBinding);
-        oSandbox.stub(oItemsTable, "bindRows");
-        oSandbox.stub(oFCL, "setLayout");
+        this.oOrdersTable = new Table();
+        this.oItemsTable = new Table();
+        this.oFcl = new FlexibleColumnLayout();
 
-        oCompany = { ID: "C1", name: "ACME" };
-
-        oView = {
-            byId: oSandbox.stub(),
-            setBusy: oSandbox.stub()
+        this.oViewStub = {
+            byId: this.sandbox.stub(),
+            setBusy: this.sandbox.stub()
         };
-        oView.byId.withArgs("ordersTable").returns(oOrdersTable);
-        oView.byId.withArgs("itemsTable").returns(oItemsTable);
-        oView.byId.withArgs("fcl").returns(oFCL);
+        this.oViewStub.byId.withArgs("ordersTable").returns(this.oOrdersTable);
+        this.oViewStub.byId.withArgs("itemsTable").returns(this.oItemsTable);
+        this.oViewStub.byId.withArgs("fcl").returns(this.oFcl);
 
-        oRoute = {
-            attachPatternMatched: oSandbox.stub(),
-            detachPatternMatched: oSandbox.stub()
-        };
-        oRouter = { getRoute: oSandbox.stub().returns(oRoute) };
-        oGlobalModel = { refresh: oSandbox.stub() };
+        this.sandbox.stub(this.oController as any, "getView").returns(this.oViewStub);
 
-        oController = new Reports("Reports");
+        this.oByIdStub = this.sandbox.stub(this.oController as any, "byId");
+        this.oByIdStub.withArgs("ordersTable").returns(this.oOrdersTable);
 
-        oSandbox.stub(oController, "getView").returns(oView);
-        oSandbox.stub(oController, "byId").returns(oOrdersTable);
-        oSandbox.stub(oController, "getRouter").returns(oRouter);
-        oSandbox.stub(oController, "getModel").returns(oGlobalModel);
-        oSandbox.stub(oController, "getI18nText").returns("txt");
-        oSandbox.stub(oController, "getProp").returns(oCompany);
-        oSandbox.stub(oController, "setProp");
-        oSandbox.stub(oController, "_getEntityContexts").returns(Promise.resolve(oCompany));
-        oSandbox.stub(oController, "_onControllerLoad");
+        this.sandbox.stub(this.oController as any, "getI18nText").returns("i18nText");
+        this.oSetPropStub = this.sandbox.stub(this.oController as any, "setProp");
+        this.oGetPropStub = this.sandbox.stub(this.oController as any, "getProp").returns({ ID: "company-1" });
+        this.sandbox.stub(this.oController as any, "getModel").returns({ refresh: this.sandbox.stub() });
     },
-    afterEach: function () {
-        oSandbox.restore();
-        oOrdersTable.destroy();
-        oItemsTable.destroy();
-        oFCL.destroy();
-        oSelect.destroy();
-        oController.destroy();
+    afterEach: function (this: TestContext) {
+        this.oOrdersTable.destroy();
+        this.oItemsTable.destroy();
+        this.oFcl.destroy();
+        this.sandbox.restore();
     }
 });
 
-QUnit.test("onInit loads the controller and attaches the route pattern matched handler", function (assert) {
-    oController.onInit();
+QUnit.test("onInit should attach the pattern matched handler for the Reports route", function (this: TestContext, assert) {
+    const oAttachStub = this.sandbox.stub();
+    const oRouteStub = { attachPatternMatched: oAttachStub, detachPatternMatched: this.sandbox.stub() };
+    const oGetRouteStub = this.sandbox.stub().returns(oRouteStub);
+    this.sandbox.stub(this.oController as any, "getRouter").returns({ getRoute: oGetRouteStub });
+    this.sandbox.stub(this.oController as any, "_onControllerLoad");
 
-    assert.ok((oController as any)._onControllerLoad.calledOnce, "controller load logic executed once");
-    assert.ok(oRouter.getRoute.calledWith("Reports"), "the Reports route was resolved");
-    assert.ok(oRoute.attachPatternMatched.calledOnce, "the pattern matched handler was attached");
+    this.oController.onInit();
+
+    assert.ok(oGetRouteStub.calledWith("Reports"), "getRoute should be called with 'Reports'");
+    assert.ok(oAttachStub.calledOnce, "attachPatternMatched should be called exactly once");
+    assert.strictEqual(oAttachStub.firstCall.args[1], this.oController, "the pattern matched handler should be bound to the controller instance");
 });
 
-QUnit.test("onExit detaches the route pattern matched handler", function (assert) {
-    oController.onExit();
+QUnit.test("onExit should detach the pattern matched handler for the Reports route", function (this: TestContext, assert) {
+    const oDetachStub = this.sandbox.stub();
+    const oRouteStub = { attachPatternMatched: this.sandbox.stub(), detachPatternMatched: oDetachStub };
+    const oGetRouteStub = this.sandbox.stub().returns(oRouteStub);
+    this.sandbox.stub(this.oController as any, "getRouter").returns({ getRoute: oGetRouteStub });
 
-    assert.ok(oRoute.detachPatternMatched.calledOnce, "the pattern matched handler was detached");
-    assert.ok(oRouter.getRoute.calledWith("Reports"), "the Reports route was resolved");
+    this.oController.onExit();
+
+    assert.ok(oGetRouteStub.calledWith("Reports"), "getRoute should be called with 'Reports'");
+    assert.ok(oDetachStub.calledOnce, "detachPatternMatched should be called exactly once");
+    assert.strictEqual(oDetachStub.firstCall.args[1], this.oController, "the pattern matched handler should be bound to the controller instance");
 });
 
-QUnit.test("onCompanyChange stores the selection and rebinds the orders table", async function (assert) {
-    oSandbox.stub(oSelect, "getSelectedKey").returns("C1");
-    const oEvent: any = { getSource: function () { return oSelect; } };
+QUnit.test("onCompanyChange should store the resolved company and rebind the orders table", async function (this: TestContext, assert) {
+    const oFakeCompanyContext = { ID: "company-1" };
+    const oGetEntityContextsStub = this.sandbox.stub(this.oController as any, "_getEntityContexts").returns(Promise.resolve(oFakeCompanyContext));
+    const oBindRowsStub = this.sandbox.stub(this.oOrdersTable, "bindRows");
 
-    await oController.onCompanyChange(oEvent);
+    const oSelectStub = { getSelectedKey: this.sandbox.stub().returns("company-1") };
+    const oEvent = { getSource: this.sandbox.stub().returns(oSelectStub) } as unknown as Event<Record<string, unknown>>;
 
-    assert.ok(oView.setBusy.calledWith(true), "the view was set busy while loading");
-    assert.ok((oController as any).setProp.calledWith("globalModel", "/selectedCompany", oCompany), "the selected company was stored");
-    assert.ok(oGlobalModel.refresh.calledWith(true), "the global model was refreshed");
-    assert.ok((oOrdersTable.bindRows as any).calledOnce, "the orders table was rebound");
-    assert.ok(oView.setBusy.calledWith(false), "the busy state was cleared");
+    await this.oController.onCompanyChange(oEvent);
+
+    assert.ok(oGetEntityContextsStub.calledWith("/Company", "company-1"), "the selected company should be looked up by its selected key");
+    assert.ok(this.oViewStub.setBusy.calledWith(true), "the view should be marked busy while the company is loading");
+    assert.ok(this.oViewStub.setBusy.calledWith(false), "the view busy state should be cleared once loading finishes");
+    assert.ok(this.oSetPropStub.calledWith("globalModel", "/selectedCompany", oFakeCompanyContext), "the resolved company should be stored on the global model");
+    assert.ok(oBindRowsStub.calledOnce, "the orders table rows binding should be refreshed for the new company");
+    const oBindingInfo = oBindRowsStub.firstCall.args[0];
+    assert.strictEqual(oBindingInfo.path, "/Orders", "the orders table should be bound to the /Orders path");
 });
 
-QUnit.test("onOrdersTableRefresh refreshes the rows binding", function (assert) {
-    oController.onOrdersTableRefresh();
+QUnit.test("onOrdersTableRefresh should refresh the rows binding of the orders table", function (this: TestContext, assert) {
+    const oRefreshStub = this.sandbox.stub();
+    this.sandbox.stub(this.oOrdersTable, "getBinding").withArgs("rows").returns({ refresh: oRefreshStub });
 
-    assert.ok(oRowsBinding.refresh.calledOnce, "the rows binding was refreshed once");
+    this.oController.onOrdersTableRefresh();
+
+    assert.ok(oRefreshStub.calledOnce, "the rows binding of the orders table should be refreshed once");
 });
 
-QUnit.test("onExportExcel builds a spreadsheet from the orders table binding", function (assert) {
-    const oBuildStub = oSandbox.stub(Spreadsheet.prototype, "build").returns(Promise.resolve());
-    oSandbox.stub(Spreadsheet.prototype, "destroy");
+QUnit.test("onExportExcel should build and destroy a Spreadsheet export of the orders table", async function (this: TestContext, assert) {
+    this.sandbox.stub(this.oOrdersTable, "getBinding").withArgs("rows").returns({});
+    const oBuildStub = this.sandbox.stub(Spreadsheet.prototype, "build").returns(Promise.resolve());
+    const oDestroySpy = this.sandbox.spy(Spreadsheet.prototype, "destroy");
 
-    oController.onExportExcel();
+    this.oController.onExportExcel();
 
-    assert.ok((oController.byId as any).calledWith("ordersTable"), "the orders table was resolved");
-    assert.ok(oBuildStub.calledOnce, "the spreadsheet build was triggered once");
+    assert.ok(this.oByIdStub.calledWith("ordersTable"), "the orders table should be looked up to export its rows");
+    assert.ok(oBuildStub.calledOnce, "the spreadsheet build should be triggered for the export");
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    assert.ok(oDestroySpy.calledOnce, "the spreadsheet instance should be destroyed after building completes");
 });
 
-QUnit.test("onOrderPress binds the order items and expands the layout", function (assert) {
-    const oContext: any = { getPath: oSandbox.stub().returns("/Orders('1')") };
-    const oEvent: any = { getParameter: oSandbox.stub().returns(oContext) };
+QUnit.test("onOrderPress should bind the items table to the pressed order and expand the detail column", function (this: TestContext, assert) {
+    const oBindRowsStub = this.sandbox.stub(this.oItemsTable, "bindRows");
+    const oSetLayoutStub = this.sandbox.stub(this.oFcl, "setLayout");
 
-    oController.onOrderPress(oEvent);
+    const oFakeContext = { getPath: this.sandbox.stub().returns("/Orders('1')") };
+    const oEvent = { getParameter: this.sandbox.stub().withArgs("rowBindingContext").returns(oFakeContext) } as unknown as Event<Record<string, unknown>>;
 
-    assert.ok((oItemsTable.bindRows as any).calledOnce, "the items table was bound");
-    assert.deepEqual((oItemsTable.bindRows as any).firstCall.args[0], { path: "/Orders('1')/items" }, "the items table was bound to the order items path");
-    assert.ok((oFCL.setLayout as any).calledWith(LayoutType.TwoColumnsMidExpanded), "the layout was expanded to two columns");
+    this.oController.onOrderPress(oEvent);
+
+    assert.ok(oBindRowsStub.calledWith({ path: "/Orders('1')/items" }), "the items table should be bound to the selected order's items");
+    assert.ok(oSetLayoutStub.calledWith(LayoutType.TwoColumnsMidExpanded), "the layout should expand to show the detail column");
 });
 
-QUnit.test("onOrderPress does nothing without a row binding context", function (assert) {
-    const oEvent: any = { getParameter: oSandbox.stub().returns(undefined) };
+QUnit.test("onOrderPress should do nothing when no row binding context is provided", function (this: TestContext, assert) {
+    const oBindRowsStub = this.sandbox.stub(this.oItemsTable, "bindRows");
+    const oSetLayoutStub = this.sandbox.stub(this.oFcl, "setLayout");
 
-    oController.onOrderPress(oEvent);
+    const oEvent = { getParameter: this.sandbox.stub().withArgs("rowBindingContext").returns(undefined) } as unknown as Event<Record<string, unknown>>;
 
-    assert.ok((oItemsTable.bindRows as any).notCalled, "the items table was not bound");
-    assert.ok((oFCL.setLayout as any).notCalled, "the layout was not changed");
+    this.oController.onOrderPress(oEvent);
+
+    assert.notOk(oBindRowsStub.called, "the items table should not be rebound without a row context");
+    assert.notOk(oSetLayoutStub.called, "the layout should not change without a row context");
 });
 
-QUnit.test("onCloseDetail collapses the layout to a single column", function (assert) {
-    oController.onCloseDetail();
+QUnit.test("onCloseDetail should collapse the layout back to one column", function (this: TestContext, assert) {
+    const oSetLayoutStub = this.sandbox.stub(this.oFcl, "setLayout");
 
-    assert.ok((oFCL.setLayout as any).calledWith(LayoutType.OneColumn), "the layout was reset to one column");
+    this.oController.onCloseDetail();
+
+    assert.ok(oSetLayoutStub.calledWith(LayoutType.OneColumn), "the layout should be reset to one column");
 });

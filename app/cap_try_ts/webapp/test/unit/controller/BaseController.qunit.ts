@@ -1,122 +1,148 @@
 import BaseController from "cap_try_ts/controller/BaseController";
-import JSONModel from "sap/ui/model/json/JSONModel";
-import Menu from "sap/m/Menu";
-import Button from "sap/m/Button";
-import Event from "sap/ui/base/Event";
-// @ts-ignore - sap/ui/thirdparty/sinon ships no type declarations
+// @ts-ignore - sap/ui/thirdparty/sinon ships no type declarations; the UI5 loader resolves this module at runtime.
 import sinon from "sap/ui/thirdparty/sinon";
+import Menu from "sap/m/Menu";
 
-let oSandbox: any;
 let oController: BaseController;
-let oGlobalModel: JSONModel;
-let oDefaultModel: JSONModel;
+let oSandbox: any;
+let oSourceControl: any;
 
 QUnit.module("BaseController", {
     beforeEach: function () {
-        oSandbox = (sinon as any).sandbox.create();
-        oController = new BaseController("cap_try_ts.controller.BaseController");
-
-        oGlobalModel = new JSONModel({
-            userInfo: { id: "alice", roles: ["admin"] },
-            selectedCompany: {},
-            selectedCart: {}
-        });
-        oDefaultModel = new JSONModel({});
-
-        const oComponent = {
-            getModel: function (sAlias?: string) {
-                return sAlias === "globalModel" ? oGlobalModel : oDefaultModel;
-            }
-        };
-        oSandbox.stub(oController, "getOwnerComponent").returns(oComponent);
+        oController = new BaseController("BaseController");
+        oSandbox = sinon.sandbox.create();
+        oSourceControl = {};
     },
     afterEach: function () {
-        oSandbox.restore();
-        const oMenu = (oController as any)._oGlobalMenu as Menu | undefined;
-        if (oMenu) {
-            oMenu.destroy();
+        const oExistingMenu = (oController as any)._oGlobalMenu;
+        if (oExistingMenu && typeof oExistingMenu.destroy === "function") {
+            oExistingMenu.destroy();
         }
-        oController.destroy();
-        oGlobalModel.destroy();
-        oDefaultModel.destroy();
+        oSandbox.restore();
     }
 });
 
-QUnit.test("getRouter returns the stored router instance", function (assert) {
-    const oFakeRouter = { navTo: function () { /* noop */ } };
+QUnit.test("getRouter returns the router instance stored on the controller", function (assert) {
+    const oFakeRouter: any = { navTo: function () { /* noop */ } };
     (oController as any)._oRouter = oFakeRouter;
-    assert.strictEqual(oController.getRouter() as unknown, oFakeRouter, "returns the router set during load");
+
+    assert.strictEqual(oController.getRouter(), oFakeRouter, "getRouter returns the exact router reference set on the controller");
 });
 
-QUnit.test("getDialogHandler returns the stored dialog handler instance", function (assert) {
-    const oFakeDialogHandler = { id: "dialog-handler" };
+QUnit.test("getDialogHandler returns the dialog handler instance stored on the controller", function (assert) {
+    const oFakeDialogHandler: any = { openDialog: function () { /* noop */ } };
     (oController as any)._oDialogHandler = oFakeDialogHandler;
-    assert.strictEqual(oController.getDialogHandler() as unknown, oFakeDialogHandler, "returns the dialog handler");
+
+    assert.strictEqual(oController.getDialogHandler(), oFakeDialogHandler, "getDialogHandler returns the exact dialog handler reference set on the controller");
 });
 
-QUnit.test("getI18n returns the stored resource bundle", function (assert) {
-    const oBundle = { getText: function () { return ""; } };
-    (oController as any)._i18n = oBundle;
-    assert.strictEqual(oController.getI18n() as unknown, oBundle, "returns the resource bundle");
+QUnit.test("getI18n returns the resource bundle instance stored on the controller", function (assert) {
+    const oFakeBundle: any = { getText: function (sKey: string) { return sKey; } };
+    (oController as any)._i18n = oFakeBundle;
+
+    assert.strictEqual(oController.getI18n(), oFakeBundle, "getI18n returns the exact resource bundle reference set on the controller");
 });
 
-QUnit.test("getI18nText delegates to the resource bundle getText", function (assert) {
-    (oController as any)._i18n = {
-        getText: function (sKey: string, aParams?: unknown[]) {
-            return "text:" + sKey + ":" + (aParams ? aParams.join(",") : "");
-        }
-    };
-    assert.strictEqual(oController.getI18nText("hello"), "text:hello:", "returns the translated text");
-    assert.strictEqual(oController.getI18nText("greet", ["a", "b"]), "text:greet:a,b", "forwards parameters to getText");
+QUnit.test("getI18nText delegates to the resource bundle's getText with the given key and parameters", function (assert) {
+    const oGetTextStub = sinon.stub().returns("translated text");
+    (oController as any)._i18n = { getText: oGetTextStub };
+
+    const sResult = oController.getI18nText("some_key", ["param1"]);
+
+    assert.strictEqual(sResult, "translated text", "getI18nText returns the value produced by the resource bundle");
+    assert.ok(oGetTextStub.calledWith("some_key", ["param1"]), "the resource bundle's getText is called with the key and parameters passed through");
 });
 
-QUnit.test("getModel resolves models from the owner component by alias", function (assert) {
-    assert.strictEqual(oController.getModel("globalModel"), oGlobalModel, "returns the aliased model");
-    assert.strictEqual(oController.getModel(), oDefaultModel, "returns the default model when no alias is given");
+QUnit.test("getModel retrieves the model for the given alias from the owner component", function (assert) {
+    const oFakeModel: any = { refresh: function () { /* noop */ } };
+    const oGetModelStub = sinon.stub();
+    oGetModelStub.withArgs("globalModel").returns(oFakeModel);
+    oSandbox.stub(oController, "getOwnerComponent").returns({ getModel: oGetModelStub });
+
+    const oResult = oController.getModel("globalModel");
+
+    assert.strictEqual(oResult, oFakeModel, "getModel returns the model instance provided by the owner component");
+    assert.ok(oGetModelStub.calledWith("globalModel"), "the owner component's getModel is called with the requested alias");
 });
 
-QUnit.test("setProp writes a property on the aliased JSON model", function (assert) {
-    oController.setProp("globalModel", "/selectedCompany", { ID: "C1" });
-    assert.deepEqual(oGlobalModel.getProperty("/selectedCompany"), { ID: "C1" }, "the property is written to the model");
+QUnit.test("getModel retrieves the default model when no alias is given", function (assert) {
+    const oFakeModel: any = {};
+    const oGetModelStub = sinon.stub().returns(oFakeModel);
+    oSandbox.stub(oController, "getOwnerComponent").returns({ getModel: oGetModelStub });
+
+    const oResult = oController.getModel();
+
+    assert.strictEqual(oResult, oFakeModel, "getModel returns the default model instance from the owner component");
+    assert.ok(oGetModelStub.calledWith(undefined), "the owner component's getModel is called without an alias");
 });
 
-QUnit.test("getProp reads a property from the aliased JSON model", function (assert) {
-    assert.strictEqual(oController.getProp("globalModel", "/userInfo/id"), "alice", "reads a scalar property");
-    assert.deepEqual(oController.getProp("globalModel", "/userInfo/roles"), ["admin"], "reads an array property");
+QUnit.test("setProp sets a property value on the model identified by the given alias", function (assert) {
+    const oSetPropertyStub = sinon.stub();
+    const oGetModelStub = sinon.stub();
+    oGetModelStub.withArgs("globalModel").returns({ setProperty: oSetPropertyStub });
+    oSandbox.stub(oController, "getOwnerComponent").returns({ getModel: oGetModelStub });
+
+    oController.setProp("globalModel", "/selectedCompany", { ID: "1" });
+
+    assert.ok(oSetPropertyStub.calledWith("/selectedCompany", { ID: "1" }), "setProperty is called on the named model with the given path and value");
 });
 
-QUnit.test("initializeMenu builds the global menu and opens it by the event source", function (assert) {
-    (oController as any)._i18n = {
-        getText: function (sKey: string) { return sKey; }
-    };
-    (oController as any)._oRouter = { navTo: function () { /* noop */ } };
+QUnit.test("getProp reads a property value from the model identified by the given alias", function (assert) {
+    const oGetPropertyStub = sinon.stub();
+    oGetPropertyStub.withArgs("/selectedCompany").returns({ ID: "1" });
+    const oGetModelStub = sinon.stub();
+    oGetModelStub.withArgs("globalModel").returns({ getProperty: oGetPropertyStub });
+    oSandbox.stub(oController, "getOwnerComponent").returns({ getModel: oGetModelStub });
 
+    const oResult = oController.getProp("globalModel", "/selectedCompany");
+
+    assert.deepEqual(oResult, { ID: "1" }, "getProp returns the value read from the named model");
+    assert.ok(oGetPropertyStub.calledWith("/selectedCompany"), "getProperty is called with the given path");
+});
+
+QUnit.test("initializeMenu creates the global menu once with three items and opens it at the event source", function (assert) {
+    const oGetI18nTextStub = oSandbox.stub(oController, "getI18nText");
+    oGetI18nTextStub.withArgs("menu_start").returns("Start");
+    oGetI18nTextStub.withArgs("menu_reports").returns("Reports");
+    oGetI18nTextStub.withArgs("menu_settings").returns("Settings");
+    oSandbox.stub(oController, "getProp").withArgs("globalModel", "/userInfo/roles").returns(["admin"]);
     const oOpenByStub = oSandbox.stub(Menu.prototype, "openBy");
-    const oButton = new Button();
-    const oEvent = { getSource: function () { return oButton; } } as unknown as Event;
+    const oEvent: any = { getSource: function () { return oSourceControl; } };
 
     oController.initializeMenu(oEvent);
 
-    const oMenu = (oController as any)._oGlobalMenu as Menu;
-    assert.ok(oMenu instanceof Menu, "a Menu instance is created and stored");
-    assert.strictEqual(oMenu.getItems().length, 3, "the menu contains three menu items");
-    assert.ok(oOpenByStub.calledOnce, "openBy is invoked once");
-    assert.strictEqual(oOpenByStub.firstCall.args[0], oButton, "openBy is invoked with the event source control");
+    const oMenu = (oController as any)._oGlobalMenu;
+    assert.ok(oMenu, "a menu instance is created and cached on the controller");
+    assert.strictEqual(oMenu.getItems().length, 3, "the menu is created with three items");
+    assert.ok(oOpenByStub.calledWith(oSourceControl), "the menu is opened by the control that triggered the event");
 
-    oButton.destroy();
+    oController.initializeMenu(oEvent);
+
+    assert.strictEqual((oController as any)._oGlobalMenu, oMenu, "a second call reuses the cached menu instance instead of creating a new one");
 });
 
-QUnit.test("toggleMessageView delegates to the message service", function (assert) {
-    const oToggleSpy = oSandbox.spy();
-    (oController as any)._messageService = {
-        toggleMessageView: oToggleSpy,
-        addMessage: function () { /* noop */ },
-        deleteMessages: function () { /* noop */ }
-    };
-    const oEvent = {} as Event;
+QUnit.test("initializeMenu hides the settings item for a user without the admin role", function (assert) {
+    const oGetI18nTextStub = oSandbox.stub(oController, "getI18nText");
+    oGetI18nTextStub.withArgs("menu_start").returns("Start");
+    oGetI18nTextStub.withArgs("menu_reports").returns("Reports");
+    oGetI18nTextStub.withArgs("menu_settings").returns("Settings");
+    oSandbox.stub(oController, "getProp").withArgs("globalModel", "/userInfo/roles").returns([]);
+    oSandbox.stub(Menu.prototype, "openBy");
+    const oEvent: any = { getSource: function () { return oSourceControl; } };
+
+    oController.initializeMenu(oEvent);
+
+    const oMenu = (oController as any)._oGlobalMenu;
+    const oSettingsItem = oMenu.getItems()[2];
+    assert.notOk(oSettingsItem.getVisible(), "the settings menu item is hidden when the user has no admin role");
+});
+
+QUnit.test("toggleMessageView delegates to the message service with the triggering event", function (assert) {
+    const oToggleStub = sinon.stub();
+    (oController as any)._messageService = { toggleMessageView: oToggleStub };
+    const oEvent: any = { getSource: function () { return oSourceControl; } };
 
     oController.toggleMessageView(oEvent);
 
-    assert.ok(oToggleSpy.calledOnce, "the message service toggleMessageView is called once");
-    assert.strictEqual(oToggleSpy.firstCall.args[0], oEvent, "the event is forwarded to the message service");
+    assert.ok(oToggleStub.calledWith(oEvent), "the message service's toggleMessageView is called with the triggering event");
 });
