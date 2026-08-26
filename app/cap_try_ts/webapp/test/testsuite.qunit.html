@@ -18,17 +18,7 @@
     // Default scaffold: only the harness smoke test is registered. The SAPUI5
     // CLI validator appends the unit tests it generates to this list.
     sap.ui.require([
-      "cap_try_ts/test/unit/AllTests.qunit",
-      "cap_try_ts/test/unit/controller/BaseController.qunit",
-      "cap_try_ts/test/unit/controller/DialogHandler.qunit",
-      "cap_try_ts/test/unit/controller/Reports.controller.qunit",
-      "cap_try_ts/test/unit/controller/Settings.controller.qunit",
-      "cap_try_ts/test/unit/controller/Shop.controller.qunit",
-      "cap_try_ts/test/unit/model/models.qunit",
-      "cap_try_ts/test/unit/service/CartService.qunit",
-      "cap_try_ts/test/unit/service/CompanyService.qunit",
-      "cap_try_ts/test/unit/service/MessageService.qunit",
-      "cap_try_ts/test/unit/service/ProductService.qunit"
+      "cap_try_ts/test/unit/AllTests.qunit"
     ], function () {
       QUnit.start();
     });
