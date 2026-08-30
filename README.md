@@ -6,8 +6,7 @@
 
 A full-stack application simulating company buy/sell operations with role-based access control, multi-cart support, and order lifecycle management. Built with SAP Cloud Application Programming Model (CAP) on the backend and SAPUI5 on the frontend, deployed to SAP BTP Cloud Foundry.
 
-<!-- 📸 SCREENSHOT: Shop page overview — logged in as admin, with the company selected,
-     the products table populated and the cart panel visible. This is the "hero" image. -->
+![Shop page overview — admin view with company details, products list with stock status colors and the cart badge](docs/screenshots/shop-hero.png)
 
 ## Highlights
 
@@ -86,8 +85,7 @@ In production the same roles are enforced by **XSUAA** (`xs-security.json` defin
    - **Green** - stock is above the minimum threshold.
    - **Yellow/Red** - stock is low or critical.
 
-<!-- 📸 SCREENSHOT: Shop page as bob — products table with the colored stock
-     indicators visible (ideally one green, one yellow/red row). -->
+![Shop page as a regular user — products table with green, yellow and red stock indicators](docs/screenshots/shop-user-stock.png)
 
 #### Managing Your Cart
 1. Click on a product to add it to your cart.
@@ -95,8 +93,7 @@ In production the same roles are enforced by **XSUAA** (`xs-security.json` defin
 3. Adjust quantities or remove items as needed.
 4. You can create **multiple carts** for different companies.
 
-<!-- 📸 SCREENSHOT: Cart dialog open with a few items in it, showing quantities
-     and the computed cart total. -->
+![Shopping Cart dialog with items, quantity steppers and the computed cart total](docs/screenshots/cart-dialog.png)
 
 #### Placing an Order
 1. Once your cart is ready, click **Finalize Cart**.
@@ -114,8 +111,7 @@ In production the same roles are enforced by **XSUAA** (`xs-security.json` defin
 - Uses a Flexible Column Layout (FCL) for master-detail navigation.
 - Export order data to Excel.
 
-<!-- 📸 SCREENSHOT: Reports page with the FlexibleColumnLayout open — orders list
-     on the left, one order's detail (items) on the right. -->
+![Reports page with the FlexibleColumnLayout open — orders list on the left, order items with price-at-create on the right](docs/screenshots/reports-fcl.png)
 
 ### As an Admin (alice)
 
@@ -126,8 +122,7 @@ Admins have access to everything a regular user can do, plus:
 - **Manage Companies** - Create, edit, or delete companies.
 - **View All Carts** - Monitor all user carts across the system.
 
-<!-- 📸 SCREENSHOT: Settings page as alice — the SideNavigation layout with the
-     company management (IconTabBar Edit/Create) visible. -->
+![Settings page — SideNavigation layout with company management (Edit/Create tabs) and the companies report](docs/screenshots/settings-companies.png)
 
 #### Product Management
 1. Go to the Shop page.
@@ -136,8 +131,7 @@ Admins have access to everything a regular user can do, plus:
    - Products referenced by existing orders cannot be deleted (the backend rejects with **409**) so order history is never orphaned.
 4. Use the **Excel template** feature to bulk-upload products: download the generated template, fill it in, and upload it back.
 
-<!-- 📸 SCREENSHOT: Add Product dialog open (this was the bug fixed for the
-     case-sensitive HTML5 repo — nice to show it working in the cloud). -->
+![Add Product dialog with name, description, price and stock fields filled in](docs/screenshots/add-product-dialog.png)
 
 #### Company Management
 1. Go to **Settings** > **Companies**.
